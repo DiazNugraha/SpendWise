@@ -1,5 +1,5 @@
-import {Text} from 'react-native';
+import {UnderConstruction} from '@/components';
 
 export const Setting: React.FC = () => {
-  return <Text>Under Construction</Text>;
+  return <UnderConstruction />;
 };
