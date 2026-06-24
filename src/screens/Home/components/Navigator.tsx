@@ -2,7 +2,12 @@ import {Pressable, Text, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {JSX} from 'react';
-import {ChartBar, Award as IconAward, Brain as IconBrain, Goal as IconGoal} from 'lucide-react-native';
+import {
+  ChartBar,
+  // Award as IconAward,
+  // Brain as IconBrain,
+  Goal as IconGoal,
+} from 'lucide-react-native';
 
 const Navigator: React.FC = () => {
   const menus: {
@@ -11,7 +16,7 @@ const Navigator: React.FC = () => {
     screenName?: string;
   }[] = [
     {
-      label: 'Add Goal',
+      label: 'Goals',
       icon: <IconGoal color={'#6D28D9'} />,
       screenName: 'Budget',
     },
@@ -19,14 +24,15 @@ const Navigator: React.FC = () => {
       label: 'Reports',
       icon: <ChartBar color={'#6D28D9'} />,
     },
-    {
-      label: 'Challenges',
-      icon: <IconAward color={'#6D28D9'} />,
-    },
-    {
-      label: 'Insights',
-      icon: <IconBrain color={'#6D28D9'} />,
-    },
+    // NOTE: FUTURE
+    // {
+    //   label: 'Challenges',
+    //   icon: <IconAward color={'#6D28D9'} />,
+    // },
+    // {
+    //   label: 'Insights',
+    //   icon: <IconBrain color={'#6D28D9'} />,
+    // },
   ];
 
   const navigation = useNavigation<StackNavigationProp<any>>();
@@ -38,10 +44,12 @@ const Navigator: React.FC = () => {
   };
 
   return (
-    <View className="flex flex-row rounded-2xl justify-evenly">
+    <View className="flex flex-row rounded-2xl justify-between gap-2">
       {menus.map((menu, i) => (
-        <View className="flex flex-col items-center justify-center" key={i}>
-          <Pressable onPress={() => handlePress(i)} className="p-5 bg-white rounded-2xl">
+        <View className="flex flex-col items-center justify-center flex-1 w-full" key={i}>
+          <Pressable
+            onPress={() => handlePress(i)}
+            className="p-5 bg-white rounded-2xl w-full flex items-center justify-center">
             {menu.icon}
           </Pressable>
           <View className="flex items-center px-2 my-2">
