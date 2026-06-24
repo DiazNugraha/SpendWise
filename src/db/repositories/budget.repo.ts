@@ -114,4 +114,8 @@ export const budgetRepo = {
 
     return budget[0];
   },
+
+  async deleteBudgetById(id: string) {
+    return await db.delete(budgets).where(eq(budgets.id, id));
+  },
 };

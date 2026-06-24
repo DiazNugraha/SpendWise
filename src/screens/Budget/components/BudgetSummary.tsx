@@ -1,41 +1,17 @@
 import {formatDate, NumberFormatter} from '@/helpers';
-import {PropsWithChildren, useCallback, useState} from 'react';
+import {PropsWithChildren} from 'react';
 import {Text, View} from 'react-native';
 import * as Icons from 'lucide-react-native';
-import {budgetRepo} from '@/db/repositories';
-import {useFocusEffect} from '@react-navigation/native';
 
 const formatter = new NumberFormatter({
   maxFractionDigits: 2,
 });
 
-const BudgetSummary: React.FC = () => {
-  const [budgets, setBudgets] = useState<IBudget[]>([]);
+interface IBudgetSummaryProps {
+  budgets: IBudget[];
+}
 
-  const fetchBudgets = useCallback(async () => {
-    const savedBudgets = await budgetRepo.findActivesEachType();
-    setBudgets(
-      savedBudgets.map(budget => ({
-        amount: budget.amount,
-        dateRange: {
-          startDate: new Date(budget.startDate),
-          endDate: new Date(budget.endDate),
-        },
-        enableNotify: budget.enableNotify,
-        icon: budget?.icon ?? '',
-        iconColor: budget?.iconColor ?? '',
-        title: budget.title,
-        type: budget.type as BudgetType,
-      })),
-    );
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchBudgets();
-    }, [fetchBudgets]),
-  );
-
+const BudgetSummary: React.FC<IBudgetSummaryProps> = ({budgets}) => {
   return (
     <View className="flex flex-col gap-3">
       <Text>Budget Summary</Text>
