@@ -1,7 +1,10 @@
 import {dummySavedBudgets} from '@/constants';
 import {getDaysLeft} from '@/helpers';
+import {RootNavigationProp} from '@/types';
+import {useNavigation} from '@react-navigation/native';
+import {Calendar, CircleQuestionMark} from 'lucide-react-native';
 import {useMemo} from 'react';
-import {Text, View} from 'react-native';
+import {Pressable, Text, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
 type Props = {
@@ -12,15 +15,15 @@ export const BudgetCard: React.FC<Props> = ({budgetType}) => {
   const spent = 200;
   const savedBudgets = dummySavedBudgets;
 
-  const {title, limit, progress, daysLeft} = useMemo(() => {
+  const selectedBudget = useMemo(() => {
     const find = savedBudgets.find(e => e.type === budgetType);
+    if (!find) return undefined;
     const limit = find?.amount ?? 0;
     const progress = (spent / limit) * 100;
-    const now = new Date();
     const daysLeft = getDaysLeft(find?.dateRange.endDate ?? new Date());
 
     return {title: find?.title ?? '', limit, progress, daysLeft};
-  }, [budgetType, spent]);
+  }, [budgetType, spent, savedBudgets]);
 
   return (
     <LinearGradient
@@ -31,6 +34,30 @@ export const BudgetCard: React.FC<Props> = ({budgetType}) => {
       {/* Decorative highlight */}
       <View className="absolute -top-2 -right-2 w-[40px] h-[40px] rounded-full bg-white/20" />
 
+      {selectedBudget ? (
+        <FoundSavedBudget budget={selectedBudget} spent={spent} />
+      ) : (
+        <NotFoundSavedBudget type={budgetType} />
+      )}
+    </LinearGradient>
+  );
+};
+
+type FoundSavedBudgetProps = {
+  budget: {
+    title: string;
+    limit: number;
+    progress: number;
+    daysLeft: number;
+  };
+  spent: number;
+};
+
+const FoundSavedBudget = ({budget, spent}: FoundSavedBudgetProps) => {
+  const {title, limit, progress, daysLeft} = budget;
+
+  return (
+    <>
       <Text className="text-violet-100 text-sm mb-2">{title}</Text>
 
       <View className="flex-row items-end">
@@ -48,6 +75,39 @@ export const BudgetCard: React.FC<Props> = ({budgetType}) => {
           <Text className="text-[10px] text-white ">{daysLeft} days left</Text>
         </View>
       </View>
-    </LinearGradient>
+    </>
+  );
+};
+
+type NotFoundSavedBudgetProps = {
+  type: BudgetType;
+};
+
+const NotFoundSavedBudget = ({type}: NotFoundSavedBudgetProps) => {
+  const navigation = useNavigation<RootNavigationProp>();
+
+  return (
+    <View className="flex flex-col gap-5 px-4 py-5 justify-center items-center">
+      <View className="flex flex-row items-center justify-center p-5 rounded-full bg-violet-400/30 relative">
+        <Calendar size={48} color={'#FFFFFF'} />
+        <View className="flex flex-row items-center justify-center p-2 rounded-full bg-violet-400/35 absolute -bottom-0.5 -right-1.5">
+          <CircleQuestionMark color={'white'} size={16} />
+        </View>
+      </View>
+      <Text className="text-white text-lg capitalize font-medium">No {type} budget Set</Text>
+      <Text className="text-white/50 text-sm text-center">
+        Create personalized budget period to track your spending goals with flexibility
+      </Text>
+
+      <Pressable
+        className="flex flex-row justify-start items-center px-7 py-3 rounded-3xl bg-white"
+        onPress={() =>
+          navigation.navigate('BudgetForm', {
+            budgetType: type,
+          })
+        }>
+        <Text className="text-violet-700 text-sm font-medium capitalize">Create {type} Budget</Text>
+      </Pressable>
+    </View>
   );
 };
