@@ -22,8 +22,8 @@ export const budgetSchema = yup.object({
       endDate: new Date(),
     }))
     .required(),
-  icon: yup.string().default(''),
-  iconColor: yup.string().default(''),
+  icon: yup.string().default('Calendar'),
+  iconColor: yup.string().default('#FF6467'),
   enableNotify: yup.boolean().default(true),
 });
 
