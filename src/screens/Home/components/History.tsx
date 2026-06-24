@@ -1,5 +1,8 @@
-import {CATEGORY_DB_DATA, CategoryIconMap, dummySavedExpenses} from '@/constants';
+import {CATEGORY_DB_DATA, CategoryIconMap} from '@/constants';
+import {expenseRepo} from '@/db/repositories';
 import {formatDate, NumberFormatter} from '@/helpers';
+import {useFocusEffect} from '@react-navigation/native';
+import {useCallback, useState} from 'react';
 import {FlatList, Text, View} from 'react-native';
 
 const formatter = new NumberFormatter({
@@ -48,11 +51,35 @@ const Item: React.FC<IExpense> = props => {
 };
 
 const History: React.FC = () => {
+  const [expenses, setExpenses] = useState<IExpense[]>([]);
+
+  const fetchExpenses = useCallback(async () => {
+    const data = await expenseRepo.findAll({limit: 5});
+
+    const formatData: IExpense[] = data.map(d => ({
+      title: d.title,
+      providers: [],
+      mediums: d.medium ? d.medium.split(',') : [],
+      category: d.categoryId,
+      amount: d.amount,
+      description: d?.description ?? undefined,
+      createdAt: new Date(d.createdAt),
+    }));
+
+    setExpenses(formatData);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchExpenses();
+    }, [fetchExpenses]),
+  );
+
   return (
     <View className="flex flex-col gap-1 p-3 flex-1" style={{maxHeight: 490}}>
       <Text className="text-lg font-medium mb-4">Recent Transactions</Text>
       <FlatList
-        data={dummySavedExpenses}
+        data={expenses}
         renderItem={({item}) => <Item {...item} />}
         keyExtractor={(_, index) => index.toString()}
         showsVerticalScrollIndicator={false}
