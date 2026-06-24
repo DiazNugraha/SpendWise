@@ -19,6 +19,7 @@ import Toast from 'react-native-toast-message';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootNavigatorParamList} from '@/types';
 import {useAlert} from '@/hooks';
+import {capitalizeFirstLetter} from '@/helpers';
 
 type BudgetDetailRouteProps = RouteProp<RootNavigatorParamList, 'BudgetForm'>;
 
@@ -55,11 +56,12 @@ const BudgetForm: React.FC = () => {
   };
 
   const createBudget = async (values: IBudgetInput) => {
+    const title = values.title ? values.title : capitalizeFirstLetter(values.type);
     const result = await budgetRepo.create({
       type: values.type as BudgetType,
       icon: values.icon,
       iconColor: values.iconColor,
-      title: values.title,
+      title: title,
       amount: values.amount,
       enableNotify: values.enableNotify,
       startDate: values.dateRange.startDate,
@@ -139,9 +141,10 @@ const BudgetForm: React.FC = () => {
               </View>
 
               <View className="flex flex-col gap-4 rounded-2xl p-5 bg-white">
+                <DecimalInputField name="amount" label="Target Amount" placeholder="1.000" required />
+                <DateInputField name="dateRange" label="Target Date" disabled={budgetType !== 'custom'} required />
+
                 <InputField name="title" label="Budget Title" placeholder="Name your budget plan" />
-                <DecimalInputField name="amount" label="Target Amount" placeholder="1.000" />
-                <DateInputField name="dateRange" label="Target Date" disabled={budgetType !== 'custom'} />
               </View>
 
               <View className="flex flex-row justify-between items-center p-5 bg-white rounded-2xl">
@@ -150,7 +153,7 @@ const BudgetForm: React.FC = () => {
                     <BellRingIcon color={'#6D28D9'} />
                   </View>
                   <View className="flex flex-col gap-2">
-                    <Text className="font-medium">Budget Alerts</Text>
+                    <Text className="font-medium">Budget Alert</Text>
                     <Text className="font-light text-[10px]">Get notified at 80% usage</Text>
                   </View>
                 </View>

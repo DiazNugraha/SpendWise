@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 
 export const budgetSchema = yup.object({
-  title: yup.string().default('').required('Title should not be empty'),
+  title: yup.string().default(''),
   amount: yup.number().typeError('Must be a number').positive().required('Amount should not be empty').default(0),
   type: yup.string().default('').required(),
   dateRange: yup
