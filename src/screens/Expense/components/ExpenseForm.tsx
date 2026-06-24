@@ -1,5 +1,5 @@
 import {Formik} from 'formik';
-import {ScrollView, View} from 'react-native';
+import {View} from 'react-native';
 import {
   DecimalInputField,
   FormButtonWrapper,
@@ -68,42 +68,30 @@ const ExpenseForm: React.FC = () => {
     <Formik initialValues={expenseSchema.getDefault()} validationSchema={expenseSchema} onSubmit={submitForm}>
       {({handleSubmit}) => (
         <FormButtonWrapper text="Submit Expense" onSubmit={handleSubmit} isLoading={isLoading}>
-          <ScrollView className="flex flex-col" contentContainerClassName="gap-3 px-4">
-            <View className="w-full flex justify-center items-center px-5">
-              <DecimalInputField
-                name="amount"
-                label="Enter Amount"
-                placeholder="1.000"
-                className="bg-transparent border-0 text-[30px] font-bold"
-              />
-            </View>
-
-            <InputField name="title" label="Title" placeholder="Input Title here" />
-
-            <SelectMultiCarouselField name="mediums" options={mediumOptions} label="Medium" itemStyle="card" />
-
-            <SelectCarouselField name="category" options={categoryOptions} label="Category" />
-
-            <MultiSelectField name="providers" options={providerOptions} label="Providers" />
-
-            <InputField
-              name="description"
-              label="Description"
-              placeholder="Input Description here"
-              multiline
-              numberOfLines={4}
+          <View className="w-full flex justify-center items-center px-5">
+            <DecimalInputField
+              name="amount"
+              label="Enter Amount"
+              placeholder="1.000"
+              className="bg-transparent border-0 text-[30px] font-bold"
             />
-          </ScrollView>
-          {/* <View className="absolute bottom-0 mb-4 bg-white w-full p-5"> */}
-          {/*   <Pressable */}
-          {/*     className={`py-5 px-6 rounded-2xl items-center justify-center  ${ */}
-          {/*       isLoading ? 'bg-[#6D28D9]/10' : 'bg-[#6D28D9]' */}
-          {/*     }`} */}
-          {/*     onPress={handleSubmit} */}
-          {/*     disabled={isLoading}> */}
-          {/*     <Text className="text-white font-medium">{isLoading ? 'Submitting...' : 'Submit Expense'}</Text> */}
-          {/*   </Pressable> */}
-          {/* </View> */}
+          </View>
+
+          <InputField name="title" label="Title" placeholder="Input Title here" />
+
+          <SelectMultiCarouselField name="mediums" options={mediumOptions} label="Medium" itemStyle="card" />
+
+          <SelectCarouselField name="category" options={categoryOptions} label="Category" />
+
+          <MultiSelectField name="providers" options={providerOptions} label="Providers" />
+
+          <InputField
+            name="description"
+            label="Description"
+            placeholder="Input Description here"
+            multiline
+            numberOfLines={4}
+          />
         </FormButtonWrapper>
       )}
     </Formik>
