@@ -3,35 +3,100 @@ import {
   DateInputField,
   DecimalInputField,
   FormButtonWrapper,
+  InputField,
   IconSelector,
   ModalWrapper,
   SwitchButton,
 } from '@/components';
 import {budgetSchema, IBudgetInput} from '@/constants/schemas';
-import {Formik} from 'formik';
+import {Formik, FormikProps} from 'formik';
 import {BellRingIcon} from 'lucide-react-native';
 import {ScrollView, Text, View} from 'react-native';
 import * as Icons from 'lucide-react-native';
+import {useEffect, useMemo, useRef, useState} from 'react';
+import {budgetRepo} from '@/db/repositories';
+import Toast from 'react-native-toast-message';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import {RootNavigatorParamList} from '@/types';
 
-// type BudgetDetailRouteProps = RouteProp<RootNavigatorParamList, 'BudgetDetail'>;
+type BudgetDetailRouteProps = RouteProp<RootNavigatorParamList, 'BudgetForm'>;
 
 const BudgetForm: React.FC = () => {
-  // const route = useRoute<BudgetDetailRouteProps>();
-  // const {budgetType} = route.params;
+  const route = useRoute<BudgetDetailRouteProps>();
+  const {budgetType} = route.params;
+  const navigation = useNavigation();
+  const formRef = useRef<FormikProps<IBudgetInput>>(null);
 
-  const submitForm = (values: IBudgetInput) => {
-    console.log(values);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const submitForm = async (values: IBudgetInput) => {
+    setIsLoading(true);
+
+    const result = await budgetRepo.create({
+      type: values.type as BudgetType,
+      icon: values.icon,
+      iconColor: values.iconColor,
+      title: values.title,
+      amount: values.amount,
+      enableNotify: values.enableNotify,
+      startDate: values.dateRange.startDate,
+      endDate: values.dateRange.endDate,
+    });
+
+    setIsLoading(false);
+
+    if (result) {
+      Toast.show({
+        type: 'success',
+        text1: 'Success!',
+        text2: 'Budget goal created successfully',
+      });
+      return navigation.goBack();
+    }
+
+    Toast.show({
+      type: 'error',
+      text1: 'Error!',
+      text2: 'Failed to create budget goal. Please try again.',
+    });
   };
+
+  const initialValues = useMemo<IBudgetInput>(() => {
+    const defaults = budgetSchema.getDefault();
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+
+    if (budgetType === 'weekly') {
+      endDate.setDate(endDate.getDate() + 2);
+    } else if (budgetType === 'monthly') {
+      endDate.setMonth(endDate.getMonth() + 1);
+    }
+
+    return budgetSchema.cast({
+      ...defaults,
+      type: budgetType ?? defaults.type,
+      dateRange: {
+        ...defaults.dateRange,
+        startDate,
+        endDate,
+      },
+    }) as IBudgetInput;
+  }, [budgetType]);
+
+  useEffect(() => {
+    formRef.current?.resetForm({values: initialValues});
+  }, [initialValues]);
 
   return (
     <ModalWrapper title="Set Saving Goal">
-      <Formik initialValues={budgetSchema.getDefault()} validationSchema={budgetSchema} onSubmit={submitForm}>
+      <Formik innerRef={formRef} initialValues={initialValues} validationSchema={budgetSchema} onSubmit={submitForm}>
         {({handleSubmit, getFieldMeta, setFieldValue}) => {
           const icon = getFieldMeta('icon').value as string;
           const iconColor = getFieldMeta('iconColor').value as string;
           const enableNotify = getFieldMeta('enableNotify').value as boolean;
+
           return (
-            <FormButtonWrapper onSubmit={handleSubmit} text="Set Budget Plan">
+            <FormButtonWrapper onSubmit={handleSubmit} text="Set Budget Plan" isLoading={isLoading}>
               <ScrollView contentContainerClassName="gap-3 px-4">
                 <View className="w-full justify-center items-center px-5 flex flex-col gap-4">
                   <IconSelector
@@ -52,8 +117,9 @@ const BudgetForm: React.FC = () => {
                 </View>
 
                 <View className="flex flex-col gap-4 rounded-2xl p-5 bg-white">
+                  <InputField name="title" label="Budget Title" placeholder="Name your budget plan" />
                   <DecimalInputField name="amount" label="Target Amount" placeholder="1.000" />
-                  <DateInputField name="dateRange" label="Target Date" />
+                  <DateInputField name="dateRange" label="Target Date" disabled={budgetType !== 'custom'} />
                 </View>
 
                 <View className="flex flex-row justify-between items-center p-5 bg-white rounded-2xl">
