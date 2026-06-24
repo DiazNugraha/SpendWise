@@ -1,9 +1,9 @@
-import {dummySavedBudgets} from '@/constants';
+import {budgetRepo, expenseRepo} from '@/db/repositories';
 import {getDaysLeft} from '@/helpers';
 import {RootNavigationProp} from '@/types';
 import {useNavigation} from '@react-navigation/native';
 import {Calendar, CircleQuestionMark} from 'lucide-react-native';
-import {useMemo} from 'react';
+import {useEffect, useState} from 'react';
 import {Pressable, Text, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -12,18 +12,52 @@ type Props = {
 };
 
 export const BudgetCard: React.FC<Props> = ({budgetType}) => {
-  const spent = 200;
-  const savedBudgets = dummySavedBudgets;
+  const [selectedBudget, setSelectedBudget] = useState<
+    | {
+        title: string;
+        limit: number;
+        progress: number;
+        daysLeft: number;
+      }
+    | undefined
+  >(undefined);
 
-  const selectedBudget = useMemo(() => {
-    const find = savedBudgets.find(e => e.type === budgetType);
-    if (!find) return undefined;
-    const limit = find?.amount ?? 0;
-    const progress = (spent / limit) * 100;
-    const daysLeft = getDaysLeft(find?.dateRange.endDate ?? new Date());
+  const [spent, setSpent] = useState<number>(0);
 
-    return {title: find?.title ?? '', limit, progress, daysLeft};
-  }, [budgetType, spent, savedBudgets]);
+  const fetchSpend = async (startDate: number, endDate: number) => {
+    const expenseTotal = await expenseRepo.sumExpensesWithinDate(startDate, endDate);
+    setSpent(expenseTotal);
+    return expenseTotal;
+  };
+
+  useEffect(() => {
+    const run = async () => {
+      const findBudget = await budgetRepo.findActiveByType(budgetType);
+
+      if (findBudget.length < 1) {
+        setSelectedBudget(undefined);
+        return;
+      }
+
+      const find = findBudget[0];
+      const limit = find?.amount ?? 0;
+
+      const expenseTotal = await fetchSpend(find.startDate, find.endDate);
+
+      const progress = limit > 0 ? (expenseTotal / limit) * 100 : 0;
+
+      const daysLeft = getDaysLeft(find?.endDate ? new Date(find.endDate) : new Date());
+
+      setSelectedBudget({
+        title: find?.title ?? '',
+        limit,
+        progress,
+        daysLeft,
+      });
+    };
+
+    run();
+  }, [budgetType]);
 
   return (
     <LinearGradient

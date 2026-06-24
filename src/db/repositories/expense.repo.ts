@@ -1,4 +1,4 @@
-import {eq, sql} from 'drizzle-orm';
+import {and, eq, gte, lte, sql} from 'drizzle-orm';
 import {db} from '../client';
 import {expenseProviders, expenses, providers} from '../schema';
 import uuid from 'react-native-uuid';
@@ -94,5 +94,16 @@ export const expenseRepo = {
     });
 
     return expensesWithProviders;
+  },
+
+  async sumExpensesWithinDate(startDate: number, endDate: number) {
+    const result = await db
+      .select({
+        total: sql<number>`COALESCE(sum(${expenses.amount}), 0)`,
+      })
+      .from(expenses)
+      .where(and(gte(expenses.createdAt, startDate), lte(expenses.createdAt, endDate)));
+
+    return result[0]?.total ?? 0;
   },
 };
