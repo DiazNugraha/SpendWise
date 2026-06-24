@@ -2,16 +2,6 @@ import {CATEGORY_DB_DATA, CategoryIconMap} from '@/constants';
 import {formatDate, NumberFormatter} from '@/helpers';
 import {FlatList, Text, View} from 'react-native';
 
-interface ISpend {
-  title: string;
-  providers: string[];
-  mediums: string[];
-  category: string;
-  amount: number;
-  description?: string;
-  createdAt: Date;
-  // proofImage?: string; // optional, omitted for now
-}
 const dummyDate = new Date();
 const datas: ISpend[] = [
   {
