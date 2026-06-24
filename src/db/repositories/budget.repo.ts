@@ -23,6 +23,14 @@ export const budgetRepo = {
     return await db.select().from(budgets).where(eq(budgets.id, id));
   },
 
+  async findActivesEachType() {
+    const weekly = await db.select().from(budgets).where(eq(budgets.type, 'weekly'));
+    const monthly = await db.select().from(budgets).where(eq(budgets.type, 'monthly'));
+    const custom = await db.select().from(budgets).where(eq(budgets.type, 'custom'));
+
+    return [weekly[0], monthly[0], custom[0]].filter(e => e !== undefined);
+  },
+
   async findActiveByType(type: BudgetType) {
     return await db
       .select()

@@ -1,15 +1,44 @@
-import {formatDate} from '@/helpers';
-import {PropsWithChildren} from 'react';
+import {formatDate, NumberFormatter} from '@/helpers';
+import {PropsWithChildren, useCallback, useEffect, useState} from 'react';
 import {Text, View} from 'react-native';
 import * as Icons from 'lucide-react-native';
-import {dummySavedBudgets} from '@/constants';
+import {budgetRepo} from '@/db/repositories';
+
+const formatter = new NumberFormatter({
+  maxFractionDigits: 2,
+});
 
 const BudgetSummary: React.FC = () => {
+  const [budgets, setBudgets] = useState<IBudget[]>([]);
+
+  const fetchBudgets = useCallback(async () => {
+    const savedBudgets = await budgetRepo.findActivesEachType();
+    console.log('budgets', savedBudgets);
+    setBudgets(
+      savedBudgets.map(budget => ({
+        amount: budget.amount,
+        dateRange: {
+          startDate: new Date(budget.startDate),
+          endDate: new Date(budget.endDate),
+        },
+        enableNotify: budget.enableNotify,
+        icon: budget?.icon ?? '',
+        iconColor: budget?.iconColor ?? '',
+        title: budget.title,
+        type: budget.type as BudgetType,
+      })),
+    );
+  }, []);
+
+  useEffect(() => {
+    fetchBudgets();
+  }, [fetchBudgets]);
+
   return (
     <View className="flex flex-col gap-3">
       <Text>Budget Summary</Text>
       <View className="flex flex-col gap-2">
-        {dummySavedBudgets.map(e => {
+        {budgets.map(e => {
           const Icon = Icons[e.icon as keyof typeof Icons] as Icons.LucideIcon;
           return (
             <ItemWrapper key={e.type}>
@@ -22,7 +51,7 @@ const BudgetSummary: React.FC = () => {
                   </Text>
                 </View>
               </View>
-              <Text className="text-[#6D28D9] font-medium">{e.amount}</Text>
+              <Text className="text-[#6D28D9] font-medium">{formatter.format(e.amount)}</Text>
             </ItemWrapper>
           );
         })}
