@@ -7,6 +7,7 @@
 
 import Container from '@/Container';
 import './global.css';
+import Toast from 'react-native-toast-message';
 
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {useMigrations} from 'drizzle-orm/op-sqlite/migrator';
@@ -44,6 +45,7 @@ function App() {
   return (
     <SafeAreaProvider>
       <AppContent />
+      <Toast />
     </SafeAreaProvider>
   );
 }

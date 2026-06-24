@@ -13,13 +13,16 @@ import {expenseSchema, IExpenseInput} from '@/constants/schemas';
 import {expenseRepo, providerRepo} from '@/db/repositories';
 import {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 const ExpenseForm: React.FC = () => {
   const navigation = useNavigation();
 
   const [providerOptions, setProviderOptions] = useState<{value: string; label: string}[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const submitForm = async (values: IExpenseInput) => {
+    setIsLoading(true);
     const savedData = await expenseRepo.create({
       amount: values.amount,
       title: values.title,
@@ -29,9 +32,22 @@ const ExpenseForm: React.FC = () => {
       medium: values.mediums.join(','),
     });
 
+    setIsLoading(false);
+
     if (savedData) {
-      navigation.goBack();
+      Toast.show({
+        type: 'success',
+        text1: 'Success!',
+        text2: 'Expense created successfully',
+      });
+      return navigation.goBack();
     }
+
+    Toast.show({
+      type: 'error',
+      text1: 'Error!',
+      text2: 'Failed to create expense. Please try again.',
+    });
   };
 
   const fetchProviderOptions = async () => {
@@ -80,9 +96,12 @@ const ExpenseForm: React.FC = () => {
           </ScrollView>
           <View className="absolute bottom-0 mb-4 bg-white w-full p-5">
             <Pressable
-              className="py-5 px-6 rounded-2xl items-center justify-center bg-[#6D28D9]"
-              onPress={handleSubmit}>
-              <Text className="text-white font-medium">Submit Expense</Text>
+              className={`py-5 px-6 rounded-2xl items-center justify-center  ${
+                isLoading ? 'bg-[#6D28D9]/10' : 'bg-[#6D28D9]'
+              }`}
+              onPress={handleSubmit}
+              disabled={isLoading}>
+              <Text className="text-white font-medium">{isLoading ? 'Submitting...' : 'Submit Expense'}</Text>
             </Pressable>
           </View>
         </FormButtonWrapper>
