@@ -1,5 +1,5 @@
 import {useField} from 'formik';
-import {useState} from 'react';
+import {Fragment, useState} from 'react';
 import {FlatList, Modal, Pressable, Text, View} from 'react-native';
 
 type SelectFieldProps<T extends string | number> = {
@@ -24,7 +24,7 @@ export function SelectField<T extends string | number>({
   const isEmpty = value.toString().length < 1;
 
   return (
-    <View>
+    <Fragment>
       {label && <Text>{label}</Text>}
 
       <Pressable
@@ -46,7 +46,7 @@ export function SelectField<T extends string | number>({
         onChange={helpers.setValue}
         modalLabel={modalLabel}
       />
-    </View>
+    </Fragment>
   );
 }
 

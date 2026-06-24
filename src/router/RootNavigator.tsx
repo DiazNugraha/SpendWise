@@ -1,5 +1,5 @@
 import {createStackNavigator} from '@react-navigation/stack';
-import {AddExpense} from '@/screens';
+import {Budget, Expense} from '@/screens';
 import {TabNavigator} from '@/components';
 
 export function RootNavigator() {
@@ -10,8 +10,16 @@ export function RootNavigator() {
       <Stack.Screen name="MainTabs" component={TabNavigator} />
 
       <Stack.Screen
-        name="AddExpense"
-        component={AddExpense}
+        name="Expense"
+        component={Expense}
+        options={{
+          presentation: 'modal',
+        }}
+      />
+
+      <Stack.Screen
+        name="Budget"
+        component={Budget}
         options={{
           presentation: 'modal',
         }}

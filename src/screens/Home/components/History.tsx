@@ -1,3 +1,5 @@
+import {CATEGORY_DB_DATA, CategoryIconMap} from '@/constants';
+import {NumberFormatter} from '@/helpers';
 import {FlatList, Text, View} from 'react-native';
 
 interface ISpend {
@@ -15,7 +17,7 @@ const datas: ISpend[] = [
     title: 'Lunch at warung',
     providers: ['GoPay'],
     mediums: ['emoney'],
-    category: 'Food',
+    category: 'food',
     amount: 35000,
     description: 'Nasi ayam + es teh',
   },
@@ -23,14 +25,14 @@ const datas: ISpend[] = [
     title: 'Morning coffee',
     providers: ['Cash'],
     mediums: ['cash'],
-    category: 'Food',
+    category: 'food',
     amount: 18000,
   },
   {
     title: 'Online ride to office',
     providers: ['GoPay'],
     mediums: ['emoney'],
-    category: 'Transport',
+    category: 'transport',
     amount: 22000,
     description: 'GoRide from home to office',
   },
@@ -38,7 +40,7 @@ const datas: ISpend[] = [
     title: 'Weekly groceries',
     providers: ['Dana'],
     mediums: ['emoney'],
-    category: 'Groceries',
+    category: 'groceries',
     amount: 125000,
     description: 'Vegetables, eggs, instant noodles',
   },
@@ -46,7 +48,7 @@ const datas: ISpend[] = [
     title: 'Mobile data package',
     providers: ['ShopeePay'],
     mediums: ['emoney'],
-    category: 'Utilities',
+    category: 'utilities',
     amount: 50000,
     description: 'Monthly internet quota',
   },
@@ -54,33 +56,51 @@ const datas: ISpend[] = [
     title: 'Parking fee',
     providers: ['Cash'],
     mediums: ['cash'],
-    category: 'Transport',
+    category: 'transport',
     amount: 5000,
   },
   {
     title: 'Movie night',
     providers: ['OVO'],
     mediums: ['emoney'],
-    category: 'Entertainment',
+    category: 'entertainment',
     amount: 45000,
     description: 'Cinema ticket',
   },
 ];
 
 const History: React.FC = () => {
+  const getCategoryItems = (key: string) => {
+    return CATEGORY_DB_DATA.find(e => e.key === key);
+  };
+
+  const formatter = new NumberFormatter({
+    maxFractionDigits: 2,
+  });
+
   const Item: React.FC<ISpend> = props => {
+    const category = getCategoryItems(props.category);
+    const Icon = CategoryIconMap[category?.key as keyof typeof CategoryIconMap];
     return (
-      <View className="p-2 px-4 bg-white rounded-lg shadow flex flex-row gap-2 w-full">
-        <View className="w-10 h-10 bg-purple-500 rounded-full" />
+      <View className="px-3 py-2 bg-white rounded-lg flex flex-row gap-2 w-full">
+        {category && (
+          <View
+            className={`p-3 rounded-md`}
+            style={{
+              backgroundColor: `${category.color}4D`,
+            }}>
+            <Icon size={20} color={category.color} />
+          </View>
+        )}
 
         <View className="flex-1 flex flex-row justify-between">
-          <View className="flex flex-col gap-2">
-            <Text className="text-sm">{props.title}</Text>
-            <Text className="text-[10px]">{props.description}</Text>
+          <View className="flex flex-col gap-2 justify-center">
+            <Text className="text-sm font-medium">{props.title}</Text>
+            {props.description && <Text className="text-[10px] font-light">{props.description}</Text>}
           </View>
 
-          <View>
-            <Text className="text-xs">{props.amount}</Text>
+          <View className="flex flex-col justify-center">
+            <Text className="text-sm font-medium">{formatter.format(props.amount)}</Text>
           </View>
         </View>
       </View>
@@ -88,16 +108,15 @@ const History: React.FC = () => {
   };
 
   return (
-    <View className="flex flex-col gap-1 bg-white px-3 py-5 rounded-2xl" style={{maxHeight: 350}}>
+    <View className="flex flex-col gap-1 p-3" style={{maxHeight: 450}}>
+      <Text className="text-lg font-medium mb-4">Recent Transactions</Text>
       <FlatList
         data={datas}
         renderItem={({item}) => <Item {...item} />}
         keyExtractor={(_, index) => index.toString()}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingHorizontal: 12,
-          paddingVertical: 10,
-          gap: 6,
+          gap: 8,
         }}
       />
     </View>

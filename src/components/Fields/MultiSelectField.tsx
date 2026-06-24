@@ -1,5 +1,6 @@
 import {useField} from 'formik';
-import {useState} from 'react';
+import {ChevronDown as ChevronDownIcon} from 'lucide-react-native';
+import {Fragment, useState} from 'react';
 import {FlatList, Modal, Pressable, Text, View} from 'react-native';
 
 type MultiSelectFieldProps<T extends string | number> = {
@@ -24,13 +25,16 @@ export function MultiSelectField<T extends string | number>({
   const isEmpty = values.length === 0;
 
   return (
-    <View>
+    <Fragment>
       {label && <Text>{label}</Text>}
 
       <Pressable
         onPress={() => setIsOpenModal(true)}
-        className={`input-field ${meta.touched && meta.error ? 'input-field-error' : ''}`}>
+        className={`input-field ${meta.touched && meta.error ? 'input-field-error' : ''} relative`}>
         <Text className={`${isEmpty ? 'text-gray-500' : ''}`}>{isEmpty ? placeholder : values.join(', ')}</Text>
+        <View className="absolute right-3 top-5">
+          <ChevronDownIcon color={'#6b7280'} />
+        </View>
       </Pressable>
 
       {meta.touched && meta.error && <Text className="text-red-500 mt-1">{meta.error}</Text>}
@@ -46,7 +50,7 @@ export function MultiSelectField<T extends string | number>({
         onChange={helpers.setValue}
         modalLabel={modalLabel}
       />
-    </View>
+    </Fragment>
   );
 }
 

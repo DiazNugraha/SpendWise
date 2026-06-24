@@ -1,4 +1,5 @@
 import {useField} from 'formik';
+import {Fragment} from 'react';
 import {Text, TextInput, View} from 'react-native';
 
 type InputFieldProp = {
@@ -24,7 +25,7 @@ export const InputField: React.FC<InputFieldProp> = ({
   const isNumeric = type === 'number';
 
   return (
-    <View>
+    <Fragment>
       {label && <Text>{label}</Text>}
 
       <TextInput
@@ -55,6 +56,6 @@ export const InputField: React.FC<InputFieldProp> = ({
       />
 
       {meta.touched && meta.error && <Text className="text-red-500 mt-1">{meta.error}</Text>}
-    </View>
+    </Fragment>
   );
 };

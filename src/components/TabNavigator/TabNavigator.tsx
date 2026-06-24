@@ -1,13 +1,13 @@
-import {Home, Budget} from '@/screens';
+import {Home, Setting} from '@/screens';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {TouchableOpacity, TouchableOpacityProps, View} from 'react-native';
-import {BarChart2, HomeIcon, Plus} from 'lucide-react-native';
+import {HomeIcon as HomeIcon, Plus as PlusIcon, Settings as SettingsIcon} from 'lucide-react-native';
 
 const AddPlaceholderButton: React.FC<TouchableOpacityProps> = ({onPress}) => {
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8} className="-top-6 flex-1 items-center justify-center">
-      <View className="w-16 h-16 rounded-[32px] bg-purple-500 items-center justify-center elevation-md">
-        <Plus color={'white'} size={24} />
+    <TouchableOpacity onPress={onPress} activeOpacity={0.8} className="-top-5 flex-1 items-center justify-center">
+      <View className="w-16 h-16 rounded-full bg-purple-700 border-4 border-white  items-center justify-center elevation-md">
+        <PlusIcon color={'white'} size={24} />
       </View>
     </TouchableOpacity>
   );
@@ -20,15 +20,20 @@ export const TabNavigator: React.FC = () => {
     <View style={{flex: 1}}>
       <Tab.Navigator
         initialRouteName="Home"
-        screenOptions={{
-          headerShown: false,
-          tabBarShowLabel: false,
-          tabBarStyle: {
-            height: 72,
-            backgroundColor: '#FFFFFF',
-            borderTopWidth: 0,
-            elevation: 12,
-          },
+        screenOptions={route => {
+          return {
+            headerShown: false,
+            tabBarShowLabel: false,
+            tabBarStyle: {
+              height: 72,
+              backgroundColor: '#FFFFFF',
+              elevation: 12,
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+            },
+            tabBarActiveTintColor: '#7C3AED',
+            tabBarInactiveTintColor: '#9CA3AF',
+          };
         }}>
         <Tab.Screen
           name="Home"
@@ -43,7 +48,7 @@ export const TabNavigator: React.FC = () => {
           listeners={({navigation}) => ({
             tabPress: e => {
               e.preventDefault();
-              navigation.navigate('AddExpense');
+              navigation.navigate('Expense');
             },
           })}
           options={{
@@ -51,10 +56,10 @@ export const TabNavigator: React.FC = () => {
           }}
         />
         <Tab.Screen
-          name="Budget"
-          component={Budget}
+          name="Setting"
+          component={Setting}
           options={{
-            tabBarIcon: ({color}) => <BarChart2 color={color} size={24} />,
+            tabBarIcon: ({color}) => <SettingsIcon color={color} size={24} />,
           }}
         />
       </Tab.Navigator>

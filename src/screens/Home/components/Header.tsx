@@ -1,13 +1,10 @@
+import {BudgetCard} from '@/components';
 import {JSX, PropsWithChildren} from 'react';
 import {Text, View} from 'react-native';
 
 const Header: React.FC = () => {
-  const Card: React.FC<PropsWithChildren> = ({children}) => {
-    return (
-      <View className="w-1/2 p-2 shadow-md">
-        <View className="bg-purple-500 p-4 shadow rounded-xl">{children}</View>
-      </View>
-    );
+  const CardWrapper: React.FC<PropsWithChildren> = ({children}) => {
+    return <View className="w-1/2 p-2">{children}</View>;
   };
 
   const CardContent: React.FC<{
@@ -35,7 +32,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <View className="bg-white flex flex-col rounded-2xl p-3 gap-5">
+    <View className="flex flex-col rounded-2xl p-3 gap-5">
       <View className="flex flex-row">
         <View className="flex flex-col gap-2">
           <Text className="font-medium">Good morning, User 👋</Text>
@@ -43,12 +40,12 @@ const Header: React.FC = () => {
         </View>
       </View>
       <View className="flex flex-row flex-wrap justify-between">
-        <Card>
-          <CardContent title="Weekly" usedAmount={20} totalAmount={30} />
-        </Card>
-        <Card>
-          <CardContent title="Monthly" usedAmount={20} totalAmount={300} />
-        </Card>
+        <CardWrapper>
+          <BudgetCard spent={200} limit={1000} title="Weekly Budget" />
+        </CardWrapper>
+        <CardWrapper>
+          <BudgetCard spent={200} limit={3000} title="Monthly Budget" />
+        </CardWrapper>
       </View>
     </View>
   );
