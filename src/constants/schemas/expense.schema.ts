@@ -2,12 +2,7 @@ import * as yup from 'yup';
 
 export const expenseSchema = yup.object({
   title: yup.string().default('').required('Title should not be empty'),
-  providers: yup
-    .array()
-    .of(yup.string())
-    .min(1, 'Select at least one provider')
-    .required('Provider should not be empty')
-    .default([]),
+  providers: yup.array().of(yup.string()).default([]),
   mediums: yup
     .array()
     .of(yup.string())

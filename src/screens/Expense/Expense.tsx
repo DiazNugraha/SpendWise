@@ -1,6 +1,6 @@
 import {View} from 'react-native';
-import ExpenseForm from './components/ExpenseForm';
 import {ModalWrapper} from '@/components';
+import ExpenseForm from './components/ExpenseForm';
 
 export const Expense: React.FC = () => {
   return (
