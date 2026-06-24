@@ -39,7 +39,7 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({value, onChange, la
       <View className="flex flex-row gap-3">
         {colorOptions.map(e => {
           return (
-            <Pressable onPress={() => onChange(e.code)}>
+            <Pressable onPress={() => onChange(e.code)} key={e.code}>
               <View
                 className="w-[34px] h-[34px] rounded-full items-center justify-center"
                 style={{
