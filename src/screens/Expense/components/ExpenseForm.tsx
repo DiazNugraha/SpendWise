@@ -1,5 +1,5 @@
 import {Formik} from 'formik';
-import {Pressable, ScrollView, Text, View} from 'react-native';
+import {ScrollView, View} from 'react-native';
 import {
   DecimalInputField,
   FormButtonWrapper,
@@ -67,7 +67,7 @@ const ExpenseForm: React.FC = () => {
   return (
     <Formik initialValues={expenseSchema.getDefault()} validationSchema={expenseSchema} onSubmit={submitForm}>
       {({handleSubmit}) => (
-        <FormButtonWrapper text="Submit Expense" onSubmit={handleSubmit}>
+        <FormButtonWrapper text="Submit Expense" onSubmit={handleSubmit} isLoading={isLoading}>
           <ScrollView className="flex flex-col" contentContainerClassName="gap-3 px-4">
             <View className="w-full flex justify-center items-center px-5">
               <DecimalInputField
@@ -94,16 +94,16 @@ const ExpenseForm: React.FC = () => {
               numberOfLines={4}
             />
           </ScrollView>
-          <View className="absolute bottom-0 mb-4 bg-white w-full p-5">
-            <Pressable
-              className={`py-5 px-6 rounded-2xl items-center justify-center  ${
-                isLoading ? 'bg-[#6D28D9]/10' : 'bg-[#6D28D9]'
-              }`}
-              onPress={handleSubmit}
-              disabled={isLoading}>
-              <Text className="text-white font-medium">{isLoading ? 'Submitting...' : 'Submit Expense'}</Text>
-            </Pressable>
-          </View>
+          {/* <View className="absolute bottom-0 mb-4 bg-white w-full p-5"> */}
+          {/*   <Pressable */}
+          {/*     className={`py-5 px-6 rounded-2xl items-center justify-center  ${ */}
+          {/*       isLoading ? 'bg-[#6D28D9]/10' : 'bg-[#6D28D9]' */}
+          {/*     }`} */}
+          {/*     onPress={handleSubmit} */}
+          {/*     disabled={isLoading}> */}
+          {/*     <Text className="text-white font-medium">{isLoading ? 'Submitting...' : 'Submit Expense'}</Text> */}
+          {/*   </Pressable> */}
+          {/* </View> */}
         </FormButtonWrapper>
       )}
     </Formik>
