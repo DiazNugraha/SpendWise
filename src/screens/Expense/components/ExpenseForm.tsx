@@ -8,13 +8,45 @@ import {
   SelectCarouselField,
   SelectMultiCarouselField,
 } from '@/components';
-import {categoryOptions, mediumOptions, providerOptions} from '@/constants/options';
+import {categoryOptions, mediumOptions} from '@/constants/options';
 import {expenseSchema, IExpenseInput} from '@/constants/schemas';
+import {expenseRepo, providerRepo} from '@/db/repositories';
+import {useEffect, useState} from 'react';
+import {useNavigation} from '@react-navigation/native';
 
 const ExpenseForm: React.FC = () => {
-  const submitForm = (values: IExpenseInput) => {
-    console.log(values);
+  const navigation = useNavigation();
+
+  const [providerOptions, setProviderOptions] = useState<{value: string; label: string}[]>([]);
+
+  const submitForm = async (values: IExpenseInput) => {
+    const savedData = await expenseRepo.create({
+      amount: values.amount,
+      title: values.title,
+      providerIds: values.providers.filter(e => e !== undefined),
+      categoryId: values.category,
+      description: values.description,
+      medium: values.mediums.join(','),
+    });
+
+    if (savedData) {
+      navigation.goBack();
+    }
   };
+
+  const fetchProviderOptions = async () => {
+    const datas = await providerRepo.findAll();
+    setProviderOptions(
+      datas.map(data => ({
+        value: data.id,
+        label: data.name,
+      })),
+    );
+  };
+
+  useEffect(() => {
+    fetchProviderOptions();
+  }, []);
 
   return (
     <Formik initialValues={expenseSchema.getDefault()} validationSchema={expenseSchema} onSubmit={submitForm}>
