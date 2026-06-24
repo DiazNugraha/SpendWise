@@ -5,6 +5,7 @@ import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {Formik} from 'formik';
 import ExpenseFormInput from './ExpenseFormInput';
+import {capitalizeFirstLetter} from '@/helpers';
 
 const ExpenseForm: React.FC = () => {
   const navigation = useNavigation();
@@ -13,9 +14,10 @@ const ExpenseForm: React.FC = () => {
 
   const submitForm = async (values: IExpenseInput) => {
     setIsLoading(true);
+    const title = values.title !== '' ? values.title : capitalizeFirstLetter(values.category);
     const savedData = await expenseRepo.create({
       amount: values.amount,
-      title: values.title,
+      title: title,
       providerIds: values.providers.filter(e => e !== undefined),
       categoryId: values.category,
       description: values.description,

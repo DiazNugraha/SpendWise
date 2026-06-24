@@ -55,16 +55,19 @@ const ExpenseFormInput: React.FC<IExpenseFormProps> = ({isLoading}) => {
           placeholder="1.000"
           className="bg-transparent border-0 text-[30px] font-bold"
           autoFocus
+          required
         />
       </View>
 
+      <SelectMultiCarouselField name="mediums" options={mediumOptions} label="Medium" itemStyle="card" required />
+
+      <SelectCarouselField name="category" options={categoryOptions} label="Category" required />
+
+      {isShowProvidersInput && (
+        <MultiSelectField name="providers" options={providerOptions} label="Providers" required />
+      )}
+
       <InputField name="title" label="Title" placeholder="Input Title here" />
-
-      <SelectMultiCarouselField name="mediums" options={mediumOptions} label="Medium" itemStyle="card" />
-
-      <SelectCarouselField name="category" options={categoryOptions} label="Category" />
-
-      {isShowProvidersInput && <MultiSelectField name="providers" options={providerOptions} label="Providers" />}
 
       <InputField
         name="description"
