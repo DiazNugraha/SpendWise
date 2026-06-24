@@ -10,6 +10,7 @@ type SelectMultiCarouselFieldProps<T> = {
   label?: string;
   options: {label: string; value: T; icon?: LucideIcon}[];
   itemStyle?: ItemStyle;
+  required?: boolean;
 };
 
 export function SelectMultiCarouselField<T>({
@@ -17,6 +18,7 @@ export function SelectMultiCarouselField<T>({
   label,
   options,
   itemStyle = 'chip',
+  required,
 }: SelectMultiCarouselFieldProps<T>) {
   const [field, meta, helpers] = useField<T[]>(name);
 
@@ -32,7 +34,11 @@ export function SelectMultiCarouselField<T>({
 
   return (
     <Fragment>
-      {label && <Text>{label}</Text>}
+      {label && (
+        <Text>
+          {label} {required && <Text className="text-red-500">*</Text>}
+        </Text>
+      )}
 
       <FlatList
         data={options}

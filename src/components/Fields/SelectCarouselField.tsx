@@ -8,9 +8,10 @@ type SelectCarouselFieldProps<T> = {
   name: string;
   label?: string;
   options: {label: string; value: T; icon?: LucideIcon}[];
+  required?: boolean;
 };
 
-export function SelectCarouselField<T>({name, label, options}: SelectCarouselFieldProps<T>) {
+export function SelectCarouselField<T>({name, label, options, required}: SelectCarouselFieldProps<T>) {
   const [field, meta, helpers] = useField<T>(name);
 
   const handleChange = (value: T | T[]) => {
@@ -21,7 +22,12 @@ export function SelectCarouselField<T>({name, label, options}: SelectCarouselFie
 
   return (
     <Fragment>
-      {label && <Text>{label}</Text>}
+      {label && (
+        <Text>
+          {label} {required && <Text className="text-red-500">*</Text>}
+        </Text>
+      )}
+
       <CarouselChips onChange={handleChange} options={options} value={field.value} />
 
       {meta.touched && meta.error && <Text className="text-red-500 mt-1">{meta.error}</Text>}

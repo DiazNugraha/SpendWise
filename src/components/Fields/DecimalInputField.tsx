@@ -8,19 +8,30 @@ type DecimalInputFieldProps = {
   label?: string;
   placeholder?: string;
   className?: string;
+  required?: boolean;
 } & TextInputProps;
 
 const formatter = new NumberFormatter({
   maxFractionDigits: 2,
 });
 
-export const DecimalInputField: React.FC<DecimalInputFieldProps> = ({name, label, placeholder, className}) => {
+export const DecimalInputField: React.FC<DecimalInputFieldProps> = ({
+  name,
+  label,
+  placeholder,
+  className,
+  required,
+}) => {
   const [field, meta, helpers] = useField<number>(name);
   const [display, setDisplay] = useState('');
 
   return (
     <Fragment>
-      {label && <Text>{label}</Text>}
+      {label && (
+        <Text>
+          {label} {required && <Text className="text-red-500">*</Text>}
+        </Text>
+      )}
 
       <TextInput
         keyboardType="decimal-pad"

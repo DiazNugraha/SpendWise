@@ -8,6 +8,7 @@ type SelectFieldProps<T extends string | number> = {
   options: {label: string; value: T}[];
   modalLabel?: string;
   placeholder?: string;
+  required?: boolean;
 };
 
 export function SelectField<T extends string | number>({
@@ -16,6 +17,7 @@ export function SelectField<T extends string | number>({
   options,
   modalLabel,
   placeholder = 'Select Options',
+  required,
 }: SelectFieldProps<T>) {
   const [field, meta, helpers] = useField<T>(name);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
@@ -25,7 +27,11 @@ export function SelectField<T extends string | number>({
 
   return (
     <Fragment>
-      {label && <Text>{label}</Text>}
+      {label && (
+        <Text>
+          {label} {required && <Text className="text-red-500">*</Text>}
+        </Text>
+      )}
 
       <Pressable
         onPress={() => setIsOpenModal(true)}

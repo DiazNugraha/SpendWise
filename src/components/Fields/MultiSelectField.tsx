@@ -9,6 +9,7 @@ type MultiSelectFieldProps<T extends string | number> = {
   options: {label: string; value: T}[];
   modalLabel?: string;
   placeholder?: string;
+  required?: boolean;
 };
 
 export function MultiSelectField<T extends string | number>({
@@ -17,6 +18,7 @@ export function MultiSelectField<T extends string | number>({
   options,
   modalLabel,
   placeholder = 'Select Options',
+  required,
 }: MultiSelectFieldProps<T>) {
   const [field, meta, helpers] = useField<T[]>(name);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
@@ -30,7 +32,11 @@ export function MultiSelectField<T extends string | number>({
 
   return (
     <Fragment>
-      {label && <Text>{label}</Text>}
+      {label && (
+        <Text>
+          {label} {required && <Text className="text-red-500">*</Text>}
+        </Text>
+      )}
 
       <Pressable
         onPress={() => setIsOpenModal(true)}
