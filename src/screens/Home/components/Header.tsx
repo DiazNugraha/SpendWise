@@ -1,12 +1,14 @@
-import {BudgetCard} from '@/components';
-import {PropsWithChildren} from 'react';
+import {BudgetCard, SegmentsControlButton} from '@/components';
+import {PropsWithChildren, useState} from 'react';
 import {Text, View} from 'react-native';
 
 const CardWrapper: React.FC<PropsWithChildren> = ({children}) => {
-  return <View className="w-1/2 p-2">{children}</View>;
+  return <View className="w-full p-2">{children}</View>;
 };
 
 const Header: React.FC = () => {
+  const [activeSegment, setActiveSegment] = useState<BudgetType>('weekly');
+
   return (
     <View className="flex flex-col rounded-2xl p-3 gap-5">
       <View className="flex flex-row">
@@ -15,14 +17,27 @@ const Header: React.FC = () => {
           <Text className="font-medium">Let’s stay within your budget today</Text>
         </View>
       </View>
-      <View className="flex flex-row flex-wrap justify-between">
-        <CardWrapper>
-          <BudgetCard spent={200} limit={1000} title="Weekly Budget" />
-        </CardWrapper>
-        <CardWrapper>
-          <BudgetCard spent={200} limit={3000} title="Monthly Budget" />
-        </CardWrapper>
-      </View>
+      <SegmentsControlButton
+        onClick={val => setActiveSegment(val as BudgetType)}
+        active={activeSegment}
+        segments={[
+          {
+            value: 'weekly',
+            label: 'Weekly',
+          },
+          {
+            value: 'monthly',
+            label: 'Monthly',
+          },
+          {
+            value: 'custom',
+            label: 'Custom',
+          },
+        ]}
+      />
+      <CardWrapper>
+        <BudgetCard budgetType={activeSegment} />
+      </CardWrapper>
     </View>
   );
 };
