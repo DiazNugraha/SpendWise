@@ -24,6 +24,10 @@ export function MultiSelectField<T extends string | number>({
   const values = field.value ?? [];
   const isEmpty = values.length === 0;
 
+  const getLabelByValue = (value: T) => {
+    return options.find(e => e.value === value)?.label ?? '';
+  };
+
   return (
     <Fragment>
       {label && <Text>{label}</Text>}
@@ -31,7 +35,9 @@ export function MultiSelectField<T extends string | number>({
       <Pressable
         onPress={() => setIsOpenModal(true)}
         className={`input-field ${meta.touched && meta.error ? 'input-field-error' : ''} relative`}>
-        <Text className={`${isEmpty ? 'text-gray-500' : ''}`}>{isEmpty ? placeholder : values.join(', ')}</Text>
+        <Text className={`${isEmpty ? 'text-gray-500' : ''}`}>
+          {isEmpty ? placeholder : [...values.map(e => getLabelByValue(e))].join(', ')}
+        </Text>
         <View className="absolute right-3 top-5">
           <ChevronDownIcon color={'#6b7280'} />
         </View>
