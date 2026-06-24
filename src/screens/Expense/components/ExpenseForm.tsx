@@ -1,4 +1,3 @@
-import * as yup from 'yup';
 import {Formik} from 'formik';
 import {Pressable, ScrollView, Text, View} from 'react-native';
 import {
@@ -10,27 +9,7 @@ import {
   SelectMultiCarouselField,
 } from '@/components';
 import {categoryOptions, mediumOptions, providerOptions} from '@/constants/options';
-
-const expenseSchema = yup.object({
-  title: yup.string().default('').required('Title should not be empty'),
-  providers: yup
-    .array()
-    .of(yup.string())
-    .min(1, 'Select at least one provider')
-    .required('Provider should not be empty')
-    .default([]),
-  mediums: yup
-    .array()
-    .of(yup.string())
-    .min(1, 'Select at least one medium')
-    .required('Medium should not be empty')
-    .default([]),
-  category: yup.string().default('').required('Category should not be empty'),
-  amount: yup.number().typeError('Must be a number').positive().required('Amount should not be empty').default(0),
-  description: yup.string().default(''),
-});
-
-type IExpenseInput = yup.InferType<typeof expenseSchema>;
+import {expenseSchema, IExpenseInput} from '@/constants/schemas';
 
 const ExpenseForm: React.FC = () => {
   const submitForm = (values: IExpenseInput) => {

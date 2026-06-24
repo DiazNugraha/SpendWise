@@ -7,30 +7,11 @@ import {
   ModalWrapper,
   SwitchButton,
 } from '@/components';
+import {budgetSchema, IBudgetInput} from '@/constants/schemas';
 import {Formik} from 'formik';
 import {BellRingIcon, CalendarIcon, LucideIcon} from 'lucide-react-native';
 import {useState} from 'react';
 import {ScrollView, Text, View} from 'react-native';
-import * as yup from 'yup';
-
-const budgetSchema = yup.object({
-  title: yup.string().default('').required('Title should not be empty'),
-  amount: yup.number().typeError('Must be a number').positive().required('Amount should not be empty').default(0),
-  type: yup.string().default('').required(),
-  dateRange: yup
-    .object({
-      startDate: yup.date().required('Start date is required').default(new Date()),
-
-      endDate: yup
-        .date()
-        .min(yup.ref('startDate'), 'End date must be after start date')
-        .required('End date is required')
-        .default(new Date()),
-    })
-    .required(),
-});
-
-type IBudgetInput = yup.InferType<typeof budgetSchema>;
 
 // type BudgetDetailRouteProps = RouteProp<RootNavigatorParamList, 'BudgetDetail'>;
 
