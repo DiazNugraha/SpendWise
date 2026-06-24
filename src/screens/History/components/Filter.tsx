@@ -1,5 +1,8 @@
 import {CarouselChips} from '@/components';
-import {budgetOptions, categoryOptions} from '@/constants/options';
+import {categoryOptions} from '@/constants/options';
+import {budgetRepo} from '@/db/repositories';
+import {useFocusEffect} from '@react-navigation/native';
+import {useCallback, useState} from 'react';
 import {Text, View} from 'react-native';
 
 interface IFilterValue {
@@ -17,15 +20,8 @@ interface IFilterProps {
 const Filter: React.FC<IFilterProps> = ({onClear, setSelectedBudget, setSelectedCategories, value}) => {
   const selectedBudget = value.budget;
   const selectedTypes = value.categories;
+  const [selectBudgetOptions, setSelectBudgetOptions] = useState<IOption<string>[]>([]);
 
-  const selectBudgetOptions = [
-    ...budgetOptions.map(val => {
-      return {
-        label: val.label,
-        value: val.rangeDate?.toString() || 'custom',
-      };
-    }),
-  ];
   const selectTypeOptions = [
     {
       label: 'All Categories',
@@ -34,9 +30,20 @@ const Filter: React.FC<IFilterProps> = ({onClear, setSelectedBudget, setSelected
     ...categoryOptions,
   ];
 
+  const fetchActiveBudgetOptions = useCallback(async () => {
+    const activeBudgets = await budgetRepo.findActivesEachType();
+    setSelectBudgetOptions([{label: 'All', value: 'all'}, ...activeBudgets.map(e => ({label: e.type, value: e.type}))]);
+  }, []);
+
   const handleClear = () => {
     onClear();
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchActiveBudgetOptions();
+    }, [fetchActiveBudgetOptions]),
+  );
 
   return (
     <View className="flex flex-col gap-3">

@@ -1,8 +1,9 @@
-import {and, eq, gte, lte, sql} from 'drizzle-orm';
+import {and, eq, gte, inArray, lte, sql} from 'drizzle-orm';
 import {db} from '../client';
 import {expenseProviders, expenses, providers} from '../schema';
 import uuid from 'react-native-uuid';
 import {applyLimit, applyWhere} from '@/helpers';
+import {budgetRepo} from './budget.repo';
 
 type IExpenseInsert = {
   title: string;
@@ -43,16 +44,34 @@ export const expenseRepo = {
     return newExpense;
   },
 
-  async findAll(options?: {limit?: number; categoryId?: string}) {
+  async findAll(options?: {limit?: number; categories?: string[]; budgetType?: BudgetType}) {
     let query = db
       .select()
       .from(expenses)
       .orderBy(sql`${expenses.createdAt} desc`);
 
-    query = options?.categoryId
-      ? applyWhere(query, eq(expenses.categoryId, options?.categoryId), options?.categoryId)
+    query = options?.categories
+      ? applyWhere(query, inArray(expenses.categoryId, options.categories), options?.categories)
       : query;
     query = applyLimit(query, options?.limit);
+
+    if (options?.budgetType && options?.budgetType !== 'all') {
+      const dateRange = await budgetRepo.findActiveByType(options.budgetType);
+      const activeBudget = dateRange[0];
+
+      if (activeBudget) {
+        query = applyWhere(
+          query,
+          and(gte(expenses.createdAt, activeBudget.startDate), lte(expenses.createdAt, activeBudget.endDate)),
+        );
+      }
+    } else {
+      const now = new Date();
+      const startDate = new Date(now);
+      const last30Days = startDate.setDate(startDate.getDate() - 30);
+
+      query = applyWhere(query, and(gte(expenses.createdAt, last30Days), lte(expenses.createdAt, now.getDate())));
+    }
 
     return await query;
   },
