@@ -1,4 +1,4 @@
-interface ISpend {
+interface IExpense {
   title: string;
   providers: string[];
   mediums: string[];
