@@ -64,9 +64,13 @@ const AlertProvider: React.FC<PropsWithChildren> = ({children}) => {
   return (
     <AlertContext.Provider value={{alert}}>
       {children}
-      <Modal visible={alertState.open} animationType="slide" transparent={true}>
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)'}}>
-          <View className="w-[300px] p-5 flex flex-col items-center bg-white rounded-2xl gap-4">
+      <Modal visible={alertState.open} animationType="fade" transparent={true}>
+        <Pressable
+          style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)'}}
+          onPress={alertState.onCancel}>
+          <Pressable
+            className="w-[300px] p-5 flex flex-col items-center bg-white rounded-2xl gap-4"
+            onPress={e => e.stopPropagation()}>
             <View className="p-3 rounded-full flex items-center justify-center bg-[#6D28D9]/10">
               <AlertCircleIcon color={'#6D28D9'} />
             </View>
@@ -85,8 +89,8 @@ const AlertProvider: React.FC<PropsWithChildren> = ({children}) => {
                 <Text className="text-white font-medium">{alertState.confirmButtonLabel}</Text>
               </Pressable>
             </View>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       </Modal>
     </AlertContext.Provider>
   );
