@@ -140,6 +140,21 @@ export const expenseRepo = {
     return result[0]?.total ?? 0;
   },
 
+  async checkIfThereIsBudgetGoalsToNotify() {
+    const activeBudgetGoals = await budgetRepo.findActivesEachType({notify: true});
+    const needToNotify = await Promise.all(
+      activeBudgetGoals.map(async budget => {
+        const expensesTotal = await expenseRepo.sumExpensesWithinDate(budget.startDate, budget.endDate);
+        if (Math.floor((expensesTotal / budget.amount) * 100) > 80) {
+          return budget;
+        }
+        return null;
+      }),
+    );
+
+    return needToNotify.filter(e => e !== null);
+  },
+
   async compareProgressWithLastBudgetGoal(budgetType: BudgetType): Promise<number> {
     const now = new Date();
 

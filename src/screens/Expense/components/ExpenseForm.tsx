@@ -30,6 +30,20 @@ const ExpenseForm: React.FC = () => {
         text1: 'Success!',
         text2: 'Expense created successfully',
       });
+
+      const needToNotifies = await expenseRepo.checkIfThereIsBudgetGoalsToNotify();
+
+      if (needToNotifies.length > 0) {
+        needToNotifies.forEach(budget => {
+          Toast.show({
+            type: 'success',
+            text1: 'Budget Alert',
+            text2: `You have used 80% of your ${budget.type} budget.`,
+            visibilityTime: 7000,
+          });
+        });
+      }
+
       return navigation.goBack();
     }
 

@@ -1,5 +1,5 @@
 interface IExpense {
-  id: string;
+  id?: string;
   title: string;
   providers: string[];
   mediums: string[];

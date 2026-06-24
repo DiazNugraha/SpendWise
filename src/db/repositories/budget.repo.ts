@@ -2,6 +2,7 @@ import {and, eq, gte, lte, sql} from 'drizzle-orm';
 import {db} from '../client';
 import {budgets, expenses} from '../schema';
 import uuid from 'react-native-uuid';
+import {applyWhere} from '@/helpers';
 
 type IBudgetInsert = {
   title: string;
@@ -23,28 +24,42 @@ export const budgetRepo = {
     return await db.select().from(budgets).where(eq(budgets.id, id));
   },
 
-  async findActivesEachType() {
-    const weekly = await db
+  async findActivesEachType(options?: {notify?: boolean}) {
+    let weeklyQuery = db
       .select()
       .from(budgets)
       .where(and(eq(budgets.type, 'weekly'), eq(budgets.isActive, true)));
-    const monthly = await db
+    let monthlyQuery = db
       .select()
       .from(budgets)
       .where(and(eq(budgets.type, 'monthly'), eq(budgets.isActive, true)));
-    const custom = await db
+    let customQuery = db
       .select()
       .from(budgets)
       .where(and(eq(budgets.type, 'custom'), eq(budgets.isActive, true)));
 
+    if (options?.notify) {
+      weeklyQuery = applyWhere(weeklyQuery, eq(budgets.enableNotify, true));
+      monthlyQuery = applyWhere(monthlyQuery, eq(budgets.enableNotify, true));
+      customQuery = applyWhere(customQuery, eq(budgets.enableNotify, true));
+    }
+
+    const weekly = await weeklyQuery;
+    const monthly = await monthlyQuery;
+    const custom = await customQuery;
+
     return [weekly[0], monthly[0], custom[0]].filter(e => e !== undefined);
   },
 
-  async findActiveByType(type: BudgetType) {
-    return await db
+  async findActiveByType(type: BudgetType, options?: {notify?: boolean}) {
+    let query = db
       .select()
       .from(budgets)
       .where(and(eq(budgets.type, type), eq(budgets.isActive, true)));
+
+    query = options?.notify ? applyWhere(query, eq(budgets.enableNotify, true)) : query;
+
+    return await query;
   },
 
   async create(data: IBudgetInsert) {
