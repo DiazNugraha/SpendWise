@@ -1,4 +1,4 @@
-import {and, eq, gte, lte} from 'drizzle-orm';
+import {and, eq, gte, lte, sql} from 'drizzle-orm';
 import {db} from '../client';
 import {budgets, expenses} from '../schema';
 import uuid from 'react-native-uuid';
@@ -87,5 +87,16 @@ export const budgetRepo = {
       .where(and(gte(expenses.createdAt, startDate), lte(expenses.createdAt, endDate)));
 
     return existingExpenses;
+  },
+
+  async getLastInactiveBudget(budgetType: BudgetType) {
+    const budget = await db
+      .select()
+      .from(budgets)
+      .where(and(eq(budgets.isActive, false), eq(budgets.type, budgetType)))
+      .orderBy(sql`${budgets.createdAt} desc`)
+      .limit(1);
+
+    return budget[0];
   },
 };

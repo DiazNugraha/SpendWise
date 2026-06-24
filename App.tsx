@@ -16,6 +16,7 @@ import migrations from '@/db/migrations/migrations';
 import {Text, View} from 'react-native';
 import {useEffect} from 'react';
 import {seedDatabase} from '@/db/seeders/seed';
+import {updateExpiredBudgets} from '@/helpers';
 
 function App() {
   const {success, error} = useMigrations(db, migrations);
@@ -23,6 +24,7 @@ function App() {
   useEffect(() => {
     if (success) {
       seedDatabase().catch(console.error);
+      updateExpiredBudgets();
     }
   }, [success]);
 
