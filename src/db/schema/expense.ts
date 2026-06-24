@@ -13,6 +13,6 @@ export const expenses = sqliteTable('expenses', {
 
   medium: text('medium'),
 
-  createdAt: integer('created_at'),
-  updatedAt: integer('updated_at'),
+  createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull(),
 });
