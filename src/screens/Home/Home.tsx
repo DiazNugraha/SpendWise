@@ -4,11 +4,23 @@ import Header from './components/Header';
 import History from './components/History';
 import Navigator from './components/Navigator';
 import {resetDatabase} from '@/helpers';
+import {useAlert} from '@/hooks';
 
 export const Home: React.FC = () => {
+  const {alert} = useAlert();
+
   const resetDatabaseAction = async () => {
-    await resetDatabase().then(() => {
-      DevSettings.reload();
+    alert({
+      title: 'Reset Database',
+      description: 'Are you sure?',
+      onConfirm: async () => {
+        await resetDatabase().then(() => {
+          DevSettings.reload();
+        });
+      },
+      onCancel: () => {
+        return;
+      },
     });
   };
 
