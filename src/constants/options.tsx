@@ -78,15 +78,16 @@ export const categoryOptions: IOptionWithIcon<string>[] = [
 
 export const budgetOptions: {label: string; rangeDate?: number; icon: LucideIcon}[] = [
   {
-    label: 'monthly',
-    rangeDate: 30,
-    icon: Calendar,
-  },
-  {
     label: 'weekly',
     rangeDate: 7,
     icon: Target,
   },
+  {
+    label: 'monthly',
+    rangeDate: 30,
+    icon: Calendar,
+  },
+
   {
     label: 'custom',
     icon: Target,
