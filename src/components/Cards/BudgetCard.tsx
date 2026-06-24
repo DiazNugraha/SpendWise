@@ -1,15 +1,19 @@
 import {budgetRepo, expenseRepo} from '@/db/repositories';
-import {getDaysLeft} from '@/helpers';
+import {getDaysLeft, NumberFormatter} from '@/helpers';
 import {RootNavigationProp} from '@/types';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {Calendar, CircleQuestionMark} from 'lucide-react-native';
-import {useEffect, useState} from 'react';
+import {useCallback, useState} from 'react';
 import {Pressable, Text, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
 type Props = {
   budgetType: BudgetType;
 };
+
+const formatter = new NumberFormatter({
+  maxFractionDigits: 2,
+});
 
 export const BudgetCard: React.FC<Props> = ({budgetType}) => {
   const [selectedBudget, setSelectedBudget] = useState<
@@ -30,34 +34,36 @@ export const BudgetCard: React.FC<Props> = ({budgetType}) => {
     return expenseTotal;
   };
 
-  useEffect(() => {
-    const run = async () => {
-      const findBudget = await budgetRepo.findActiveByType(budgetType);
+  const fetchBudget = useCallback(async () => {
+    const findBudget = await budgetRepo.findActiveByType(budgetType);
 
-      if (findBudget.length < 1) {
-        setSelectedBudget(undefined);
-        return;
-      }
+    if (findBudget.length < 1) {
+      setSelectedBudget(undefined);
+      return;
+    }
 
-      const find = findBudget[0];
-      const limit = find?.amount ?? 0;
+    const find = findBudget[0];
+    const limit = find?.amount ?? 0;
 
-      const expenseTotal = await fetchSpend(find.startDate, find.endDate);
+    const expenseTotal = await fetchSpend(find.startDate, find.endDate);
 
-      const progress = limit > 0 ? (expenseTotal / limit) * 100 : 0;
+    const progress = limit > 0 ? (expenseTotal / limit) * 100 : 0;
 
-      const daysLeft = getDaysLeft(find?.endDate ? new Date(find.endDate) : new Date());
+    const daysLeft = getDaysLeft(find?.endDate ? new Date(find.endDate) : new Date());
 
-      setSelectedBudget({
-        title: find?.title ?? '',
-        limit,
-        progress,
-        daysLeft,
-      });
-    };
-
-    run();
+    setSelectedBudget({
+      title: find?.title ?? '',
+      limit,
+      progress,
+      daysLeft,
+    });
   }, [budgetType]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchBudget();
+    }, [fetchBudget]),
+  );
 
   return (
     <LinearGradient
@@ -95,8 +101,8 @@ const FoundSavedBudget = ({budget, spent}: FoundSavedBudgetProps) => {
       <Text className="text-violet-100 text-sm mb-2">{title}</Text>
 
       <View className="flex-row items-end">
-        <Text className="text-white text-3xl font-bold">{spent}</Text>
-        <Text className="text-violet-200 text-base mb-1"> / {limit}</Text>
+        <Text className="text-white text-3xl font-bold">{formatter.format(spent)}</Text>
+        <Text className="text-violet-200 text-base mb-1"> / {formatter.format(limit)}</Text>
       </View>
 
       {/* Progress bar */}
@@ -104,7 +110,9 @@ const FoundSavedBudget = ({budget, spent}: FoundSavedBudgetProps) => {
         <View className="h-1.5 rounded-full bg-white" style={{width: `${progress}%`}} />
       </View>
       <View className="flex flex-row justify-between mt-5">
-        <Text className="text-white text-xs">Remaining: {limit - spent >= 0 ? limit - spent : 0}</Text>
+        <Text className="text-white text-xs">
+          Remaining: {formatter.format(limit - spent >= 0 ? limit - spent : 0)}
+        </Text>
         <View className="bg-white/20 rounded-2xl px-2 py-1">
           <Text className="text-[10px] text-white ">{daysLeft} days left</Text>
         </View>
