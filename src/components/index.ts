@@ -3,3 +3,4 @@ export {TabNavigator} from './TabNavigator/TabNavigator.tsx';
 
 export * from './Fields';
 export * from './Wrappers';
+export * from './Buttons';
