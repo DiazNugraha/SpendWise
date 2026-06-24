@@ -1,4 +1,4 @@
-type BudgetType = 'monthly' | 'weekly' | 'custom';
+type BudgetType = 'monthly' | 'weekly' | 'custom' | 'all';
 
 interface IBudget {
   title: string;
