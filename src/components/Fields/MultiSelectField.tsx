@@ -1,0 +1,111 @@
+import {useField} from 'formik';
+import {useState} from 'react';
+import {FlatList, Modal, Pressable, Text, View} from 'react-native';
+
+type MultiSelectFieldProps<T extends string | number> = {
+  name: string;
+  label?: string;
+  options: {label: string; value: T}[];
+  modalLabel?: string;
+  placeholder?: string;
+};
+
+export function MultiSelectField<T extends string | number>({
+  name,
+  label,
+  options,
+  modalLabel,
+  placeholder = 'Select Options',
+}: MultiSelectFieldProps<T>) {
+  const [field, meta, helpers] = useField<T[]>(name);
+  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+
+  const values = field.value ?? [];
+  const isEmpty = values.length === 0;
+
+  return (
+    <View>
+      {label && <Text>{label}</Text>}
+
+      <Pressable
+        onPress={() => setIsOpenModal(true)}
+        className={`input-field ${meta.touched && meta.error ? 'input-field-error' : ''}`}>
+        <Text className={`${isEmpty ? 'text-gray-500' : ''}`}>{isEmpty ? placeholder : values.join(', ')}</Text>
+      </Pressable>
+
+      {meta.touched && meta.error && <Text className="text-red-500 mt-1">{meta.error}</Text>}
+
+      <MultiSelectDialog
+        open={isOpenModal}
+        onClose={() => {
+          helpers.setTouched(true);
+          setIsOpenModal(false);
+        }}
+        options={options}
+        values={values}
+        onChange={helpers.setValue}
+        modalLabel={modalLabel}
+      />
+    </View>
+  );
+}
+
+type MultiSelectDialogProps<T extends string | number> = {
+  open: boolean;
+  onClose: () => void;
+  options: {label: string; value: T}[];
+  values: T[];
+  onChange: (values: T[]) => void;
+  modalLabel?: string;
+};
+
+function MultiSelectDialog<T extends string | number>({
+  open,
+  onClose,
+  options,
+  values,
+  onChange,
+  modalLabel = 'Select',
+}: MultiSelectDialogProps<T>) {
+  const toggle = (value: T) => {
+    if (values.includes(value)) {
+      onChange(values.filter(v => v !== value));
+    } else {
+      onChange([...values, value]);
+    }
+  };
+
+  return (
+    <Modal visible={open} transparent animationType="slide">
+      <View style={{flex: 1, backgroundColor: 'rgba(0,0,0,0.4)'}}>
+        <Pressable style={{flex: 1}} onPress={onClose} />
+
+        <View className="h-[50%] bg-white rounded-t-2xl p-4">
+          <Text className="text-xs mb-3">{modalLabel}</Text>
+
+          <FlatList
+            data={options}
+            keyExtractor={item => String(item.value)}
+            renderItem={({item}) => {
+              const selected = values.includes(item.value);
+
+              return (
+                <Pressable
+                  onPress={() => toggle(item.value)}
+                  className={`p-3 border border-b-[1px] border-[#eee] ${selected ? 'bg-[#e6f0ff]' : 'bg-white'}`}>
+                  <Text>
+                    {item.label} {selected ? '✓' : ''}
+                  </Text>
+                </Pressable>
+              );
+            }}
+          />
+
+          <Pressable onPress={onClose} className="mt-3 p-3 bg-[#007AFF] rounded-md">
+            <Text className="text-white text-center">Done</Text>
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
+  );
+}
