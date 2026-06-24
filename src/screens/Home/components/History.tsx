@@ -2,7 +2,7 @@ import {CATEGORY_DB_DATA, CategoryIconMap} from '@/constants';
 import {expenseRepo} from '@/db/repositories';
 import {formatDate, NumberFormatter} from '@/helpers';
 import {useFocusEffect} from '@react-navigation/native';
-import {useCallback, useState} from 'react';
+import {Fragment, useCallback, useState} from 'react';
 import {FlatList, Text, View} from 'react-native';
 
 const formatter = new NumberFormatter({
@@ -77,17 +77,25 @@ const History: React.FC = () => {
 
   return (
     <View className="flex flex-col gap-1 p-3 flex-1" style={{maxHeight: 490}}>
-      <Text className="text-lg font-medium mb-4">Recent Transactions</Text>
-      <FlatList
-        data={expenses}
-        renderItem={({item}) => <Item {...item} />}
-        keyExtractor={(_, index) => index.toString()}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          gap: 8,
-        }}
-        style={{flex: 1}}
-      />
+      {expenses.length > 0 ? (
+        <Fragment>
+          <Text className="text-lg font-medium mb-4">Recent Transactions</Text>
+          <FlatList
+            data={expenses}
+            renderItem={({item}) => <Item {...item} />}
+            keyExtractor={(_, index) => index.toString()}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              gap: 8,
+            }}
+            style={{flex: 1}}
+          />
+        </Fragment>
+      ) : (
+        <View className="flex justify-center items-center">
+          <Text className="text-lg font-medium mb-4 content-center">---- Make your expenses! ----</Text>
+        </View>
+      )}
     </View>
   );
 };
