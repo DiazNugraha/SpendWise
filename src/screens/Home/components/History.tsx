@@ -1,95 +1,12 @@
-import {CATEGORY_DB_DATA, CategoryIconMap} from '@/constants';
+import {CATEGORY_DB_DATA, CategoryIconMap, dummySavedExpenses} from '@/constants';
 import {formatDate, NumberFormatter} from '@/helpers';
 import {FlatList, Text, View} from 'react-native';
-
-const dummyDate = new Date();
-const datas: ISpend[] = [
-  {
-    title: 'Lunch at warung',
-    providers: ['GoPay'],
-    mediums: ['emoney'],
-    category: 'food',
-    amount: 35000,
-    description: 'Nasi ayam + es teh',
-    createdAt: dummyDate,
-  },
-  {
-    title: 'Morning coffee',
-    providers: ['Cash'],
-    mediums: ['cash'],
-    category: 'food',
-    amount: 18000,
-    createdAt: dummyDate,
-  },
-  {
-    title: 'Online ride to office',
-    providers: ['GoPay'],
-    mediums: ['emoney'],
-    category: 'transport',
-    amount: 22000,
-    description: 'GoRide from home to office',
-    createdAt: dummyDate,
-  },
-  {
-    title: 'Weekly groceries',
-    providers: ['Dana'],
-    mediums: ['emoney'],
-    category: 'groceries',
-    amount: 125000,
-    description: 'Vegetables, eggs, instant noodles',
-    createdAt: dummyDate,
-  },
-  {
-    title: 'Mobile data package',
-    providers: ['ShopeePay'],
-    mediums: ['emoney'],
-    category: 'utilities',
-    amount: 50000,
-    description: 'Monthly internet quota',
-    createdAt: dummyDate,
-  },
-  {
-    title: 'Parking fee',
-    providers: ['Cash'],
-    mediums: ['cash'],
-    category: 'transport',
-    amount: 5000,
-    createdAt: dummyDate,
-  },
-  {
-    title: 'Movie night',
-    providers: ['OVO'],
-    mediums: ['emoney'],
-    category: 'entertainment',
-    amount: 45000,
-    description: 'Cinema ticket',
-    createdAt: dummyDate,
-  },
-  {
-    title: 'Movie night',
-    providers: ['OVO'],
-    mediums: ['emoney'],
-    category: 'entertainment',
-    amount: 45000,
-    description: 'Cinema ticket',
-    createdAt: dummyDate,
-  },
-  {
-    title: 'Movie night',
-    providers: ['OVO'],
-    mediums: ['emoney'],
-    category: 'entertainment',
-    amount: 45000,
-    description: 'Cinema ticket',
-    createdAt: dummyDate,
-  },
-];
 
 const formatter = new NumberFormatter({
   maxFractionDigits: 2,
 });
 
-const Item: React.FC<ISpend> = props => {
+const Item: React.FC<IExpense> = props => {
   const getCategoryItems = (key: string) => {
     return CATEGORY_DB_DATA.find(e => e.key === key);
   };
@@ -135,7 +52,7 @@ const History: React.FC = () => {
     <View className="flex flex-col gap-1 p-3" style={{maxHeight: 490}}>
       <Text className="text-lg font-medium mb-4">Recent Transactions</Text>
       <FlatList
-        data={datas}
+        data={dummySavedExpenses}
         renderItem={({item}) => <Item {...item} />}
         keyExtractor={(_, index) => index.toString()}
         showsVerticalScrollIndicator={false}

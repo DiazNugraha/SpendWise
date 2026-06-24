@@ -1,47 +1,24 @@
 import {formatDate} from '@/helpers';
-import {Calendar, LucideIcon, Target} from 'lucide-react-native';
 import {PropsWithChildren} from 'react';
 import {Text, View} from 'react-native';
+import * as Icons from 'lucide-react-native';
+import {dummySavedBudgets} from '@/constants';
 
 const BudgetSummary: React.FC = () => {
-  const savedBudgets: {name: string; startDate: Date; endDate: Date; amount: number; icon: LucideIcon}[] = [
-    {
-      name: 'monthly',
-      startDate: new Date(),
-      endDate: new Date(),
-      amount: 3000,
-      icon: Calendar,
-    },
-    {
-      name: 'weekly',
-      startDate: new Date(),
-      endDate: new Date(),
-      amount: 1000,
-      icon: Target,
-    },
-    {
-      name: 'custom',
-      startDate: new Date(),
-      endDate: new Date(),
-      amount: 3900,
-      icon: Target,
-    },
-  ];
-
   return (
     <View className="flex flex-col gap-3">
       <Text>Budget Summary</Text>
       <View className="flex flex-col gap-2">
-        {savedBudgets.map(e => {
-          const Icon = e.icon;
+        {dummySavedBudgets.map(e => {
+          const Icon = Icons[e.icon as keyof typeof Icons] as Icons.LucideIcon;
           return (
-            <ItemWrapper key={e.name}>
+            <ItemWrapper key={e.type}>
               <View className="flex flex-row gap-2 items-center">
-                <Icon color={'#6D28D9'} />
+                {Icon && <Icon color={e.iconColor} />}
                 <View className="flex flex-col gap-2">
-                  <Text className="capitalize font-medium text-sm">{e.name}</Text>
+                  <Text className="capitalize font-medium text-sm">{e.type}</Text>
                   <Text className="text-[10px]">
-                    {formatDate(e.startDate)} - {formatDate(e.endDate)}
+                    {formatDate(e.dateRange.startDate)} - {formatDate(e.dateRange.endDate)}
                   </Text>
                 </View>
               </View>
