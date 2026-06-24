@@ -13,9 +13,17 @@ import {useMigrations} from 'drizzle-orm/op-sqlite/migrator';
 import {db} from '@/db/client';
 import migrations from '@/db/migrations/migrations';
 import {Text, View} from 'react-native';
+import {useEffect} from 'react';
+import {seedDatabase} from '@/db/seeders/seed';
 
 function App() {
   const {success, error} = useMigrations(db, migrations);
+
+  useEffect(() => {
+    if (success) {
+      seedDatabase().catch(console.error);
+    }
+  }, [success]);
 
   if (error) {
     return (
