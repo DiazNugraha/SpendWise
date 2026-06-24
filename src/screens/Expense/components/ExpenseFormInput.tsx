@@ -54,6 +54,7 @@ const ExpenseFormInput: React.FC<IExpenseFormProps> = ({isLoading}) => {
           label="Enter Amount"
           placeholder="1.000"
           className="bg-transparent border-0 text-[30px] font-bold"
+          autoFocus
         />
       </View>
 

@@ -1,14 +1,14 @@
 import {NumberFormatter} from '@/helpers';
 import {useField} from 'formik';
 import {Fragment, useState} from 'react';
-import {Text, TextInput, View} from 'react-native';
+import {Text, TextInput, TextInputProps} from 'react-native';
 
 type DecimalInputFieldProps = {
   name: string;
   label?: string;
   placeholder?: string;
   className?: string;
-};
+} & TextInputProps;
 
 const formatter = new NumberFormatter({
   maxFractionDigits: 2,
@@ -33,6 +33,7 @@ export const DecimalInputField: React.FC<DecimalInputFieldProps> = ({name, label
             helpers.setValue(parsed);
           }
         }}
+        autoFocus
         onBlur={() => {
           helpers.setTouched(true);
           if (typeof field.value === 'number') {
