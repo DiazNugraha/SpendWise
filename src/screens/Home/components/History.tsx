@@ -1,7 +1,8 @@
 import {CATEGORY_DB_DATA, CategoryIconMap} from '@/constants';
 import {expenseRepo} from '@/db/repositories';
 import {formatDate, NumberFormatter} from '@/helpers';
-import {useFocusEffect} from '@react-navigation/native';
+import {RootNavigationProp} from '@/types';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {Fragment, useCallback, useState} from 'react';
 import {FlatList, Text, View} from 'react-native';
 
@@ -52,6 +53,7 @@ const Item: React.FC<IExpense> = props => {
 
 const History: React.FC = () => {
   const [expenses, setExpenses] = useState<IExpense[]>([]);
+  const navigation = useNavigation<RootNavigationProp>();
 
   const fetchExpenses = useCallback(async () => {
     const data = await expenseRepo.findAll({limit: 5});
@@ -79,7 +81,16 @@ const History: React.FC = () => {
     <View className="flex flex-col gap-1 p-3 flex-1" style={{maxHeight: 490}}>
       {expenses.length > 0 ? (
         <Fragment>
-          <Text className="text-lg font-medium mb-4">Recent Transactions</Text>
+          <View className="flex flex-row justify-between items-center">
+            <Text className="text-lg font-medium mb-4">Recent Transactions</Text>
+            <Text
+              className="text-slate-500 text-xs"
+              onPress={() => {
+                return navigation.navigate('History');
+              }}>
+              View History
+            </Text>
+          </View>
           <FlatList
             data={expenses}
             renderItem={({item}) => <Item {...item} />}
