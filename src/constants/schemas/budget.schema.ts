@@ -15,6 +15,9 @@ export const budgetSchema = yup.object({
         .default(new Date()),
     })
     .required(),
+  icon: yup.string().default(''),
+  iconColor: yup.string().default(''),
+  enableNotify: yup.boolean().default(true),
 });
 
 export type IBudgetInput = yup.InferType<typeof budgetSchema>;
