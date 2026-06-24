@@ -40,8 +40,8 @@ const Navigator: React.FC = () => {
   return (
     <View className="flex flex-row rounded-2xl justify-evenly">
       {menus.map((menu, i) => (
-        <View className="flex flex-col items-center justify-center">
-          <Pressable onPress={() => handlePress(i)} key={i} className="p-5 bg-white rounded-2xl">
+        <View className="flex flex-col items-center justify-center" key={i}>
+          <Pressable onPress={() => handlePress(i)} className="p-5 bg-white rounded-2xl">
             {menu.icon}
           </Pressable>
           <View className="flex items-center px-2 my-2">

@@ -33,7 +33,7 @@ const BudgetTypeSelector: React.FC<Props> = ({onChange}) => {
   };
 
   const getColorStyle = (label: string): {bgColor: string; color: string} => {
-    if (selected == label)
+    if (selected === label)
       return {
         bgColor: '#6D28D9',
         color: 'white',
