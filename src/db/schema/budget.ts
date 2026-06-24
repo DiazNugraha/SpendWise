@@ -15,6 +15,7 @@ export const budgets = sqliteTable('budgets', {
   iconColor: text('icon_color'),
 
   enableNotify: integer('enable_notify', {mode: 'boolean'}).notNull(),
+  isActive: integer('is_active', {mode: 'boolean'}).notNull().default(false),
 
   createdAt: integer('created_at'),
   updatedAt: integer('updated_at'),
