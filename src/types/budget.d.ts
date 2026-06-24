@@ -1,6 +1,8 @@
+type BudgetType = 'monthly' | 'weekly' | 'custom';
+
 interface IBudget {
   title: string;
-  type: 'monthly' | 'weekly' | 'custom';
+  type: BudgetType;
   dateRange: {
     startDate: Date;
     endDate: Date;

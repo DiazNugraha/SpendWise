@@ -1,10 +1,10 @@
 export const dummySavedBudgets: IBudget[] = [
   {
-    title: '',
+    title: 'Monthly Budget',
     type: 'monthly',
     dateRange: {
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: new Date('2026-02-25 12:15'),
+      endDate: new Date('2026-03-25 12:15'),
     },
     amount: 3000,
     icon: 'Calendar',
@@ -12,11 +12,11 @@ export const dummySavedBudgets: IBudget[] = [
     enableNotify: true,
   },
   {
-    title: '',
+    title: 'Weekly Budget',
     type: 'weekly',
     dateRange: {
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: new Date('2026-02-25 12:15'),
+      endDate: new Date('2026-03-04 12:15'),
     },
     amount: 1000,
     icon: 'Target',
@@ -24,11 +24,11 @@ export const dummySavedBudgets: IBudget[] = [
     enableNotify: true,
   },
   {
-    title: '',
+    title: 'Custom Budget',
     type: 'custom',
     dateRange: {
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: new Date('2026-02-25 12:15'),
+      endDate: new Date('2026-04-01 12:15'),
     },
     amount: 3900,
     icon: 'Target',
