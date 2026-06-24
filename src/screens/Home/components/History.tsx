@@ -4,7 +4,7 @@ import {formatDate, NumberFormatter} from '@/helpers';
 import {RootNavigationProp} from '@/types';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {Fragment, useCallback, useState} from 'react';
-import {FlatList, Text, View} from 'react-native';
+import {Text, View} from 'react-native';
 
 const formatter = new NumberFormatter({
   maxFractionDigits: 2,
@@ -56,9 +56,10 @@ const History: React.FC = () => {
   const navigation = useNavigation<RootNavigationProp>();
 
   const fetchExpenses = useCallback(async () => {
-    const data = await expenseRepo.findAll({limit: 5});
+    const {data} = await expenseRepo.findAll({limit: 5});
 
     const formatData: IExpense[] = data.map(d => ({
+      id: d.id,
       title: d.title,
       providers: [],
       mediums: d.medium ? d.medium.split(',') : [],
@@ -91,16 +92,11 @@ const History: React.FC = () => {
               View History
             </Text>
           </View>
-          <FlatList
-            data={expenses}
-            renderItem={({item}) => <Item {...item} />}
-            keyExtractor={(_, index) => index.toString()}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-              gap: 8,
-            }}
-            style={{flex: 1}}
-          />
+          <View className="flex flex-col gap-2 mb-3">
+            {expenses.map(item => (
+              <Item {...item} key={item.id} />
+            ))}
+          </View>
         </Fragment>
       ) : (
         <View className="flex justify-center items-center">

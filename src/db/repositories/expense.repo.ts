@@ -2,7 +2,7 @@ import {and, eq, gte, inArray, lte, sql} from 'drizzle-orm';
 import {db} from '../client';
 import {expenseProviders, expenses, providers} from '../schema';
 import uuid from 'react-native-uuid';
-import {applyLimit, applyWhere} from '@/helpers';
+import {applyLimit, applyWhere, getDaysBetween} from '@/helpers';
 import {budgetRepo} from './budget.repo';
 
 type IExpenseInsert = {
@@ -55,6 +55,8 @@ export const expenseRepo = {
       : query;
     query = applyLimit(query, options?.limit);
 
+    let totalExpense = 0;
+
     if (options?.budgetType && options?.budgetType !== 'all') {
       const dateRange = await budgetRepo.findActiveByType(options.budgetType);
       const activeBudget = dateRange[0];
@@ -64,16 +66,28 @@ export const expenseRepo = {
           query,
           and(gte(expenses.createdAt, activeBudget.startDate), lte(expenses.createdAt, activeBudget.endDate)),
         );
+        totalExpense = await expenseRepo.sumExpensesWithinDate(activeBudget.startDate, activeBudget.endDate);
       }
     } else {
       const now = new Date();
-      const startDate = new Date(now);
-      const last30Days = startDate.setDate(startDate.getDate() - 30);
+      const last30Days = new Date(now);
+      last30Days.setDate(last30Days.getDate() - 30);
 
-      query = applyWhere(query, and(gte(expenses.createdAt, last30Days), lte(expenses.createdAt, now.getDate())));
+      query = applyWhere(
+        query,
+        and(gte(expenses.createdAt, last30Days.getTime()), lte(expenses.createdAt, now.getTime())),
+      );
+      totalExpense = await expenseRepo.sumExpensesWithinDate(last30Days.getTime(), now.getTime());
     }
 
-    return await query;
+    const data = await query;
+
+    return {
+      data,
+      meta: {
+        totalExpense,
+      },
+    };
   },
 
   async findById(id: string) {
@@ -124,5 +138,31 @@ export const expenseRepo = {
       .where(and(gte(expenses.createdAt, startDate), lte(expenses.createdAt, endDate)));
 
     return result[0]?.total ?? 0;
+  },
+
+  async compareProgressWithLastBudgetGoal(budgetType: BudgetType): Promise<number> {
+    const now = new Date();
+
+    const currentActiveBudget = (await budgetRepo.findActiveByType(budgetType))[0];
+    if (!currentActiveBudget) return 0;
+
+    const lastInactiveBudget = await budgetRepo.getLastInactiveBudget(budgetType);
+
+    if (!lastInactiveBudget) return 100;
+
+    const daysPointDiff = getDaysBetween(new Date(currentActiveBudget.startDate), now);
+
+    const samePointOfTimeInLastBudget = new Date(lastInactiveBudget.startDate);
+    samePointOfTimeInLastBudget.setDate(samePointOfTimeInLastBudget.getDate() + daysPointDiff);
+    const currentGoalsExpense = await expenseRepo.sumExpensesWithinDate(currentActiveBudget.startDate, now.getTime());
+
+    const lastGoalsExpense = await expenseRepo.sumExpensesWithinDate(
+      lastInactiveBudget.startDate,
+      samePointOfTimeInLastBudget.getTime(),
+    );
+
+    const currentGoalRate = (currentGoalsExpense / currentActiveBudget.amount) * 100;
+    const lastGoalRate = (lastGoalsExpense / lastInactiveBudget.amount) * 100;
+    return Math.floor(((currentGoalRate - lastGoalRate) / lastGoalRate) * 100);
   },
 };

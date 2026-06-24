@@ -8,6 +8,7 @@ import {useFocusEffect} from '@react-navigation/native';
 import {formatDate, NumberFormatter} from '@/helpers';
 import {CATEGORY_DB_DATA, CategoryIconMap} from '@/constants';
 import {categoryOptions} from '@/constants/options';
+import {ArrowUpIcon} from 'lucide-react-native';
 
 const formatter = new NumberFormatter({
   maxFractionDigits: 2,
@@ -22,6 +23,7 @@ export const History = () => {
     categories: ['all', ...categoryOptions.map(e => e.value)],
   });
   const [expenses, setExpenses] = useState<IExpense[]>([]);
+  const [totalExpense, setTotalExpense] = useState<number>(0);
 
   const fetchExpenses = useCallback(async () => {
     const appliedFilter = {
@@ -30,7 +32,9 @@ export const History = () => {
       ...(filter.budget ? {budgetType: filter.budget as BudgetType} : {}),
     };
 
-    const data = await expenseRepo.findAll(appliedFilter);
+    const {data, meta} = await expenseRepo.findAll(appliedFilter);
+
+    setTotalExpense(meta.totalExpense);
 
     const formatData: IExpense[] = data.map(d => ({
       title: d.title,
@@ -81,10 +85,14 @@ export const History = () => {
           start={{x: 0, y: 0}}
           end={{x: 1, y: 1}}
           className="w-full rounded-2xl p-5 overflow-hidden">
-          <View className="absolute -top-2 -right-2 w-[40px] h-[40px] rounded-full bg-white/20" />
-          <Text className="text-white/50 font-medium text-base">Total Expense</Text>
-          <Text className="text-white text-3xl font-bold">400.000</Text>
-          <Text className="text-white/50 font-normal text-sm">12% vs last week</Text>
+          <View className="flex flex-col gap-3">
+            <Text className="text-white/70 font-medium text-base">Total Expense</Text>
+            <Text className="text-white text-3xl font-bold">{formatter.format(totalExpense)}</Text>
+            <View className="flex flex-row gap-1 items-center">
+              <ArrowUpIcon size={16} color={'white'} />
+              <Text className="text-white/40 font-normal text-sm">12% vs last week</Text>
+            </View>
+          </View>
         </LinearGradient>
 
         <FlatList
