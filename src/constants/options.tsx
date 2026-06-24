@@ -1,5 +1,5 @@
 import {CategoryIconMap} from '@/constants';
-import {Banknote as IconBanknote, LucideIcon, Wallet as IconWallet} from 'lucide-react-native';
+import {Banknote as IconBanknote, LucideIcon, Wallet as IconWallet, Calendar, Target} from 'lucide-react-native';
 
 type IOption<T extends string | number> = {
   label: string;
@@ -73,5 +73,22 @@ export const categoryOptions: IOptionWithIcon<string>[] = [
     label: 'OVO',
     value: 'ovo',
     icon: CategoryIconMap['ovo' as keyof typeof CategoryIconMap],
+  },
+];
+
+export const budgetOptions: {label: string; rangeDate?: number; icon: LucideIcon}[] = [
+  {
+    label: 'monthly',
+    rangeDate: 30,
+    icon: Calendar,
+  },
+  {
+    label: 'weekly',
+    rangeDate: 7,
+    icon: Target,
+  },
+  {
+    label: 'custom',
+    icon: Target,
   },
 ];

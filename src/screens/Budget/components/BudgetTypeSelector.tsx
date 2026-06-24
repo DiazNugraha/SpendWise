@@ -1,23 +1,6 @@
-import {Calendar, LucideIcon, Target} from 'lucide-react-native';
+import {budgetOptions} from '@/constants/options';
 import {useState} from 'react';
 import {Pressable, Text, View} from 'react-native';
-
-const targetTypes: {label: string; rangeDate?: number; icon: LucideIcon}[] = [
-  {
-    label: 'monthly',
-    rangeDate: 30,
-    icon: Calendar,
-  },
-  {
-    label: 'weekly',
-    rangeDate: 7,
-    icon: Target,
-  },
-  {
-    label: 'custom',
-    icon: Target,
-  },
-];
 
 type Props = {
   onChange: (value: {label: string; rangeDate?: number}) => void;
@@ -27,7 +10,7 @@ const BudgetTypeSelector: React.FC<Props> = ({onChange}) => {
   const [selected, setSelected] = useState<string>();
 
   const getBorderRoundedStyle = (orderIndex: number): string => {
-    if (targetTypes.length === orderIndex + 1) return 'rounded-r-2xl';
+    if (budgetOptions.length === orderIndex + 1) return 'rounded-r-2xl';
     if (orderIndex === 0) return 'rounded-l-2xl';
     return '';
   };
@@ -46,7 +29,7 @@ const BudgetTypeSelector: React.FC<Props> = ({onChange}) => {
 
   return (
     <View className="flex flex-row w-full">
-      {targetTypes.map((target, index) => {
+      {budgetOptions.map((target, index) => {
         const borderStyle = getBorderRoundedStyle(index);
         const Icon = target.icon;
         const colorStyle = getColorStyle(target.label);
