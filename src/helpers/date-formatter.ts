@@ -20,3 +20,14 @@ export const formatDate = (
 
   return new Intl.DateTimeFormat(locales, dateTimeOption).format(formattedDate);
 };
+
+export const getDaysLeft = (endDate: Date): number => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const target = new Date(endDate);
+  target.setHours(0, 0, 0, 0);
+
+  const diffMs = target.getTime() - today.getTime();
+  return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+};
