@@ -18,6 +18,7 @@ import {budgetRepo} from '@/db/repositories';
 import Toast from 'react-native-toast-message';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootNavigatorParamList} from '@/types';
+import {useAlert} from '@/hooks';
 
 type BudgetDetailRouteProps = RouteProp<RootNavigatorParamList, 'BudgetForm'>;
 
@@ -27,11 +28,33 @@ const BudgetForm: React.FC = () => {
   const navigation = useNavigation();
   const formRef = useRef<FormikProps<IBudgetInput>>(null);
 
+  const {alert} = useAlert();
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const submitForm = async (values: IBudgetInput) => {
     setIsLoading(true);
 
+    const existingBudget = await budgetRepo.findActiveByType(values.type as BudgetType);
+    if (existingBudget.length > 0) {
+      alert({
+        title: 'Active Budget Plan Exist!',
+        description: `You already have an active ${values.type} plan. Budget plan of ${existingBudget[0].amount}. Creating a new budget will replace your current plan. Do you want to continue?`,
+        onConfirm: async () => {
+          await budgetRepo.setToInactive(existingBudget[0].id);
+          await createBudget(values);
+        },
+        confirmButtonLabel: 'Yes, Continue',
+      });
+
+      setIsLoading(false);
+      return;
+    }
+
+    await createBudget(values);
+  };
+
+  const createBudget = async (values: IBudgetInput) => {
     const result = await budgetRepo.create({
       type: values.type as BudgetType,
       icon: values.icon,

@@ -2,10 +2,10 @@ import {Pressable, ScrollView, Text, View} from 'react-native';
 import {ModalWrapper} from '@/components';
 import BudgetTypeSelector from './components/BudgetTypeSelector';
 import BudgetSummary from './components/BudgetSummary';
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useState} from 'react';
 import {NumberFormatter} from '@/helpers';
 import {ActivityIcon, ChevronRight} from 'lucide-react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {RootNavigationProp} from '@/types';
 import {budgetRepo} from '@/db/repositories';
 
@@ -28,9 +28,11 @@ export const Budget: React.FC = () => {
     });
   }, [type]);
 
-  useEffect(() => {
-    fetchSelectedBudget();
-  }, [fetchSelectedBudget]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchSelectedBudget();
+    }, [fetchSelectedBudget]),
+  );
 
   const navigation = useNavigation<RootNavigationProp>();
 

@@ -1,8 +1,9 @@
 import {formatDate, NumberFormatter} from '@/helpers';
-import {PropsWithChildren, useCallback, useEffect, useState} from 'react';
+import {PropsWithChildren, useCallback, useState} from 'react';
 import {Text, View} from 'react-native';
 import * as Icons from 'lucide-react-native';
 import {budgetRepo} from '@/db/repositories';
+import {useFocusEffect} from '@react-navigation/native';
 
 const formatter = new NumberFormatter({
   maxFractionDigits: 2,
@@ -13,7 +14,6 @@ const BudgetSummary: React.FC = () => {
 
   const fetchBudgets = useCallback(async () => {
     const savedBudgets = await budgetRepo.findActivesEachType();
-    console.log('budgets', savedBudgets);
     setBudgets(
       savedBudgets.map(budget => ({
         amount: budget.amount,
@@ -30,9 +30,11 @@ const BudgetSummary: React.FC = () => {
     );
   }, []);
 
-  useEffect(() => {
-    fetchBudgets();
-  }, [fetchBudgets]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchBudgets();
+    }, [fetchBudgets]),
+  );
 
   return (
     <View className="flex flex-col gap-3">
