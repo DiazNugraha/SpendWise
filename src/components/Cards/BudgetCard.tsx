@@ -107,7 +107,7 @@ const FoundSavedBudget = ({budget, spent}: FoundSavedBudgetProps) => {
 
       {/* Progress bar */}
       <View className="mt-4 h-1.5 rounded-full bg-white/30">
-        <View className="h-1.5 rounded-full bg-white" style={{width: `${progress <= 100 ? progress : 100}%`}} />
+        <View className="h-1.5 rounded-full bg-white" style={{width: `${spent > limit ? 100 : progress}%`}} />
       </View>
       <View className="flex flex-row justify-between mt-5">
         <Text className="text-white text-xs">
