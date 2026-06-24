@@ -15,6 +15,20 @@
       "when": 1776336935343,
       "tag": "0001_tranquil_menace",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1776702663038,
+      "tag": "0002_easy_korg",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1776702781546,
+      "tag": "0003_mighty_xorn",
+      "breakpoints": true
     }
   ]
 }
