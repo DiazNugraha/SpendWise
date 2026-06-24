@@ -2,7 +2,7 @@ import {formatDate} from '@/helpers';
 import {useField} from 'formik';
 import React, {Fragment, useState} from 'react';
 import {Modal, Pressable, Text, View} from 'react-native';
-import DateTimePicker, {DateType, useDefaultStyles} from 'react-native-ui-datepicker';
+import DateTimePicker, {DateType} from 'react-native-ui-datepicker';
 
 type DateinputFieldProps = {
   name: string;
@@ -68,7 +68,6 @@ type DateSelectDialogProps = {
 };
 
 const DateSelectDialog: React.FC<DateSelectDialogProps> = ({open, onClose, onChange, modalLabel = 'Select', value}) => {
-  const defaultStyles = useDefaultStyles();
   const [range, setRange] = useState<IDateRange>(value);
 
   const onConfirm = (dateRangeValue: IDateRange) => {
@@ -84,7 +83,7 @@ const DateSelectDialog: React.FC<DateSelectDialogProps> = ({open, onClose, onCha
       <View style={{flex: 1, backgroundColor: 'rgba(0,0,0,0.4)'}}>
         <Pressable style={{flex: 1}} onPress={onClose} />
 
-        <View className="h-[50%] bg-white rounded-t-2xl p-4">
+        <View className="h-[50%] bg-white rounded-t-2xl p-4 flex-1 bg-[#F5FCFF]">
           <Text className="text-xs mb-3">{modalLabel}</Text>
 
           <DateTimePicker
@@ -97,7 +96,20 @@ const DateSelectDialog: React.FC<DateSelectDialogProps> = ({open, onClose, onCha
                 endDate: dates.endDate,
               });
             }}
-            styles={defaultStyles}
+            classNames={{
+              // Component Containers (for background colors, layout padding, margins)
+              day: 'flex-1 items-center justify-center py-2',
+              header: 'flex-row justify-between items-center px-4 py-2',
+
+              // Literal Text Targets (THIS makes the text visible)
+              day_label: 'text-neutral-900 font-medium', // Individual day text
+              weekday_label: 'text-neutral-500 font-medium', // Su, Mo, Tu column labels
+
+              // Highlight Styles for your Range Selection
+              range_fill: 'bg-blue-100', // Mid-range highlight color
+              selected: 'bg-blue-600 rounded-full', // Start & End bubble shape
+              selected_label: 'text-white font-bold', // Forces selection text to be white
+            }}
           />
 
           <Pressable
