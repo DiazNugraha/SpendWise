@@ -49,7 +49,7 @@ const Item: React.FC<IExpense> = props => {
 
 const History: React.FC = () => {
   return (
-    <View className="flex flex-col gap-1 p-3" style={{maxHeight: 490}}>
+    <View className="flex flex-col gap-1 p-3 flex-1" style={{maxHeight: 490}}>
       <Text className="text-lg font-medium mb-4">Recent Transactions</Text>
       <FlatList
         data={dummySavedExpenses}
@@ -59,6 +59,7 @@ const History: React.FC = () => {
         contentContainerStyle={{
           gap: 8,
         }}
+        style={{flex: 1}}
       />
     </View>
   );
