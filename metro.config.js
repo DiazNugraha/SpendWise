@@ -9,6 +9,8 @@ const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
  */
 const config = mergeConfig(getDefaultConfig(__dirname), {});
 
+config.resolver.sourceExts.push('sql');
+
 module.exports = withNativeWind(config, {
   input: './global.css',
 });

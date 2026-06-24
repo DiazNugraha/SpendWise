@@ -2,10 +2,7 @@ module.exports = function (api) {
   api.cache(true);
 
   return {
-    presets: [
-      'module:@react-native/babel-preset',
-      'nativewind/babel',
-    ],
+    presets: ['module:@react-native/babel-preset', 'nativewind/babel'],
     plugins: [
       [
         'module-resolver',
@@ -14,6 +11,12 @@ module.exports = function (api) {
           alias: {
             '@': './src',
           },
+        },
+      ],
+      [
+        'inline-import',
+        {
+          extensions: ['.sql'],
         },
       ],
     ],
