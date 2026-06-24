@@ -8,6 +8,7 @@ type DateinputFieldProps = {
   name: string;
   label?: string;
   placeholder?: string;
+  disabled?: boolean;
 };
 
 type IDateRange = {
@@ -15,7 +16,12 @@ type IDateRange = {
   endDate: DateType | Date;
 };
 
-export const DateInputField: React.FC<DateinputFieldProps> = ({name, label, placeholder = 'Select Date Range'}) => {
+export const DateInputField: React.FC<DateinputFieldProps> = ({
+  name,
+  disabled = false,
+  label,
+  placeholder = 'Select Date Range',
+}) => {
   const [field, meta, helpers] = useField<IDateRange>(name);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -32,7 +38,8 @@ export const DateInputField: React.FC<DateinputFieldProps> = ({name, label, plac
 
       <Pressable
         onPress={() => setIsOpen(true)}
-        className={`input-field ${meta.touched && meta.error ? 'input-field-error' : ''}`}>
+        className={`input-field ${meta.touched && meta.error ? 'input-field-error' : ''}`}
+        disabled={disabled}>
         <Text className={`${isEmpty ? 'text-gray-500' : ''}`}>
           {isEmpty
             ? placeholder
