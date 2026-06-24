@@ -9,9 +9,10 @@ import {
 } from '@/components';
 import {budgetSchema, IBudgetInput} from '@/constants/schemas';
 import {Formik} from 'formik';
-import {BellRingIcon, CalendarIcon, LucideIcon} from 'lucide-react-native';
+import {BellRingIcon} from 'lucide-react-native';
 import {useState} from 'react';
 import {ScrollView, Text, View} from 'react-native';
+import * as Icons from 'lucide-react-native';
 
 // type BudgetDetailRouteProps = RouteProp<RootNavigatorParamList, 'BudgetDetail'>;
 
@@ -19,7 +20,7 @@ const BudgetForm: React.FC = () => {
   // const route = useRoute<BudgetDetailRouteProps>();
   // const {budgetType} = route.params;
 
-  const [icon, setIcon] = useState<LucideIcon>();
+  const [icon, setIcon] = useState<string>('Calendar');
   const [iconColor, setIconColor] = useState<string>();
   const [enableNotify, setEnableNotify] = useState<boolean>(true);
 
@@ -39,7 +40,7 @@ const BudgetForm: React.FC = () => {
                   style={{
                     backgroundColor: iconColor ? iconColor : '#9C9C9C',
                   }}
-                  value={icon ?? CalendarIcon}
+                  value={icon ? (icon as keyof typeof Icons) : 'Calendar'}
                   onChange={value => setIcon(value)}
                 />
                 <View className="flex flex-col gap-2 items-center justify-center">

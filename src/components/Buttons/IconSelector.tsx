@@ -1,16 +1,17 @@
 import {CalendarIcon, Hamburger, LucideIcon, TargetIcon} from 'lucide-react-native';
 import {Fragment, useState} from 'react';
 import {FlatList, Modal, Pressable, StyleProp, Text, View, ViewStyle} from 'react-native';
+import * as Icons from 'lucide-react-native';
 
 type Props = {
-  value: LucideIcon;
-  onChange: (value: LucideIcon) => void;
+  value: keyof typeof Icons;
+  onChange: (value: string) => void;
   className?: string;
   style?: StyleProp<ViewStyle>;
 };
 
 export const IconSelector: React.FC<Props> = ({value, onChange, className, style}) => {
-  const Icon = value;
+  const Icon = Icons[value] as Icons.LucideIcon;
   const [open, setOpen] = useState<boolean>(false);
 
   return (
@@ -19,17 +20,33 @@ export const IconSelector: React.FC<Props> = ({value, onChange, className, style
         <Icon color={'white'} />
       </Pressable>
 
-      <IconPickerDialog open={open} value={value} onChange={onChange} onClose={() => setOpen(false)} />
+      <IconPickerDialog open={open} value={Icon} onChange={onChange} onClose={() => setOpen(false)} />
     </Fragment>
   );
 };
 
-const iconOptions: LucideIcon[] = [CalendarIcon, TargetIcon, Hamburger];
+const iconOptions: {
+  name: string;
+  icon: LucideIcon;
+}[] = [
+  {
+    name: 'Calendar',
+    icon: CalendarIcon,
+  },
+  {
+    name: 'Target',
+    icon: TargetIcon,
+  },
+  {
+    name: 'Hamburger',
+    icon: Hamburger,
+  },
+];
 
 type IconPickerDialogProps = {
   value: LucideIcon;
   onClose: () => void;
-  onChange: (value: LucideIcon) => void;
+  onChange: (value: string) => void;
   open: boolean;
 };
 
@@ -48,14 +65,14 @@ const IconPickerDialog: React.FC<IconPickerDialogProps> = ({open, value, onClose
             contentContainerStyle={{gap: 12}}
             columnWrapperStyle={{gap: 12}}
             renderItem={({item}) => {
-              const Icon = item;
+              const Icon = item.icon;
               return (
                 <Pressable
                   className="items-center rounded-2xl p-5"
                   style={{
-                    backgroundColor: value === item ? '#f0f0f0' : '#fff',
+                    backgroundColor: value === item.icon ? '#f0f0f0' : '#fff',
                   }}
-                  onPress={() => onChange(item)}>
+                  onPress={() => onChange(item.name)}>
                   <Icon color="black" />
                 </Pressable>
               );
