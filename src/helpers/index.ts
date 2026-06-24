@@ -3,3 +3,4 @@ export * from './date-formatter';
 export * from './query-builder';
 export * from './reset-database';
 export * from './budget';
+export * from './text-formatter';
