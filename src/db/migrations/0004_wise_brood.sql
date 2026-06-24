@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `providers_name_unique` ON `providers` (`name`);
