@@ -21,6 +21,7 @@ export const DecimalInputField: React.FC<DecimalInputFieldProps> = ({
   placeholder,
   className,
   required,
+  autoFocus,
 }) => {
   const [field, meta, helpers] = useField<number>(name);
   const [display, setDisplay] = useState('');
@@ -36,7 +37,7 @@ export const DecimalInputField: React.FC<DecimalInputFieldProps> = ({
       <TextInput
         keyboardType="decimal-pad"
         placeholder={placeholder}
-        value={display}
+        value={display.length > 0 ? display : field.value ? String(formatter.format(field.value)) : ''}
         onChangeText={text => {
           setDisplay(text);
           const parsed = NumberFormatter.parse(text);
@@ -44,7 +45,7 @@ export const DecimalInputField: React.FC<DecimalInputFieldProps> = ({
             helpers.setValue(parsed);
           }
         }}
-        autoFocus
+        autoFocus={autoFocus}
         onBlur={() => {
           helpers.setTouched(true);
           if (typeof field.value === 'number') {

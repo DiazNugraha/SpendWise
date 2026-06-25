@@ -6,6 +6,7 @@ export type RootNavigatorParamList = {
   Budget: undefined;
   BudgetForm: {
     budgetType: string;
+    isEdit?: boolean;
   };
   History: undefined;
   [key: string]: any;

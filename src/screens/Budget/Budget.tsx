@@ -106,7 +106,27 @@ export const Budget: React.FC = () => {
           </View>
         )}
 
-        {!!type && (
+        {!!type && selectedBudget && (
+          <Pressable
+            className="rounded-xl flex flex-row  p-3 justify-between items-center border border-[#6D28D9]/20 bg-purple-100/20"
+            onPress={() =>
+              navigation.navigate('BudgetForm', {
+                budgetType: type,
+                isEdit: true,
+              })
+            }>
+            <View className="flex flex-row gap-2 items-center">
+              <ActivityIcon color={'#6D28D9'} />
+              <View className="flex flex-col gap-2">
+                <Text className="font-medium">Edit Saved Budget Goal</Text>
+                <Text className="font-light text-[10px]">Change current saved {type} budget goal</Text>
+              </View>
+            </View>
+            <ChevronRight color={'#6D28D9'} />
+          </Pressable>
+        )}
+
+        {!!type && !selectedBudget && (
           <Pressable
             className="rounded-xl flex flex-row  p-3 justify-between items-center border border-[#6D28D9]/20 bg-purple-100/20"
             onPress={() =>
