@@ -82,6 +82,25 @@ export const budgetRepo = {
     });
   },
 
+  async update(id: string, data: IBudgetInsert) {
+    const now = Date.now();
+
+    return await db
+      .update(budgets)
+      .set({
+        title: data.title,
+        type: data.type,
+        amount: data.amount,
+        icon: data.icon,
+        iconColor: data.iconColor,
+        enableNotify: data.enableNotify,
+        startDate: data.startDate.getTime(),
+        endDate: data.endDate.getTime(),
+        updatedAt: now,
+      })
+      .where(eq(budgets.id, id));
+  },
+
   async setToInactive(id: string) {
     return await db
       .update(budgets)

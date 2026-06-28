@@ -53,7 +53,8 @@ const toFormValues = (budgetType: BudgetType, budget?: IBudgetInput) => {
 
 const BudgetForm: React.FC = () => {
   const route = useRoute<BudgetDetailRouteProps>();
-  const {budgetType, isEdit} = route.params;
+  const {budgetType, id: budgetId} = route.params;
+  const isEdit = !!budgetId;
   const navigation = useNavigation();
   const formRef = useRef<FormikProps<IBudgetInput>>(null);
 
@@ -65,6 +66,21 @@ const BudgetForm: React.FC = () => {
     setIsLoading(true);
 
     const existingBudget = await budgetRepo.findActiveByType(values.type as BudgetType);
+
+    if (existingBudget.length > 0 && isEdit) {
+      alert({
+        title: 'Modify Current Budget Goals',
+        description: `Are you sure to change your current goals?`,
+        onConfirm: async () => {
+          await updateBudget(values);
+        },
+        confirmButtonLabel: 'Yes, Continue',
+      });
+
+      setIsLoading(false);
+      return;
+    }
+
     if (existingBudget.length > 0) {
       alert({
         title: 'Active Budget Plan Exist!',
@@ -122,6 +138,40 @@ const BudgetForm: React.FC = () => {
       type: 'error',
       text1: 'Error!',
       text2: 'Failed to create budget goal. Please try again.',
+    });
+  };
+
+  const updateBudget = async (values: IBudgetInput) => {
+    if (!budgetId) return;
+
+    const title = values.title ? values.title : capitalizeFirstLetter(values.type);
+
+    const result = await budgetRepo.update(budgetId, {
+      type: values.type as BudgetType,
+      icon: values.icon,
+      iconColor: values.iconColor,
+      title: title,
+      amount: values.amount,
+      enableNotify: values.enableNotify,
+      startDate: values.dateRange.startDate,
+      endDate: values.dateRange.endDate,
+    });
+
+    setIsLoading(false);
+
+    if (result) {
+      Toast.show({
+        type: 'success',
+        text1: 'Success!',
+        text2: 'Budget goal updated successfully',
+      });
+      return navigation.goBack();
+    }
+
+    Toast.show({
+      type: 'error',
+      text1: 'Error!',
+      text2: 'Failed to update budget goal. Please try again.',
     });
   };
 
@@ -195,6 +245,7 @@ const BudgetForm: React.FC = () => {
                   label="Target Date"
                   disabled={budgetType !== 'custom' || isEdit}
                   required
+                  minDate={new Date()}
                 />
                 <InputField name="title" label="Budget Title" placeholder="Name your budget plan" />
               </View>

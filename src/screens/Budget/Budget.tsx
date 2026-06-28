@@ -112,7 +112,7 @@ export const Budget: React.FC = () => {
             onPress={() =>
               navigation.navigate('BudgetForm', {
                 budgetType: type,
-                isEdit: true,
+                id: selectedBudget.id,
               })
             }>
             <View className="flex flex-row gap-2 items-center">
