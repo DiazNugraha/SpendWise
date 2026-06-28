@@ -10,6 +10,7 @@ type DateinputFieldProps = {
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
+  minDate?: Date;
 };
 
 type IDateRange = {
@@ -23,6 +24,7 @@ export const DateInputField: React.FC<DateinputFieldProps> = ({
   label,
   placeholder = 'Select Date Range',
   required,
+  minDate,
 }) => {
   const [field, meta, helpers] = useField<IDateRange>(name);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -44,7 +46,7 @@ export const DateInputField: React.FC<DateinputFieldProps> = ({
 
       <Pressable
         onPress={() => setIsOpen(true)}
-        className={`input-field ${meta.touched && meta.error ? 'input-field-error' : ''}`}
+        className={`input-field ${meta.touched && meta.error ? 'input-field-error' : ''} disabled:input-field-disabled`}
         disabled={disabled}>
         <Text className={`${isEmpty ? 'text-gray-500' : ''}`}>
           {isEmpty
@@ -60,6 +62,7 @@ export const DateInputField: React.FC<DateinputFieldProps> = ({
         onChange={selectedRange => handleOnChange(selectedRange)}
         onClose={() => setIsOpen(false)}
         value={field.value}
+        minDate={minDate}
       />
     </Fragment>
   );
@@ -71,9 +74,17 @@ type DateSelectDialogProps = {
   onChange: (value: IDateRange) => void;
   modalLabel?: string;
   value: IDateRange;
+  minDate?: Date;
 };
 
-const DateSelectDialog: React.FC<DateSelectDialogProps> = ({open, onClose, onChange, modalLabel = 'Select', value}) => {
+const DateSelectDialog: React.FC<DateSelectDialogProps> = ({
+  open,
+  onClose,
+  onChange,
+  modalLabel = 'Select',
+  value,
+  minDate,
+}) => {
   const [range, setRange] = useState<IDateRange>(value);
 
   const onConfirm = (dateRangeValue: IDateRange) => {
@@ -112,18 +123,20 @@ const DateSelectDialog: React.FC<DateSelectDialogProps> = ({open, onClose, onCha
               weekday_label: 'text-neutral-500 font-medium', // Su, Mo, Tu column labels
 
               // Highlight Styles for your Range Selection
-              range_fill: 'bg-blue-100', // Mid-range highlight color
-              selected: 'bg-blue-600 rounded-full', // Start & End bubble shape
+              range_fill: 'bg-purple-100', // Mid-range highlight color
+              selected: 'bg-purple-600 rounded-full', // Start & End bubble shape
               selected_label: 'text-white font-bold', // Forces selection text to be white
+              disabled: 'opacity-30',
             }}
+            minDate={minDate}
           />
 
           <Pressable
             onPress={() => {
               onConfirm(range);
             }}
-            className="mt-3 p-3 bg-[#007AFF] rounded-md">
-            <Text className="text-white text-center">Done</Text>
+            className="py-5 px-6 rounded-2xl items-center justify-center bg-[#6D28D9]">
+            <Text className="text-white text-center font-medium">Done</Text>
           </Pressable>
         </View>
       </View>
