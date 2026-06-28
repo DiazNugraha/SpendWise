@@ -1,4 +1,4 @@
-import {Home, Setting} from '@/screens';
+import {Home, Settings} from '@/screens';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {TouchableOpacity, TouchableOpacityProps, View} from 'react-native';
 import {HomeIcon as HomeIcon, Plus as PlusIcon, Settings as SettingsIcon} from 'lucide-react-native';
@@ -20,7 +20,7 @@ export const TabNavigator: React.FC = () => {
     <View style={{flex: 1}}>
       <Tab.Navigator
         initialRouteName="Home"
-        screenOptions={route => {
+        screenOptions={() => {
           return {
             headerShown: false,
             tabBarShowLabel: false,
@@ -57,7 +57,7 @@ export const TabNavigator: React.FC = () => {
         />
         <Tab.Screen
           name="Setting"
-          component={Setting}
+          component={Settings}
           options={{
             tabBarIcon: ({color}) => <SettingsIcon color={color} size={24} />,
           }}

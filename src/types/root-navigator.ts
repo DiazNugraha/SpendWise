@@ -9,6 +9,8 @@ export type RootNavigatorParamList = {
     id?: string;
   };
   History: undefined;
+  WalletSettings: undefined;
+  AccountSettings: undefined;
   [key: string]: any;
 };
 

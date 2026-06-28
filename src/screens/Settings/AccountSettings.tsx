@@ -1,5 +1,5 @@
 import {UnderConstruction} from '@/components';
 
-export const Setting: React.FC = () => {
+export const AccountSettings: React.FC = () => {
   return <UnderConstruction />;
 };
