@@ -78,8 +78,8 @@ const IconPickerDialog: React.FC<IconPickerDialogProps> = ({open, value, onClose
               );
             }}
           />
-          <Pressable onPress={onClose} className="mt-3 p-3 bg-[#007AFF] rounded-md">
-            <Text className="text-white text-center">Done</Text>
+          <Pressable onPress={onClose} className="py-5 px-6 rounded-2xl items-center justify-center bg-[#6D28D9]">
+            <Text className="text-white text-center font-medium">Done</Text>
           </Pressable>
         </View>
       </View>
