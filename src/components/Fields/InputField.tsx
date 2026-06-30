@@ -11,6 +11,7 @@ type InputFieldProp = {
   numberOfLines?: number;
   type?: 'number' | 'text';
   required?: boolean;
+  maxLength?: number;
 };
 
 export const InputField: React.FC<InputFieldProp> = ({
@@ -22,6 +23,7 @@ export const InputField: React.FC<InputFieldProp> = ({
   numberOfLines,
   type = 'text',
   required,
+  maxLength,
 }) => {
   const [field, meta, helpers] = useField(name);
   const isNumeric = type === 'number';
@@ -55,11 +57,13 @@ export const InputField: React.FC<InputFieldProp> = ({
         }}
         onBlur={() => helpers.setTouched(true)}
         placeholder={placeholder}
+        placeholderTextColor="#6b7280"
         secureTextEntry={secureTextEntry}
         multiline={multiline}
         numberOfLines={numberOfLines}
         className={`input-field ${meta.touched && meta.error ? 'input-field-error' : ''} ${multiline ? 'h-32' : ''}`}
         textAlignVertical="top"
+        maxLength={maxLength}
       />
 
       {meta.touched && meta.error && <Text className="text-red-500 mt-1">{meta.error}</Text>}
