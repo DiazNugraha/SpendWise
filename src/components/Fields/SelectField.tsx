@@ -102,7 +102,7 @@ function SelectDialog<T extends string | number>({
             }}
           />
 
-          <Pressable onPress={onClose} className="mt-3 p-3 bg-[#007AFF] rounded-md">
+          <Pressable onPress={onClose} className="main-button-container">
             <Text className="text-white text-center">Done</Text>
           </Pressable>
         </View>
