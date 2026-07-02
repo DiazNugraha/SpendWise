@@ -14,4 +14,8 @@
   .input-field-disabled {
     @apply opacity-50;
   }
+
+  .main-button-container {
+    @apply py-5 px-6 rounded-2xl items-center justify-center bg-[#6D28D9];
+  }
 }
