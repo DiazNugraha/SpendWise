@@ -9,6 +9,7 @@ type SelectFieldProps<T extends string | number> = {
   modalLabel?: string;
   placeholder?: string;
   required?: boolean;
+  onChange?: (value: T) => void;
 };
 
 export function SelectField<T extends string | number>({
@@ -18,6 +19,7 @@ export function SelectField<T extends string | number>({
   modalLabel,
   placeholder = 'Select Options',
   required,
+  onChange,
 }: SelectFieldProps<T>) {
   const [field, meta, helpers] = useField<T>(name);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
@@ -49,7 +51,10 @@ export function SelectField<T extends string | number>({
         }}
         options={options}
         value={value}
-        onChange={helpers.setValue}
+        onChange={val => {
+          helpers.setValue(val);
+          onChange?.(val);
+        }}
         modalLabel={modalLabel}
       />
     </Fragment>
