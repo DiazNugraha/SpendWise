@@ -11,4 +11,6 @@ export const users = sqliteTable('users', {
 
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),
+
+  primaryCurrencyCode: text('primary_currency_code'),
 });

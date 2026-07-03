@@ -7,16 +7,18 @@ import m0002 from './0002_easy_korg.sql';
 import m0003 from './0003_mighty_xorn.sql';
 import m0004 from './0004_wise_brood.sql';
 import m0005 from './0005_woozy_sphinx.sql';
+import m0006 from './0006_cooing_stardust.sql';
 
-export default {
-  journal,
-  migrations: {
-    m0000,
-    m0001,
-    m0002,
-    m0003,
-    m0004,
-    m0005,
-  },
-};
-
+  export default {
+    journal,
+    migrations: {
+      m0000,
+m0001,
+m0002,
+m0003,
+m0004,
+m0005,
+m0006
+    }
+  }
+  

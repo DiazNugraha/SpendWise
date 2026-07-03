@@ -13,6 +13,7 @@ export const addUserSeeder = async () => {
     email: 'johndoe@gmail.com',
     createdAt: now,
     updatedAt: now,
+    primaryCurrencyCode: 'IDR',
   };
 
   return await db.insert(users).values(dummyUser);
