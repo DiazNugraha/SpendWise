@@ -50,6 +50,13 @@
       "when": 1783066674788,
       "tag": "0006_cooing_stardust",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1783069725210,
+      "tag": "0007_damp_famine",
+      "breakpoints": true
     }
   ]
 }
