@@ -1,6 +1,12 @@
 import {eq, sql} from 'drizzle-orm';
 import {db} from '../client';
 import {providers, userProviders, users} from '../schema';
+import uuid from 'react-native-uuid';
+
+type IUserProviderInsert = {
+  providerId: string;
+  identifier: string;
+};
 
 export const userRepo = {
   async find() {
@@ -34,5 +40,36 @@ export const userRepo = {
       .from(users)
       .limit(1)
       .orderBy(sql`${users.createdAt} desc`);
+  },
+
+  async createUserProvider(data: IUserProviderInsert) {
+    const now = Date.now();
+    const newUuid = uuid.v4();
+
+    const user = (await userRepo.getUser())[0];
+    if (!user) return;
+
+    return await db.insert(userProviders).values({
+      id: newUuid,
+      ...data,
+      createdAt: now,
+      updatedAt: now,
+      userId: user.id,
+    });
+  },
+
+  async updateUserProvider(id: string, data: IUserProviderInsert) {
+    const now = Date.now();
+
+    const user = (await userRepo.getUser())[0];
+    if (!user) return;
+
+    return await db
+      .update(userProviders)
+      .set({
+        ...data,
+        updatedAt: now,
+      })
+      .where(eq(userProviders.id, id));
   },
 };
