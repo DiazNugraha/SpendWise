@@ -1,11 +1,14 @@
 import {InputField, SelectCarouselField} from '@/components';
+import {userRepo} from '@/db/repositories';
 import {useFocusEffect} from '@react-navigation/native';
 import {Formik, FormikProps} from 'formik';
 import {useCallback, useMemo, useRef} from 'react';
 import {Pressable, Text, View} from 'react-native';
+import Toast from 'react-native-toast-message';
 import * as yup from 'yup';
 
 interface IWallet {
+  id: string;
   providerId: string;
   identifier: string;
 }
@@ -20,13 +23,40 @@ type IWalletInput = yup.InferType<typeof walletSchema>;
 interface IWalletModalProps {
   selectedItem?: IWallet;
   providerOptions: IOption<string>[];
+  onRefetch: () => void;
 }
 
-export const WalletForm: React.FC<IWalletModalProps> = ({providerOptions, selectedItem}) => {
+export const WalletForm: React.FC<IWalletModalProps> = ({providerOptions, selectedItem, onRefetch}) => {
   const formRef = useRef<FormikProps<IWalletInput>>(null);
 
-  const onSubmit = async (value: IWalletInput) => {
-    console.log('wallet input value', value);
+  const handleOnSubmit = async (value: IWalletInput) => {
+    let result = null;
+
+    if (selectedItem) {
+      result = await userRepo.updateUserProvider(selectedItem.id, {
+        ...value,
+      });
+    } else {
+      result = await userRepo.createUserProvider({...value});
+    }
+
+    if (result) {
+      Toast.show({
+        type: 'success',
+        text1: 'Success!',
+        text2: `Wallet ${selectedItem ? 'updated' : 'created'} successfully`,
+      });
+
+      onRefetch();
+
+      return;
+    }
+
+    Toast.show({
+      type: 'error',
+      text1: 'Error!',
+      text2: `Failed to ${selectedItem ? 'update' : 'create'} wallet. Please try again.`,
+    });
   };
 
   const initialValues = useMemo(() => walletSchema.getDefault(), []);
@@ -48,7 +78,7 @@ export const WalletForm: React.FC<IWalletModalProps> = ({providerOptions, select
     }, [selectedItem, initialValues]),
   );
   return (
-    <Formik innerRef={formRef} initialValues={initialValues} validationSchema={walletSchema} onSubmit={onSubmit}>
+    <Formik innerRef={formRef} initialValues={initialValues} validationSchema={walletSchema} onSubmit={handleOnSubmit}>
       {({handleSubmit}) => (
         <View className="flex flex-col flex-1 justify-between">
           <View className="flex flex-col gap-2">

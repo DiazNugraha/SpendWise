@@ -1,11 +1,12 @@
-import {providerRepo} from '@/db/repositories';
+import {providerRepo, userRepo} from '@/db/repositories';
 import {useFocusEffect} from '@react-navigation/native';
-import {ChevronRight} from 'lucide-react-native';
+import {ChevronRight, PlusIcon} from 'lucide-react-native';
 import React, {useCallback, useState} from 'react';
 import {Modal, Pressable, Text, View} from 'react-native';
 import {WalletForm} from './Form';
 
 interface IWallet {
+  id: string;
   providerId: string;
   identifier: string;
 }
@@ -13,24 +14,29 @@ interface IWallet {
 export const WalletList: React.FC = () => {
   const [selectedWallet, setSelectedWallet] = useState<IWallet>();
   const [providerOptions, setProviderOptions] = useState<IOption<string>[]>([]);
+  const [savedWallets, setSavedWallets] = useState<IWallet[]>([]);
+  const [openModal, setOpenModal] = useState<boolean>(false);
 
-  const fetchProviderOptions = useCallback(async () => {
+  const fetchSavedProviders = useCallback(async () => {
     const providers = await providerRepo.findAll();
     setProviderOptions(providers.map(provider => ({label: provider.name, value: provider.id})));
+
+    const wallets = await userRepo.getUserProviders();
+    if (wallets)
+      setSavedWallets(
+        wallets?.map(e => ({
+          id: e.user_providers.id,
+          identifier: e.user_providers.identifier,
+          providerId: e.user_providers.providerId,
+        })),
+      );
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      fetchProviderOptions();
-    }, [fetchProviderOptions]),
+      fetchSavedProviders();
+    }, [fetchSavedProviders]),
   );
-
-  const walletsDummy: IWallet[] = [
-    {
-      providerId: 'cf572b0d-a90c-4ffa-8089-bd2dea2cafba',
-      identifier: '0912382123',
-    },
-  ];
 
   const getProviderName = (providerId: string): string => {
     return providerOptions.find(e => e.value === providerId)?.label ?? '';
@@ -40,21 +46,37 @@ export const WalletList: React.FC = () => {
     <View className="flex flex-col gap-3">
       <Text className="font-medium text-base">Wallets</Text>
       <View className="flex flex-col gap-2">
-        {walletsDummy.map(wallet => (
+        {savedWallets.map(wallet => (
           <WalletItem
             name={getProviderName(wallet.providerId)}
             identifier={wallet.identifier}
-            onClick={() => setSelectedWallet(wallet)}
+            onClick={() => {
+              setSelectedWallet(wallet);
+              setOpenModal(true);
+            }}
             key={wallet.identifier}
           />
         ))}
+        <Pressable
+          className="main-button-container flex items-center justify-center"
+          onPress={() => setOpenModal(true)}>
+          <PlusIcon color={'white'} size={30} />
+        </Pressable>
       </View>
 
       <WalletModal
-        open={!!selectedWallet}
-        onClose={() => setSelectedWallet(undefined)}
+        open={openModal}
+        onClose={() => {
+          setSelectedWallet(undefined);
+          setOpenModal(false);
+        }}
         providerOptions={providerOptions}
         selectedItem={selectedWallet}
+        onRefetch={() => {
+          fetchSavedProviders();
+          setSelectedWallet(undefined);
+          setOpenModal(false);
+        }}
       />
     </View>
   );
@@ -85,16 +107,17 @@ interface IWalletModalProps {
   onClose: () => void;
   selectedItem?: IWallet;
   providerOptions: IOption<string>[];
+  onRefetch: () => void;
 }
 
-const WalletModal: React.FC<IWalletModalProps> = ({open, onClose, providerOptions, selectedItem}) => {
+const WalletModal: React.FC<IWalletModalProps> = ({open, onClose, providerOptions, selectedItem, onRefetch}) => {
   return (
     <Modal visible={open} transparent animationType="slide">
       <View style={{flex: 1, backgroundColor: 'rgba(0,0,0,0.4)'}}>
         <Pressable style={{flex: 1}} onPress={onClose} />
 
         <View className="h-[50%] bg-white rounded-t-2xl p-4 flex-1">
-          <WalletForm selectedItem={selectedItem} providerOptions={providerOptions} />
+          <WalletForm selectedItem={selectedItem} providerOptions={providerOptions} onRefetch={onRefetch} />
         </View>
       </View>
     </Modal>
