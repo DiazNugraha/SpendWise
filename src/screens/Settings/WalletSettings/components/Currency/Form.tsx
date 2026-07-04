@@ -75,7 +75,7 @@ export const CurrencyForm: React.FC = () => {
   return (
     <Formik innerRef={formRef} initialValues={initialValues} validationSchema={currencySchema} onSubmit={handleChange}>
       {({handleSubmit}) => (
-        <View className="flex flex-col flex-1 gap-3">
+        <View className="flex flex-col gap-3">
           <SelectField name="currency" options={CURRENCY_OPTIONS} onChange={() => handleSubmit()} />
         </View>
       )}

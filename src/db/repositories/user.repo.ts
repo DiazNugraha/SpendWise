@@ -72,4 +72,8 @@ export const userRepo = {
       })
       .where(eq(userProviders.id, id));
   },
+
+  async removeUserProvider(id: string) {
+    return await db.delete(userProviders).where(eq(userProviders.id, id));
+  },
 };
