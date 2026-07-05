@@ -1,17 +1,19 @@
 import {userRepo} from '@/db/repositories';
 import {useFocusEffect} from '@react-navigation/native';
-import {PlusIcon, Trash2Icon} from 'lucide-react-native';
+import {BanknoteIcon, LandmarkIcon, PlusIcon, Trash2Icon} from 'lucide-react-native';
 import React, {useCallback, useState} from 'react';
-import {Modal, Pressable, Text, View} from 'react-native';
+import {Image, ImageSourcePropType, Modal, Pressable, Text, View} from 'react-native';
 import {WalletForm} from './Form';
 import {useAlert} from '@/hooks';
 import Toast from 'react-native-toast-message';
+import {providerLogos} from '@/constants';
 
 interface IWallet {
   id: string;
   providerId: string;
   name: string;
   identifier: string;
+  providerIdentifier: string;
 }
 
 export const WalletList: React.FC = () => {
@@ -29,6 +31,7 @@ export const WalletList: React.FC = () => {
         wallets?.map(e => ({
           id: e.user_providers.id,
           name: e.providers?.name ?? '',
+          providerIdentifier: e.providers?.identifier ?? '',
           identifier: e.user_providers.identifier,
           providerId: e.user_providers.providerId,
         })),
@@ -75,8 +78,7 @@ export const WalletList: React.FC = () => {
       <View className="flex flex-col gap-2">
         {savedWallets.map(wallet => (
           <WalletItem
-            name={wallet.name}
-            identifier={wallet.identifier}
+            wallet={wallet}
             onClick={() => {
               setSelectedWallet(wallet);
               setOpenModal(true);
@@ -110,24 +112,40 @@ export const WalletList: React.FC = () => {
 };
 
 interface IWalletItemProps {
-  name: string;
-  identifier: string;
+  wallet: IWallet;
   onClick: () => void;
   onRemove: () => void;
 }
 
-const WalletItem: React.FC<IWalletItemProps> = ({name, identifier, onClick, onRemove}) => {
+const WalletItem: React.FC<IWalletItemProps> = ({wallet, onClick, onRemove}) => {
+  const {name, identifier, providerIdentifier} = wallet;
+
+  const walletIcon = () => {
+    if (providerIdentifier === 'bank') return <LandmarkIcon size={24} />;
+
+    if (providerIdentifier === 'cash') return <BanknoteIcon size={24} />;
+
+    const fileLocation = providerLogos[providerIdentifier];
+
+    if (!fileLocation) return '';
+
+    return <Image source={fileLocation as ImageSourcePropType} style={{width: 24, height: 24}} />;
+  };
+
   return (
     <Pressable
       className="flex flex-row justify-between px-5 py-3 border-gray-300 border rounded-2xl items-center"
       onPress={() => {
-        if (identifier !== 'cash') onClick();
+        if (providerIdentifier !== 'cash') onClick();
       }}>
-      <View className="flex flex-col gap-2">
-        <Text>{name}</Text>
-        {identifier !== 'cash' && <Text className="text-xs text-gray-600">{identifier}</Text>}
+      <View className="flex flex-row gap-2 items-center">
+        {walletIcon()}
+        <View className="flex flex-col gap-2">
+          <Text>{name}</Text>
+          {providerIdentifier !== 'cash' && <Text className="text-xs text-gray-600">{identifier}</Text>}
+        </View>
       </View>
-      {identifier !== 'cash' && <Trash2Icon size={24} color={'red'} onPress={onRemove} />}
+      {providerIdentifier !== 'cash' && <Trash2Icon size={24} color={'red'} onPress={onRemove} />}
     </Pressable>
   );
 };
