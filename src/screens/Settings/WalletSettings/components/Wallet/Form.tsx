@@ -1,8 +1,8 @@
 import {InputField, SelectCarouselField} from '@/components';
-import {userRepo} from '@/db/repositories';
+import {providerRepo, userRepo} from '@/db/repositories';
 import {useFocusEffect} from '@react-navigation/native';
 import {Formik, FormikProps} from 'formik';
-import {useCallback, useMemo, useRef} from 'react';
+import {useCallback, useMemo, useRef, useState} from 'react';
 import {Pressable, Text, View} from 'react-native';
 import Toast from 'react-native-toast-message';
 import * as yup from 'yup';
@@ -22,12 +22,13 @@ type IWalletInput = yup.InferType<typeof walletSchema>;
 
 interface IWalletModalProps {
   selectedItem?: IWallet;
-  providerOptions: IOption<string>[];
   onRefetch: () => void;
 }
 
-export const WalletForm: React.FC<IWalletModalProps> = ({providerOptions, selectedItem, onRefetch}) => {
+export const WalletForm: React.FC<IWalletModalProps> = ({selectedItem, onRefetch}) => {
   const formRef = useRef<FormikProps<IWalletInput>>(null);
+
+  const [providerOptions, setProviderOptions] = useState<IOption<string>[]>([]);
 
   const handleOnSubmit = async (value: IWalletInput) => {
     let result = null;
@@ -61,9 +62,25 @@ export const WalletForm: React.FC<IWalletModalProps> = ({providerOptions, select
 
   const initialValues = useMemo(() => walletSchema.getDefault(), []);
 
+  const fetchProviderOptions = useCallback(async () => {
+    const providers = await providerRepo.findAll();
+
+    const wallets = await userRepo.getUserProviders();
+
+    const walletCollection = wallets?.map(e => e.providers?.name ?? '') ?? [];
+
+    setProviderOptions(
+      providers
+        .filter(e => !walletCollection.includes(e.name))
+        .map(provider => ({label: provider.name, value: provider.id})),
+    );
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       if (!formRef.current) return;
+
+      fetchProviderOptions();
 
       if (selectedItem) {
         formRef.current.resetForm({
@@ -75,14 +92,16 @@ export const WalletForm: React.FC<IWalletModalProps> = ({providerOptions, select
       } else {
         formRef.current.resetForm({values: initialValues});
       }
-    }, [selectedItem, initialValues]),
+    }, [selectedItem, initialValues, fetchProviderOptions]),
   );
   return (
     <Formik innerRef={formRef} initialValues={initialValues} validationSchema={walletSchema} onSubmit={handleOnSubmit}>
       {({handleSubmit}) => (
         <View className="flex flex-col flex-1 justify-between">
           <View className="flex flex-col gap-2">
-            <SelectCarouselField name="providerId" label="Provider" required options={providerOptions} />
+            {!selectedItem && (
+              <SelectCarouselField name="providerId" label="Provider" required options={providerOptions} />
+            )}
             <InputField name="identifier" label="Identifier" required placeholder="Your wallet identifier" />
           </View>
           <Pressable className="main-button-container" onPress={handleSubmit}>
