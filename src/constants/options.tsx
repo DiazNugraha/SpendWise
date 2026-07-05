@@ -13,26 +13,12 @@ type IOptionWithIcon<T extends string | number> = {
 };
 
 export const providerOptions: IOption<string>[] = [
-  {
-    label: 'Cash',
-    value: 'cash',
-  },
-  {
-    label: 'GoPay',
-    value: 'gopay',
-  },
-  {
-    label: 'Dana',
-    value: 'dana',
-  },
-  {
-    label: 'ShopeePay',
-    value: 'shopeepay',
-  },
-  {
-    label: 'OVO',
-    value: 'ovo',
-  },
+  {label: 'Cash', value: 'cash'},
+  {label: 'Bank Account', value: 'bank'},
+  {label: 'GoPay', value: 'gopay'},
+  {label: 'DANA', value: 'dana'},
+  {label: 'ShopeePay', value: 'shopeepay'},
+  {label: 'OVO', value: 'ovo'},
 ];
 
 export const mediumOptions: IOptionWithIcon<string>[] = [

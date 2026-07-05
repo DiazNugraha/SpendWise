@@ -16,5 +16,8 @@ export const addUserSeeder = async () => {
     primaryCurrencyCode: 'IDR',
   };
 
+  const existingUser = await db.select().from(users);
+  if (existingUser.length > 0) return;
+
   return await db.insert(users).values(dummyUser);
 };

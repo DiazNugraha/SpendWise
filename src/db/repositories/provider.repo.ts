@@ -4,6 +4,10 @@ import uuid from 'react-native-uuid';
 
 type IProviderInsert = {
   name: string;
+  identifier: string;
+  logo: string;
+  createdAt: number;
+  updatedAt: number;
 };
 
 export const providerRepo = {
@@ -12,14 +16,22 @@ export const providerRepo = {
   },
 
   async create(data: IProviderInsert) {
-    const now = Date.now();
     const newProviderId = uuid.v4();
 
     return await db.insert(providers).values({
       id: newProviderId,
-      name: data.name,
-      createdAt: now,
-      updatedAt: now,
+      ...data,
     });
+  },
+
+  async createProviders(datas: IProviderInsert[]) {
+    const formattedDatas = await Promise.all(
+      datas.map(async data => {
+        const newUuid = uuid.v4();
+        return {id: newUuid, ...data};
+      }),
+    );
+
+    return await db.insert(providers).values(formattedDatas);
   },
 };
