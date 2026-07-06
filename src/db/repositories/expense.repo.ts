@@ -33,12 +33,16 @@ export const expenseRepo = {
 
     // link providers (many to many)
     if (data.providerIds && data.providerIds?.length > 0) {
-      await db.insert(expenseProviders).values(
-        data.providerIds?.map(id => ({
+      const formattedProviders = data.providerIds?.map(id => {
+        const newUuid = uuid.v4();
+        return {
+          id: newUuid,
           expenseId: newExpenseId,
           providerId: id,
-        })),
-      );
+        };
+      });
+
+      await db.insert(expenseProviders).values(formattedProviders);
     }
 
     return newExpense;
