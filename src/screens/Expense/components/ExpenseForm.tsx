@@ -21,7 +21,6 @@ const ExpenseForm: React.FC = () => {
       providerIds: values.providers.filter(e => e !== undefined),
       categoryId: values.category,
       description: values.description,
-      medium: values.mediums.join(','),
     });
 
     setIsLoading(false);

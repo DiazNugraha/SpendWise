@@ -3,13 +3,12 @@ import {
   DecimalInputField,
   FormButtonWrapper,
   InputField,
-  MultiSelectField,
   SelectCarouselField,
   SelectMultiCarouselField,
 } from '@/components';
-import {categoryOptions, mediumOptions} from '@/constants/options';
-import {providerRepo} from '@/db/repositories';
-import {useEffect, useMemo, useState} from 'react';
+import {categoryOptions} from '@/constants/options';
+import {userRepo} from '@/db/repositories';
+import {useEffect, useState} from 'react';
 import {useFormikContext} from 'formik';
 import {IExpenseInput} from '@/constants/schemas';
 
@@ -18,29 +17,20 @@ interface IExpenseFormProps {
 }
 
 const ExpenseFormInput: React.FC<IExpenseFormProps> = ({isLoading}) => {
-  const {values, handleSubmit, setFieldValue} = useFormikContext<IExpenseInput>();
+  const {handleSubmit} = useFormikContext<IExpenseInput>();
 
   const [providerOptions, setProviderOptions] = useState<{value: string; label: string}[]>([]);
 
   const fetchProviderOptions = async () => {
-    const datas = await providerRepo.findAll();
+    const datas = await userRepo.getUserProviders();
+    if (!datas) return;
     setProviderOptions(
       datas.map(data => ({
-        value: data.id,
-        label: data.name,
+        value: data.providers?.id ?? '',
+        label: data.providers?.name ?? '',
       })),
     );
   };
-
-  const isShowProvidersInput = useMemo(() => {
-    return !(values.mediums.length === 1 && values.mediums[0] === 'cash');
-  }, [values.mediums]);
-
-  useEffect(() => {
-    if (values.mediums.length === 1 && values.mediums[0] === 'cash') {
-      setFieldValue('providers', []);
-    }
-  }, [values.mediums, setFieldValue]);
 
   useEffect(() => {
     fetchProviderOptions();
@@ -59,13 +49,9 @@ const ExpenseFormInput: React.FC<IExpenseFormProps> = ({isLoading}) => {
         />
       </View>
 
-      <SelectMultiCarouselField name="mediums" options={mediumOptions} label="Medium" itemStyle="card" required />
-
       <SelectCarouselField name="category" options={categoryOptions} label="Category" required />
 
-      {isShowProvidersInput && (
-        <MultiSelectField name="providers" options={providerOptions} label="Providers" required />
-      )}
+      <SelectMultiCarouselField name="providers" options={providerOptions} label="Providers" required />
 
       <InputField name="title" label="Title" placeholder="Input Title here" />
 
