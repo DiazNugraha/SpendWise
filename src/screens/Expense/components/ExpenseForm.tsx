@@ -1,6 +1,6 @@
 import {expenseSchema, IExpenseInput} from '@/constants/schemas';
 import {expenseRepo} from '@/db/repositories';
-import {useState} from 'react';
+import {useMemo, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {Formik} from 'formik';
@@ -14,9 +14,11 @@ const ExpenseForm: React.FC = () => {
 
   const submitForm = async (values: IExpenseInput) => {
     setIsLoading(true);
+
     const title = values.title !== '' ? values.title : capitalizeFirstLetter(values.category);
+
     const savedData = await expenseRepo.create({
-      amount: values.amount,
+      amount: values.amount ?? 0,
       title: title,
       providerIds: values.providers.filter(e => e !== undefined),
       categoryId: values.category,
@@ -55,8 +57,10 @@ const ExpenseForm: React.FC = () => {
     });
   };
 
+  const initialValues = useMemo(() => expenseSchema.getDefault(), []);
+
   return (
-    <Formik initialValues={expenseSchema.getDefault()} validationSchema={expenseSchema} onSubmit={submitForm}>
+    <Formik initialValues={initialValues} validationSchema={expenseSchema} onSubmit={submitForm}>
       <ExpenseFormInput isLoading={isLoading} />
     </Formik>
   );

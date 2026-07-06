@@ -19,7 +19,7 @@ interface IExpenseFormProps {
 }
 
 const ExpenseFormInput: React.FC<IExpenseFormProps> = ({isLoading}) => {
-  const {handleSubmit} = useFormikContext<IExpenseInput>();
+  const {handleSubmit, setFieldError, values} = useFormikContext<IExpenseInput>();
 
   const [providerOptions, setProviderOptions] = useState<
     {label: string; value: string; icon?: LucideIcon | ReactElement}[]
@@ -40,12 +40,21 @@ const ExpenseFormInput: React.FC<IExpenseFormProps> = ({isLoading}) => {
     );
   };
 
+  const onSubmit = () => {
+    if (!values.amount) {
+      setFieldError('amount', 'Amount should not be empty');
+      return;
+    }
+
+    handleSubmit();
+  };
+
   useEffect(() => {
     fetchProviderOptions();
   }, []);
 
   return (
-    <FormButtonWrapper text="Submit Expense" onSubmit={handleSubmit} isLoading={isLoading}>
+    <FormButtonWrapper text="Submit Expense" onSubmit={onSubmit} isLoading={isLoading}>
       <View className="w-full flex justify-center items-center px-5">
         <DecimalInputField
           name="amount"
