@@ -8,9 +8,11 @@ import {
 } from '@/components';
 import {categoryOptions} from '@/constants/options';
 import {userRepo} from '@/db/repositories';
-import {useEffect, useState} from 'react';
+import {ReactElement, useEffect, useState} from 'react';
 import {useFormikContext} from 'formik';
 import {IExpenseInput} from '@/constants/schemas';
+import {LucideIcon} from 'lucide-react-native';
+import {displayProviderIcon} from '@/constants';
 
 interface IExpenseFormProps {
   isLoading: boolean;
@@ -19,16 +21,22 @@ interface IExpenseFormProps {
 const ExpenseFormInput: React.FC<IExpenseFormProps> = ({isLoading}) => {
   const {handleSubmit} = useFormikContext<IExpenseInput>();
 
-  const [providerOptions, setProviderOptions] = useState<{value: string; label: string}[]>([]);
+  const [providerOptions, setProviderOptions] = useState<
+    {label: string; value: string; icon?: LucideIcon | ReactElement}[]
+  >([]);
 
   const fetchProviderOptions = async () => {
     const datas = await userRepo.getUserProviders();
     if (!datas) return;
     setProviderOptions(
-      datas.map(data => ({
-        value: data.providers?.id ?? '',
-        label: data.providers?.name ?? '',
-      })),
+      datas.map(data => {
+        const icon = data.providers?.identifier ? displayProviderIcon(data.providers?.identifier) : undefined;
+        return {
+          value: data.providers?.id ?? '',
+          label: data.providers?.name ?? '',
+          icon: icon,
+        };
+      }),
     );
   };
 
@@ -51,7 +59,13 @@ const ExpenseFormInput: React.FC<IExpenseFormProps> = ({isLoading}) => {
 
       <SelectCarouselField name="category" options={categoryOptions} label="Category" required />
 
-      <SelectMultiCarouselField name="providers" options={providerOptions} label="Providers" required />
+      <SelectMultiCarouselField
+        name="providers"
+        options={providerOptions}
+        label="Providers"
+        required
+        itemStyle="card"
+      />
 
       <InputField name="title" label="Title" placeholder="Input Title here" />
 

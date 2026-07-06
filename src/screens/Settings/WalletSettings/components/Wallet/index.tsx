@@ -1,12 +1,12 @@
 import {userRepo} from '@/db/repositories';
 import {useFocusEffect} from '@react-navigation/native';
-import {BanknoteIcon, LandmarkIcon, PlusIcon, Trash2Icon} from 'lucide-react-native';
+import {PlusIcon, Trash2Icon} from 'lucide-react-native';
 import React, {useCallback, useState} from 'react';
-import {Image, ImageSourcePropType, Modal, Pressable, Text, View} from 'react-native';
+import {Modal, Pressable, Text, View} from 'react-native';
 import {WalletForm} from './Form';
 import {useAlert} from '@/hooks';
 import Toast from 'react-native-toast-message';
-import {providerLogos} from '@/constants';
+import {displayProviderIcon} from '@/constants';
 
 interface IWallet {
   id: string;
@@ -120,18 +120,6 @@ interface IWalletItemProps {
 const WalletItem: React.FC<IWalletItemProps> = ({wallet, onClick, onRemove}) => {
   const {name, identifier, providerIdentifier} = wallet;
 
-  const walletIcon = () => {
-    if (providerIdentifier === 'bank') return <LandmarkIcon size={24} />;
-
-    if (providerIdentifier === 'cash') return <BanknoteIcon size={24} />;
-
-    const fileLocation = providerLogos[providerIdentifier];
-
-    if (!fileLocation) return '';
-
-    return <Image source={fileLocation as ImageSourcePropType} style={{width: 24, height: 24}} />;
-  };
-
   return (
     <Pressable
       className="flex flex-row justify-between px-5 py-3 border-gray-300 border rounded-2xl items-center"
@@ -139,7 +127,7 @@ const WalletItem: React.FC<IWalletItemProps> = ({wallet, onClick, onRemove}) => 
         if (providerIdentifier !== 'cash') onClick();
       }}>
       <View className="flex flex-row gap-2 items-center">
-        {walletIcon()}
+        {displayProviderIcon(wallet.providerIdentifier)}
         <View className="flex flex-col gap-2">
           <Text>{name}</Text>
           {providerIdentifier !== 'cash' && <Text className="text-xs text-gray-600">{identifier}</Text>}
