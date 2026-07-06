@@ -1,6 +1,6 @@
 import {useField} from 'formik';
 import {LucideIcon} from 'lucide-react-native';
-import {Fragment} from 'react';
+import {Fragment, isValidElement, ReactElement} from 'react';
 import {FlatList, Pressable, Text} from 'react-native';
 
 type ItemStyle = 'chip' | 'card';
@@ -8,7 +8,7 @@ type ItemStyle = 'chip' | 'card';
 type SelectMultiCarouselFieldProps<T> = {
   name: string;
   label?: string;
-  options: {label: string; value: T; icon?: LucideIcon}[];
+  options: {label: string; value: T; icon?: LucideIcon | ReactElement}[];
   itemStyle?: ItemStyle;
   required?: boolean;
 };
@@ -73,12 +73,11 @@ function PressableChip<T>({
   isSelected,
   itemStyle,
 }: {
-  item: {label: string; value: T; icon?: LucideIcon};
+  item: {label: string; value: T; icon?: LucideIcon | ReactElement};
   onChange: (value: T) => void;
   isSelected: boolean;
   itemStyle: ItemStyle;
 }) {
-  const Icon = item.icon;
   const style: string =
     itemStyle === 'chip'
       ? 'px-5 py-3 flex flex-row gap-2 rounded-3xl'
@@ -88,14 +87,28 @@ function PressableChip<T>({
   const selectedTextStyle: string = itemStyle === 'chip' ? 'text-[#fff]' : 'text-[#6D28D9]';
   const selectedIconStyle: string = itemStyle === 'chip' ? 'white' : '#6D28D9';
 
+  const displayIcon = () => {
+    if (!item.icon) return null;
+
+    // Already-rendered element, e.g. <Image />
+    if (isValidElement(item.icon)) {
+      return item.icon;
+    }
+
+    // Lucide icon component
+    const Icon = item.icon;
+
+    return <Icon size={16} color={isSelected ? selectedIconStyle : '#6b7280'} />;
+  };
+
   return (
     <Pressable
       onPress={() => onChange(item.value)}
       className={`items-center justify-center ${style} ${
         isSelected ? `${selectedStyle}` : 'border border-[#eee] bg-white'
       }`}>
-      {Icon && <Icon size={16} color={isSelected ? `${selectedIconStyle}` : '#6b7280'} />}
-      <Text numberOfLines={1} className={`font-medium ${isSelected ? `${selectedTextStyle}` : 'text-gray-500'}`}>
+      {displayIcon()}
+      <Text className={`text-center font-medium ${isSelected ? `${selectedTextStyle}` : 'text-gray-500'}`}>
         {item.label}
       </Text>
     </Pressable>
