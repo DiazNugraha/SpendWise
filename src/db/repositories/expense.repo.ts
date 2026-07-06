@@ -10,7 +10,6 @@ type IExpenseInsert = {
   categoryId: string;
   amount: number;
   description?: string;
-  medium?: string;
   providerIds?: string[];
 };
 
@@ -26,7 +25,6 @@ export const expenseRepo = {
       categoryId: data.categoryId,
       amount: data.amount,
       description: data.description,
-      medium: data.medium,
       createdAt: now,
       updatedAt: now,
     });

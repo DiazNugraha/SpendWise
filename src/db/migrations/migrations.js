@@ -12,6 +12,7 @@ import m0007 from './0007_damp_famine.sql';
 import m0008 from './0008_boring_pestilence.sql';
 import m0009 from './0009_sudden_salo.sql';
 import m0010 from './0010_gorgeous_cassandra_nova.sql';
+import m0011 from './0011_modern_stryfe.sql';
 
   export default {
     journal,
@@ -26,7 +27,8 @@ m0006,
 m0007,
 m0008,
 m0009,
-m0010
+m0010,
+m0011
     }
   }
   
