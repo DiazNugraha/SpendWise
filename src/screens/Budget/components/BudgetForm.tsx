@@ -30,7 +30,7 @@ const toFormValues = (budgetType: BudgetType, budget?: IBudgetInput) => {
     const endDate = new Date(startDate);
 
     if (budgetType === 'weekly') {
-      endDate.setDate(endDate.getDate() + 2);
+      endDate.setDate(endDate.getDate() + 7);
     } else if (budgetType === 'monthly') {
       endDate.setMonth(endDate.getMonth() + 1);
     }
