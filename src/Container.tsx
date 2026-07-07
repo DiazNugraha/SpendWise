@@ -1,13 +1,15 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {RootNavigator} from '@/router';
-import {AlertProvider} from './contexts';
+import {AlertProvider, ProfileProvider} from './contexts';
 
 export default function Container() {
   return (
     <NavigationContainer>
-      <AlertProvider>
-        <RootNavigator />
-      </AlertProvider>
+      <ProfileProvider>
+        <AlertProvider>
+          <RootNavigator />
+        </AlertProvider>
+      </ProfileProvider>
     </NavigationContainer>
   );
 }
