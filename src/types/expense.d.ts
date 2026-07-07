@@ -2,7 +2,6 @@ interface IExpense {
   id?: string;
   title: string;
   providers: string[];
-  mediums: string[];
   category: string;
   amount: number;
   description?: string;

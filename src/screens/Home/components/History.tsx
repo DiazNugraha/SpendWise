@@ -16,7 +16,6 @@ const History: React.FC = () => {
       id: d.id,
       title: d.title,
       providers: [],
-      mediums: d.medium ? d.medium.split(',') : [],
       category: d.categoryId,
       amount: d.amount,
       description: d?.description ?? undefined,

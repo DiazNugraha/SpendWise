@@ -38,7 +38,6 @@ export const History = () => {
     const formatData: IExpense[] = data.map(d => ({
       title: d.title,
       providers: [],
-      mediums: d.medium ? d.medium.split(',') : [],
       category: d.categoryId,
       amount: d.amount,
       description: d?.description ?? undefined,
