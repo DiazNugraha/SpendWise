@@ -8,12 +8,15 @@ import {useFocusEffect} from '@react-navigation/native';
 import {NumberFormatter} from '@/helpers';
 import {categoryOptions} from '@/constants/options';
 import {ArrowUpIcon} from 'lucide-react-native';
+import {useProfile} from '@/hooks';
 
 const formatter = new NumberFormatter({
   maxFractionDigits: 2,
 });
 
 export const History = () => {
+  const {primaryCurrencySymbol} = useProfile();
+
   const [filter, setFilter] = useState<{
     budget: string;
     categories: string[];
@@ -85,7 +88,9 @@ export const History = () => {
           className="w-full rounded-2xl p-5 overflow-hidden">
           <View className="flex flex-col gap-3">
             <Text className="text-white/70 font-medium text-base">Total Expense</Text>
-            <Text className="text-white text-3xl font-bold">{formatter.format(totalExpense)}</Text>
+            <Text className="text-white text-3xl font-bold">
+              {primaryCurrencySymbol} {formatter.format(totalExpense)}
+            </Text>
             <View className="flex flex-row gap-1 items-center">
               <ArrowUpIcon size={16} color={'white'} />
               <Text className="text-white/40 font-normal text-sm">12% vs last week</Text>

@@ -1,5 +1,6 @@
 import {CATEGORY_DB_DATA, CategoryIconMap} from '@/constants';
 import {formatDate, NumberFormatter} from '@/helpers';
+import {useProfile} from '@/hooks';
 import {ChevronDown, ChevronUp} from 'lucide-react-native';
 import {useState} from 'react';
 import {Pressable, Text, View} from 'react-native';
@@ -11,6 +12,8 @@ const formatter = new NumberFormatter({
 });
 
 export const ExpenseCard: React.FC<IExpense> = props => {
+  const {primaryCurrencySymbol} = useProfile();
+
   const [showMoreDesc, setShowMoreDesc] = useState<boolean>(false);
   const getCategoryItems = (key: string) => {
     return CATEGORY_DB_DATA.find(e => e.key === key);
@@ -62,7 +65,9 @@ export const ExpenseCard: React.FC<IExpense> = props => {
           </View>
 
           <View className="flex flex-col justify-center items-end gap-2">
-            <Text className="text-sm font-medium">{formatter.format(props.amount)}</Text>
+            <Text className="text-sm font-medium">
+              {primaryCurrencySymbol} {formatter.format(props.amount)}
+            </Text>
             <Text className="text-[10px] font-light">
               {formatDate(props.createdAt, {
                 dateTimeOption: {

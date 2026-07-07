@@ -8,7 +8,7 @@ import {ActivityIcon, ChevronRight, TrashIcon} from 'lucide-react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {RootNavigationProp} from '@/types';
 import {budgetRepo} from '@/db/repositories';
-import {useAlert} from '@/hooks';
+import {useAlert, useProfile} from '@/hooks';
 import Toast from 'react-native-toast-message';
 
 const formatter = new NumberFormatter({
@@ -17,6 +17,7 @@ const formatter = new NumberFormatter({
 
 export const Budget: React.FC = () => {
   const {alert} = useAlert();
+  const {primaryCurrencySymbol} = useProfile();
   const navigation = useNavigation<RootNavigationProp>();
 
   const [type, setType] = useState<string>();
@@ -98,7 +99,9 @@ export const Budget: React.FC = () => {
           <View className="w-full flex flex-col justify-center items-center px-5 gap-3">
             <Text>Your Current Target</Text>
             {selectedBudget ? (
-              <Text className="text-[30px] font-bold">{formatter.format(selectedBudget.amount)}</Text>
+              <Text className="text-[30px] font-bold">
+                {primaryCurrencySymbol} {formatter.format(selectedBudget.amount)}
+              </Text>
             ) : (
               <Text className="text-[30px] font-bold">Not Set Yet</Text>
             )}

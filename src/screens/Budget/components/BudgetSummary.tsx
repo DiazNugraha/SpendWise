@@ -2,6 +2,7 @@ import {formatDate, NumberFormatter} from '@/helpers';
 import {PropsWithChildren} from 'react';
 import {Text, View} from 'react-native';
 import * as Icons from 'lucide-react-native';
+import {useProfile} from '@/hooks';
 
 const formatter = new NumberFormatter({
   maxFractionDigits: 2,
@@ -12,6 +13,8 @@ interface IBudgetSummaryProps {
 }
 
 const BudgetSummary: React.FC<IBudgetSummaryProps> = ({budgets}) => {
+  const {primaryCurrencySymbol} = useProfile();
+
   return (
     <View className="flex flex-col gap-3">
       <Text>Budget Summary</Text>
@@ -29,7 +32,9 @@ const BudgetSummary: React.FC<IBudgetSummaryProps> = ({budgets}) => {
                   </Text>
                 </View>
               </View>
-              <Text className="text-[#6D28D9] font-medium">{formatter.format(e.amount)}</Text>
+              <Text className="text-[#6D28D9] font-medium">
+                {primaryCurrencySymbol} {formatter.format(e.amount)}
+              </Text>
             </ItemWrapper>
           );
         })}

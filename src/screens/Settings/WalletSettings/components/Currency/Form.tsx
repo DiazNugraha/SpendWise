@@ -1,5 +1,6 @@
 import {SelectField} from '@/components';
 import {userRepo} from '@/db/repositories';
+import {useProfile} from '@/hooks';
 import {useFocusEffect} from '@react-navigation/native';
 import {Formik, FormikProps} from 'formik';
 import {useCallback, useMemo, useRef, useState} from 'react';
@@ -23,6 +24,8 @@ const currencySchema = yup.object({
 type ICurrencyInput = yup.InferType<typeof currencySchema>;
 
 export const CurrencyForm: React.FC = () => {
+  const {onRefetch: onRefetchUserProfile} = useProfile();
+
   const formRef = useRef<FormikProps<ICurrencyInput>>(null);
   const [userId, setUserId] = useState<string>();
 
@@ -39,6 +42,8 @@ export const CurrencyForm: React.FC = () => {
         text1: 'Success!',
         text2: 'Currency updated successfully',
       });
+
+      onRefetchUserProfile();
       return;
     }
 

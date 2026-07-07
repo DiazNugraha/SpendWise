@@ -1,5 +1,6 @@
 import {budgetRepo, expenseRepo} from '@/db/repositories';
 import {getDaysLeft, NumberFormatter} from '@/helpers';
+import {useProfile} from '@/hooks';
 import {RootNavigationProp} from '@/types';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {Calendar, CircleQuestionMark} from 'lucide-react-native';
@@ -95,14 +96,19 @@ type FoundSavedBudgetProps = {
 
 const FoundSavedBudget = ({budget, spent}: FoundSavedBudgetProps) => {
   const {title, limit, progress, daysLeft} = budget;
+  const {primaryCurrencySymbol} = useProfile();
 
   return (
     <>
       <Text className="text-violet-100 text-sm mb-2">{title}</Text>
 
       <View className="flex-row items-end">
-        <Text className="text-white text-3xl font-bold">{formatter.format(spent)}</Text>
-        <Text className="text-violet-200 text-base mb-1"> / {formatter.format(limit)}</Text>
+        <Text className="text-white text-3xl font-bold">
+          {primaryCurrencySymbol} {formatter.format(spent)}
+        </Text>
+        <Text className="text-violet-200 text-base mb-1">
+          / {primaryCurrencySymbol} {formatter.format(limit)}
+        </Text>
       </View>
 
       {/* Progress bar */}
@@ -111,7 +117,7 @@ const FoundSavedBudget = ({budget, spent}: FoundSavedBudgetProps) => {
       </View>
       <View className="flex flex-row justify-between mt-5">
         <Text className="text-white text-xs">
-          Remaining: {formatter.format(limit - spent >= 0 ? limit - spent : 0)}
+          Remaining: {primaryCurrencySymbol} {formatter.format(limit - spent >= 0 ? limit - spent : 0)}
         </Text>
         <View className="bg-white/20 rounded-2xl px-2 py-1">
           <Text className="text-[10px] text-white ">{daysLeft} days left</Text>
