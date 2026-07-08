@@ -8,6 +8,11 @@ type IUserProviderInsert = {
   identifier: string;
 };
 
+type IUserInput = {
+  firstName: string;
+  lastName: string;
+};
+
 export const userRepo = {
   async find() {
     return await db.select().from(users);
@@ -40,6 +45,15 @@ export const userRepo = {
       .from(users)
       .limit(1)
       .orderBy(sql`${users.createdAt} desc`);
+  },
+
+  async updateUser(userId: string, data: IUserInput) {
+    return await db
+      .update(users)
+      .set({
+        ...data,
+      })
+      .where(eq(users.id, userId));
   },
 
   async createUserProvider(data: IUserProviderInsert) {

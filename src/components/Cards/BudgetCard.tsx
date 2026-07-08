@@ -107,6 +107,7 @@ const FoundSavedBudget = ({budget, spent}: FoundSavedBudgetProps) => {
           {primaryCurrencySymbol} {formatter.format(spent)}
         </Text>
         <Text className="text-violet-200 text-base mb-1">
+          {' '}
           / {primaryCurrencySymbol} {formatter.format(limit)}
         </Text>
       </View>
