@@ -1,10 +1,9 @@
-import {userRepo} from '@/db/repositories';
 import {useFocusEffect} from '@react-navigation/native';
 import {PlusIcon, Trash2Icon} from 'lucide-react-native';
 import React, {useCallback, useState} from 'react';
 import {Modal, Pressable, Text, View} from 'react-native';
 import {WalletForm} from './Form';
-import {useAlert} from '@/hooks';
+import {useAlert, useUserRepo} from '@/hooks';
 import Toast from 'react-native-toast-message';
 import {displayProviderIcon} from '@/constants';
 
@@ -18,6 +17,7 @@ interface IWallet {
 
 export const WalletList: React.FC = () => {
   const {alert} = useAlert();
+  const userRepo = useUserRepo();
 
   const [selectedWallet, setSelectedWallet] = useState<IWallet>();
   const [savedWallets, setSavedWallets] = useState<IWallet[]>([]);
@@ -36,7 +36,7 @@ export const WalletList: React.FC = () => {
           providerId: e.user_providers.providerId,
         })),
       );
-  }, []);
+  }, [userRepo]);
 
   useFocusEffect(
     useCallback(() => {

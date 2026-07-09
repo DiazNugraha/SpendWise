@@ -13,10 +13,12 @@ type IUserInput = {
   lastName: string;
 };
 
-export const userRepo = {
+export class UserRepo {
+  constructor(private readonly userId?: string) {}
+
   async find() {
     return await db.select().from(users);
-  },
+  }
 
   async setPrimaryCurrencyCode(userId: string, code: string) {
     return await db
@@ -25,19 +27,18 @@ export const userRepo = {
         primaryCurrencyCode: code,
       })
       .where(eq(users.id, userId));
-  },
+  }
 
   async getUserProviders() {
-    const user = (await userRepo.getUser())[0];
-    if (!user) return;
+    if (!this.userId) return;
 
     const result = await db
       .select()
       .from(userProviders)
-      .where(eq(userProviders.userId, user.id))
+      .where(eq(userProviders.userId, this.userId))
       .leftJoin(providers, eq(userProviders.providerId, providers.id));
     return result;
-  },
+  }
 
   async getUser() {
     return await db
@@ -45,7 +46,7 @@ export const userRepo = {
       .from(users)
       .limit(1)
       .orderBy(sql`${users.createdAt} desc`);
-  },
+  }
 
   async updateUser(userId: string, data: IUserInput) {
     return await db
@@ -54,29 +55,25 @@ export const userRepo = {
         ...data,
       })
       .where(eq(users.id, userId));
-  },
+  }
 
   async createUserProvider(data: IUserProviderInsert) {
+    if (!this.userId) return;
+
     const now = Date.now();
     const newUuid = uuid.v4();
-
-    const user = (await userRepo.getUser())[0];
-    if (!user) return;
 
     return await db.insert(userProviders).values({
       id: newUuid,
       ...data,
       createdAt: now,
       updatedAt: now,
-      userId: user.id,
+      userId: this.userId,
     });
-  },
+  }
 
   async updateUserProvider(id: string, data: IUserProviderInsert) {
     const now = Date.now();
-
-    const user = (await userRepo.getUser())[0];
-    if (!user) return;
 
     return await db
       .update(userProviders)
@@ -85,9 +82,9 @@ export const userRepo = {
         updatedAt: now,
       })
       .where(eq(userProviders.id, id));
-  },
+  }
 
   async removeUserProvider(id: string) {
     return await db.delete(userProviders).where(eq(userProviders.id, id));
-  },
-};
+  }
+}

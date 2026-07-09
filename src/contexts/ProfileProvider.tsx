@@ -1,4 +1,4 @@
-import {userRepo} from '@/db/repositories';
+import {UserRepo} from '@/db/repositories';
 import {getCurrencySymbol} from '@/helpers';
 import {useFocusEffect} from '@react-navigation/native';
 import {createContext, PropsWithChildren, useCallback, useContext, useState} from 'react';
@@ -24,6 +24,7 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
   const [primaryCurrencySymbol, setPrimaryCurrencySymbol] = useState<string>('');
 
   const fetchUserProfile = useCallback(async () => {
+    const userRepo = new UserRepo();
     const existingUser = (await userRepo.getUser())[0];
     const primaryCurrencyCode = existingUser.primaryCurrencyCode;
 

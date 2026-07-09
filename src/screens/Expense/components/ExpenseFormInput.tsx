@@ -7,12 +7,12 @@ import {
   SelectMultiCarouselField,
 } from '@/components';
 import {categoryOptions} from '@/constants/options';
-import {userRepo} from '@/db/repositories';
-import {ReactElement, useEffect, useState} from 'react';
+import {ReactElement, useCallback, useEffect, useState} from 'react';
 import {useFormikContext} from 'formik';
 import {IExpenseInput} from '@/constants/schemas';
 import {LucideIcon} from 'lucide-react-native';
 import {displayProviderIcon} from '@/constants';
+import {useUserRepo} from '@/hooks';
 
 interface IExpenseFormProps {
   isLoading: boolean;
@@ -20,25 +20,28 @@ interface IExpenseFormProps {
 
 const ExpenseFormInput: React.FC<IExpenseFormProps> = ({isLoading}) => {
   const {handleSubmit, setFieldError, values} = useFormikContext<IExpenseInput>();
+  const userRepo = useUserRepo();
 
   const [providerOptions, setProviderOptions] = useState<
     {label: string; value: string; icon?: LucideIcon | ReactElement}[]
   >([]);
 
-  const fetchProviderOptions = async () => {
-    const datas = await userRepo.getUserProviders();
-    if (!datas) return;
-    setProviderOptions(
-      datas.map(data => {
-        const icon = data.providers?.identifier ? displayProviderIcon(data.providers?.identifier) : undefined;
-        return {
-          value: data.providers?.id ?? '',
-          label: data.providers?.name ?? '',
-          icon: icon,
-        };
-      }),
-    );
-  };
+  const fetchProviderOptions = useCallback(async () => {
+    async () => {
+      const datas = await userRepo.getUserProviders();
+      if (!datas) return;
+      setProviderOptions(
+        datas.map(data => {
+          const icon = data.providers?.identifier ? displayProviderIcon(data.providers?.identifier) : undefined;
+          return {
+            value: data.providers?.id ?? '',
+            label: data.providers?.name ?? '',
+            icon: icon,
+          };
+        }),
+      );
+    };
+  }, [userRepo]);
 
   const onSubmit = () => {
     if (!values.amount) {
@@ -51,7 +54,7 @@ const ExpenseFormInput: React.FC<IExpenseFormProps> = ({isLoading}) => {
 
   useEffect(() => {
     fetchProviderOptions();
-  }, []);
+  }, [fetchProviderOptions]);
 
   return (
     <FormButtonWrapper text="Submit Expense" onSubmit={onSubmit} isLoading={isLoading}>

@@ -1,11 +1,10 @@
 import {Formik, FormikProps} from 'formik';
 import {useCallback, useMemo, useRef} from 'react';
 import * as yup from 'yup';
-import {useProfile} from '@/hooks';
+import {useProfile, useUserRepo} from '@/hooks';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {InputField} from '@/components';
 import {Pressable, Text, View} from 'react-native';
-import {userRepo} from '@/db/repositories';
 import Toast from 'react-native-toast-message';
 
 const accountSchema = yup.object({
@@ -17,6 +16,7 @@ type IAccountInput = yup.InferType<typeof accountSchema>;
 
 export const AccountForm: React.FC = () => {
   const {user: userProfile, onRefetch} = useProfile();
+  const userRepo = useUserRepo();
   const navigation = useNavigation();
 
   const formRef = useRef<FormikProps<IAccountInput>>(null);

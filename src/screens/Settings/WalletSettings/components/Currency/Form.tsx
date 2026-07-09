@@ -1,6 +1,5 @@
 import {SelectField} from '@/components';
-import {userRepo} from '@/db/repositories';
-import {useProfile} from '@/hooks';
+import {useProfile, useUserRepo} from '@/hooks';
 import {useFocusEffect} from '@react-navigation/native';
 import {Formik, FormikProps} from 'formik';
 import {useCallback, useMemo, useRef, useState} from 'react';
@@ -25,6 +24,7 @@ type ICurrencyInput = yup.InferType<typeof currencySchema>;
 
 export const CurrencyForm: React.FC = () => {
   const {onRefetch: onRefetchUserProfile} = useProfile();
+  const userRepo = useUserRepo();
 
   const formRef = useRef<FormikProps<ICurrencyInput>>(null);
   const [userId, setUserId] = useState<string>();
@@ -67,7 +67,7 @@ export const CurrencyForm: React.FC = () => {
     } else {
       formRef.current?.resetForm({values: initialValues});
     }
-  }, [initialValues]);
+  }, [initialValues, userRepo]);
 
   useFocusEffect(
     useCallback(() => {

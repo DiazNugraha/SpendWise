@@ -2,11 +2,13 @@ import uuid from 'react-native-uuid';
 import {db} from '../client';
 import {providers, userProviders} from '../schema';
 import {eq} from 'drizzle-orm';
-import {userRepo} from '../repositories';
+import {UserRepo} from '../repositories';
 
 export const addUserProvider = async () => {
   const now = Date.now();
   const newUuid = uuid.v4();
+
+  const userRepo = new UserRepo();
 
   const cashProvider = (await db.select().from(providers).where(eq(providers.identifier, 'cash')).limit(1))[0];
   const existingUser = (await userRepo.getUser())[0];
