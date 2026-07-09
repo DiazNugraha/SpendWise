@@ -1,8 +1,11 @@
 import {providerOptions} from '@/constants/options';
-import {providerRepo} from '../repositories';
+import {ProviderRepo} from '../repositories';
 
 export const addProvidersSeeder = async () => {
+  const providerRepo = new ProviderRepo();
+
   const now = Date.now();
+
   const seedDatas: {
     name: string;
     identifier: string;

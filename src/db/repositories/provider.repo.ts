@@ -10,10 +10,10 @@ type IProviderInsert = {
   updatedAt: number;
 };
 
-export const providerRepo = {
+export class ProviderRepo {
   async findAll() {
     return await db.select().from(providers);
-  },
+  }
 
   async create(data: IProviderInsert) {
     const newProviderId = uuid.v4();
@@ -22,7 +22,7 @@ export const providerRepo = {
       id: newProviderId,
       ...data,
     });
-  },
+  }
 
   async createProviders(datas: IProviderInsert[]) {
     const formattedDatas = await Promise.all(
@@ -33,5 +33,5 @@ export const providerRepo = {
     );
 
     return await db.insert(providers).values(formattedDatas);
-  },
-};
+  }
+}

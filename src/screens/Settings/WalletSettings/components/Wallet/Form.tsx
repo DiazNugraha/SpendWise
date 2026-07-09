@@ -1,6 +1,5 @@
 import {InputField, SelectCarouselField} from '@/components';
-import {providerRepo} from '@/db/repositories';
-import {useUserRepo} from '@/hooks';
+import {useProviderRepo, useUserRepo} from '@/hooks';
 import {useFocusEffect} from '@react-navigation/native';
 import {Formik, FormikProps} from 'formik';
 import {useCallback, useMemo, useRef, useState} from 'react';
@@ -28,6 +27,8 @@ interface IWalletModalProps {
 
 export const WalletForm: React.FC<IWalletModalProps> = ({selectedItem, onRefetch}) => {
   const userRepo = useUserRepo();
+  const providerRepo = useProviderRepo();
+
   const formRef = useRef<FormikProps<IWalletInput>>(null);
 
   const [providerOptions, setProviderOptions] = useState<IOption<string>[]>([]);
@@ -76,7 +77,7 @@ export const WalletForm: React.FC<IWalletModalProps> = ({selectedItem, onRefetch
         .filter(e => !walletCollection.includes(e.name))
         .map(provider => ({label: provider.name, value: provider.id})),
     );
-  }, [userRepo]);
+  }, [userRepo, providerRepo]);
 
   useFocusEffect(
     useCallback(() => {
