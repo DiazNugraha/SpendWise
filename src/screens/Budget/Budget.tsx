@@ -7,8 +7,7 @@ import {NumberFormatter} from '@/helpers';
 import {ActivityIcon, ChevronRight, TrashIcon} from 'lucide-react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {RootNavigationProp} from '@/types';
-import {budgetRepo} from '@/db/repositories';
-import {useAlert, useProfile} from '@/hooks';
+import {useAlert, useBudgetRepo, useProfile} from '@/hooks';
 import Toast from 'react-native-toast-message';
 
 const formatter = new NumberFormatter({
@@ -19,6 +18,8 @@ export const Budget: React.FC = () => {
   const {alert} = useAlert();
   const {primaryCurrencySymbol} = useProfile();
   const navigation = useNavigation<RootNavigationProp>();
+
+  const budgetRepo = useBudgetRepo();
 
   const [type, setType] = useState<string>();
   const [budgets, setBudgets] = useState<IBudget[]>([]);
@@ -73,7 +74,7 @@ export const Budget: React.FC = () => {
         type: budget.type as BudgetType,
       })),
     );
-  }, []);
+  }, [budgetRepo]);
 
   useFocusEffect(
     useCallback(() => {

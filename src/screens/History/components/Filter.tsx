@@ -1,6 +1,6 @@
 import {CarouselChips} from '@/components';
 import {categoryOptions} from '@/constants/options';
-import {budgetRepo} from '@/db/repositories';
+import {useBudgetRepo} from '@/hooks';
 import {useFocusEffect} from '@react-navigation/native';
 import {useCallback, useState} from 'react';
 import {Text, View} from 'react-native';
@@ -20,6 +20,9 @@ interface IFilterProps {
 const Filter: React.FC<IFilterProps> = ({onClear, setSelectedBudget, setSelectedCategories, value}) => {
   const selectedBudget = value.budget;
   const selectedTypes = value.categories;
+
+  const budgetRepo = useBudgetRepo();
+
   const [selectBudgetOptions, setSelectBudgetOptions] = useState<IOption<string>[]>([]);
 
   const selectTypeOptions = [
@@ -33,7 +36,7 @@ const Filter: React.FC<IFilterProps> = ({onClear, setSelectedBudget, setSelected
   const fetchActiveBudgetOptions = useCallback(async () => {
     const activeBudgets = await budgetRepo.findActivesEachType();
     setSelectBudgetOptions([{label: 'All', value: 'all'}, ...activeBudgets.map(e => ({label: e.type, value: e.type}))]);
-  }, []);
+  }, [budgetRepo]);
 
   const handleClear = () => {
     onClear();

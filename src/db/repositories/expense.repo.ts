@@ -3,7 +3,7 @@ import {db} from '../client';
 import {expenseProviders, expenses, providers} from '../schema';
 import uuid from 'react-native-uuid';
 import {applyLimit, applyWhere, getDaysBetween} from '@/helpers';
-import {budgetRepo} from './budget.repo';
+import {BudgetRepo} from './budget.repo';
 
 type IExpenseInsert = {
   title: string;
@@ -12,6 +12,8 @@ type IExpenseInsert = {
   description?: string;
   providerIds?: string[];
 };
+
+const budgetRepo = new BudgetRepo();
 
 export const expenseRepo = {
   async create(data: IExpenseInsert) {

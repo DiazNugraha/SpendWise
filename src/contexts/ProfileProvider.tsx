@@ -1,7 +1,6 @@
 import {UserRepo} from '@/db/repositories';
 import {getCurrencySymbol} from '@/helpers';
-import {useFocusEffect} from '@react-navigation/native';
-import {createContext, PropsWithChildren, useCallback, useContext, useState} from 'react';
+import {createContext, PropsWithChildren, useCallback, useContext, useEffect, useState} from 'react';
 
 interface IUser {
   id: string;
@@ -44,11 +43,9 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
     }
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchUserProfile();
-    }, [fetchUserProfile]),
-  );
+  useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
 
   return (
     <ProfileContext.Provider

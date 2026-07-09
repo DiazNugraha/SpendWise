@@ -1,6 +1,6 @@
-import {budgetRepo, expenseRepo} from '@/db/repositories';
+import {expenseRepo} from '@/db/repositories';
 import {getDaysLeft, NumberFormatter} from '@/helpers';
-import {useProfile} from '@/hooks';
+import {useBudgetRepo, useProfile} from '@/hooks';
 import {RootNavigationProp} from '@/types';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {Calendar, CircleQuestionMark} from 'lucide-react-native';
@@ -28,6 +28,8 @@ export const BudgetCard: React.FC<Props> = ({budgetType}) => {
   >(undefined);
 
   const [spent, setSpent] = useState<number>(0);
+
+  const budgetRepo = useBudgetRepo();
 
   const fetchSpend = async (startDate: number, endDate: number) => {
     const expenseTotal = await expenseRepo.sumExpensesWithinDate(startDate, endDate);
@@ -58,7 +60,7 @@ export const BudgetCard: React.FC<Props> = ({budgetType}) => {
       progress,
       daysLeft,
     });
-  }, [budgetType]);
+  }, [budgetType, budgetRepo]);
 
   useFocusEffect(
     useCallback(() => {

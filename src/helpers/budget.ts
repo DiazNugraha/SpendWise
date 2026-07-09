@@ -1,6 +1,7 @@
-import {budgetRepo} from '@/db/repositories';
+import {BudgetRepo} from '@/db/repositories';
 
 export const updateExpiredBudgets = async () => {
+  const budgetRepo = new BudgetRepo();
   const activeBudgets = await budgetRepo.findActivesEachType();
   const now = new Date();
 

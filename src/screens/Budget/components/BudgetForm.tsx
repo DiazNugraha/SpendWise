@@ -14,11 +14,10 @@ import {BellRingIcon} from 'lucide-react-native';
 import {Text, View} from 'react-native';
 import * as Icons from 'lucide-react-native';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {budgetRepo} from '@/db/repositories';
 import Toast from 'react-native-toast-message';
 import {RouteProp, useFocusEffect, useNavigation, useRoute} from '@react-navigation/native';
 import {RootNavigatorParamList} from '@/types';
-import {useAlert} from '@/hooks';
+import {useAlert, useBudgetRepo} from '@/hooks';
 import {capitalizeFirstLetter} from '@/helpers';
 
 type BudgetDetailRouteProps = RouteProp<RootNavigatorParamList, 'BudgetForm'>;
@@ -55,7 +54,10 @@ const BudgetForm: React.FC = () => {
   const route = useRoute<BudgetDetailRouteProps>();
   const {budgetType, id: budgetId} = route.params;
   const isEdit = !!budgetId;
+
   const navigation = useNavigation();
+  const budgetRepo = useBudgetRepo();
+
   const formRef = useRef<FormikProps<IBudgetInput>>(null);
 
   const {alert} = useAlert();
@@ -198,7 +200,7 @@ const BudgetForm: React.FC = () => {
         }),
       });
     }
-  }, [budgetType]);
+  }, [budgetType, budgetRepo]);
 
   useEffect(() => {
     formRef.current?.resetForm({values: initialValues});
