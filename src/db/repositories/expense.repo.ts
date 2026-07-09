@@ -13,9 +13,9 @@ type IExpenseInsert = {
   providerIds?: string[];
 };
 
-const budgetRepo = new BudgetRepo();
+export class ExpenseRepo {
+  constructor(private readonly budgetRepo: BudgetRepo, private readonly userId?: string) {}
 
-export const expenseRepo = {
   async create(data: IExpenseInsert) {
     const now = Date.now();
     const newExpenseId = uuid.v4();
@@ -46,7 +46,7 @@ export const expenseRepo = {
     }
 
     return newExpense;
-  },
+  }
 
   async findAll(options?: {limit?: number; categories?: string[]; budgetType?: BudgetType}) {
     let query = db
@@ -62,7 +62,7 @@ export const expenseRepo = {
     let totalExpense = 0;
 
     if (options?.budgetType && options?.budgetType !== 'all') {
-      const dateRange = await budgetRepo.findActiveByType(options.budgetType);
+      const dateRange = await this.budgetRepo.findActiveByType(options.budgetType);
       const activeBudget = dateRange[0];
 
       if (activeBudget) {
@@ -70,7 +70,7 @@ export const expenseRepo = {
           query,
           and(gte(expenses.createdAt, activeBudget.startDate), lte(expenses.createdAt, activeBudget.endDate)),
         );
-        totalExpense = await expenseRepo.sumExpensesWithinDate(activeBudget.startDate, activeBudget.endDate);
+        totalExpense = await this.sumExpensesWithinDate(activeBudget.startDate, activeBudget.endDate);
       }
     } else {
       const now = new Date();
@@ -81,7 +81,7 @@ export const expenseRepo = {
         query,
         and(gte(expenses.createdAt, last30Days.getTime()), lte(expenses.createdAt, now.getTime())),
       );
-      totalExpense = await expenseRepo.sumExpensesWithinDate(last30Days.getTime(), now.getTime());
+      totalExpense = await this.sumExpensesWithinDate(last30Days.getTime(), now.getTime());
     }
 
     const data = await query;
@@ -92,15 +92,15 @@ export const expenseRepo = {
         totalExpense,
       },
     };
-  },
+  }
 
   async findById(id: string) {
     return await db.select().from(expenses).where(eq(expenses.id, id)).limit(1);
-  },
+  }
 
   async deleteById(id: string) {
     return await db.delete(expenses).where(eq(expenses.id, id)).limit(1);
-  },
+  }
 
   async findAllDetailed() {
     //  base expenses + category
@@ -131,7 +131,7 @@ export const expenseRepo = {
     });
 
     return expensesWithProviders;
-  },
+  }
 
   async sumExpensesWithinDate(startDate: number, endDate: number) {
     const result = await db
@@ -142,13 +142,13 @@ export const expenseRepo = {
       .where(and(gte(expenses.createdAt, startDate), lte(expenses.createdAt, endDate)));
 
     return result[0]?.total ?? 0;
-  },
+  }
 
   async checkIfThereIsBudgetGoalsToNotify() {
-    const activeBudgetGoals = await budgetRepo.findActivesEachType({notify: true});
+    const activeBudgetGoals = await this.budgetRepo.findActivesEachType({notify: true});
     const needToNotify = await Promise.all(
       activeBudgetGoals.map(async budget => {
-        const expensesTotal = await expenseRepo.sumExpensesWithinDate(budget.startDate, budget.endDate);
+        const expensesTotal = await this.sumExpensesWithinDate(budget.startDate, budget.endDate);
         if (Math.floor((expensesTotal / budget.amount) * 100) > 80) {
           return budget;
         }
@@ -157,15 +157,15 @@ export const expenseRepo = {
     );
 
     return needToNotify.filter(e => e !== null);
-  },
+  }
 
   async compareProgressWithLastBudgetGoal(budgetType: BudgetType): Promise<number> {
     const now = new Date();
 
-    const currentActiveBudget = (await budgetRepo.findActiveByType(budgetType))[0];
+    const currentActiveBudget = (await this.budgetRepo.findActiveByType(budgetType))[0];
     if (!currentActiveBudget) return 0;
 
-    const lastInactiveBudget = await budgetRepo.getLastInactiveBudget(budgetType);
+    const lastInactiveBudget = await this.budgetRepo.getLastInactiveBudget(budgetType);
 
     if (!lastInactiveBudget) return 100;
 
@@ -173,9 +173,9 @@ export const expenseRepo = {
 
     const samePointOfTimeInLastBudget = new Date(lastInactiveBudget.startDate);
     samePointOfTimeInLastBudget.setDate(samePointOfTimeInLastBudget.getDate() + daysPointDiff);
-    const currentGoalsExpense = await expenseRepo.sumExpensesWithinDate(currentActiveBudget.startDate, now.getTime());
+    const currentGoalsExpense = await this.sumExpensesWithinDate(currentActiveBudget.startDate, now.getTime());
 
-    const lastGoalsExpense = await expenseRepo.sumExpensesWithinDate(
+    const lastGoalsExpense = await this.sumExpensesWithinDate(
       lastInactiveBudget.startDate,
       samePointOfTimeInLastBudget.getTime(),
     );
@@ -183,5 +183,5 @@ export const expenseRepo = {
     const currentGoalRate = (currentGoalsExpense / currentActiveBudget.amount) * 100;
     const lastGoalRate = (lastGoalsExpense / lastInactiveBudget.amount) * 100;
     return Math.floor(((currentGoalRate - lastGoalRate) / lastGoalRate) * 100);
-  },
-};
+  }
+}

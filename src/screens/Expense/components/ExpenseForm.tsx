@@ -1,14 +1,16 @@
 import {expenseSchema, IExpenseInput} from '@/constants/schemas';
-import {expenseRepo} from '@/db/repositories';
 import {useMemo, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {Formik} from 'formik';
 import ExpenseFormInput from './ExpenseFormInput';
 import {capitalizeFirstLetter} from '@/helpers';
+import {useExpenseRepo} from '@/hooks';
 
 const ExpenseForm: React.FC = () => {
   const navigation = useNavigation();
+
+  const expenseRepo = useExpenseRepo();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 

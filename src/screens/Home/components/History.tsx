@@ -1,5 +1,5 @@
 import {ExpenseCard} from '@/components';
-import {expenseRepo} from '@/db/repositories';
+import {useExpenseRepo} from '@/hooks';
 import {RootNavigationProp} from '@/types';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {Fragment, useCallback, useState} from 'react';
@@ -8,6 +8,8 @@ import {Text, View} from 'react-native';
 const History: React.FC = () => {
   const [expenses, setExpenses] = useState<IExpense[]>([]);
   const navigation = useNavigation<RootNavigationProp>();
+
+  const expenseRepo = useExpenseRepo();
 
   const fetchExpenses = useCallback(async () => {
     const {data} = await expenseRepo.findAll({limit: 5});
@@ -23,7 +25,7 @@ const History: React.FC = () => {
     }));
 
     setExpenses(formatData);
-  }, []);
+  }, [expenseRepo]);
 
   useFocusEffect(
     useCallback(() => {

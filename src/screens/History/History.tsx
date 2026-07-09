@@ -3,12 +3,11 @@ import {FlatList, Text, View} from 'react-native';
 import Filter from './components/Filter';
 import {useCallback, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
-import {expenseRepo} from '@/db/repositories';
 import {useFocusEffect} from '@react-navigation/native';
 import {NumberFormatter} from '@/helpers';
 import {categoryOptions} from '@/constants/options';
 import {ArrowUpIcon} from 'lucide-react-native';
-import {useProfile} from '@/hooks';
+import {useExpenseRepo, useProfile} from '@/hooks';
 
 const formatter = new NumberFormatter({
   maxFractionDigits: 2,
@@ -16,6 +15,7 @@ const formatter = new NumberFormatter({
 
 export const History = () => {
   const {primaryCurrencySymbol} = useProfile();
+  const expenseRepo = useExpenseRepo();
 
   const [filter, setFilter] = useState<{
     budget: string;
@@ -48,7 +48,7 @@ export const History = () => {
     }));
 
     setExpenses(formatData);
-  }, [filter]);
+  }, [filter, expenseRepo]);
 
   useFocusEffect(
     useCallback(() => {
