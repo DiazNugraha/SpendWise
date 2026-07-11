@@ -25,7 +25,7 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
   const fetchUserProfile = useCallback(async () => {
     const userRepo = new UserRepo();
     const existingUser = (await userRepo.getUser())[0];
-    const primaryCurrencyCode = existingUser.primaryCurrencyCode;
+    const primaryCurrencyCode = existingUser?.primaryCurrencyCode;
 
     if (existingUser) {
       setUser({

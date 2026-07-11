@@ -17,6 +17,8 @@ export const budgets = sqliteTable('budgets', {
   enableNotify: integer('enable_notify', {mode: 'boolean'}).notNull(),
   isActive: integer('is_active', {mode: 'boolean'}).notNull().default(false),
 
+  userId: text('user_id').notNull(),
+
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),
 });

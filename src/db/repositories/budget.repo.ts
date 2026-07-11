@@ -65,6 +65,8 @@ export class BudgetRepo {
   }
 
   async create(data: IBudgetInsert) {
+    if (!this.userId) return;
+
     const now = Date.now();
     const newBudgetId = uuid.v4();
 
@@ -79,6 +81,7 @@ export class BudgetRepo {
       startDate: data.startDate.getTime(),
       endDate: data.endDate.getTime(),
       isActive: true,
+      userId: this.userId,
       createdAt: now,
       updatedAt: now,
     });
