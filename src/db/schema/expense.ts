@@ -11,6 +11,8 @@ export const expenses = sqliteTable('expenses', {
 
   description: text('description'),
 
+  userId: text('user_id').notNull(),
+
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),
 });

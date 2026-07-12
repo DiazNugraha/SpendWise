@@ -17,6 +17,8 @@ export class ExpenseRepo {
   constructor(private readonly budgetRepo: BudgetRepo, private readonly userId?: string) {}
 
   async create(data: IExpenseInsert) {
+    if (!this.userId) return;
+
     const now = Date.now();
     const newExpenseId = uuid.v4();
 
@@ -27,6 +29,7 @@ export class ExpenseRepo {
       categoryId: data.categoryId,
       amount: data.amount,
       description: data.description,
+      userId: this.userId,
       createdAt: now,
       updatedAt: now,
     });

@@ -1,0 +1,1 @@
+ALTER TABLE `expenses` ADD `user_id` text NOT NULL;
