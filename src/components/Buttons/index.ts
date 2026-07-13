@@ -3,3 +3,4 @@ export {ColorSelector} from './ColorSelector';
 export {IconSelector} from './IconSelector';
 export {SegmentsControlButton} from './SegmentsControlButton';
 export {CarouselChips} from './CarouselChips';
+export {DatePicker} from './DatePicker';
