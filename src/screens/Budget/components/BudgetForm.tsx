@@ -110,7 +110,7 @@ const BudgetForm: React.FC = () => {
     if (typeof values.dateRange.startDate === 'string') {
       adjustedDateType = {
         startDate: new Date(values.dateRange.startDate),
-        endDate: new Date(values.dateRange.startDate),
+        endDate: new Date(values.dateRange.endDate),
       };
     }
     const title = values.title ? values.title : capitalizeFirstLetter(values.type);
