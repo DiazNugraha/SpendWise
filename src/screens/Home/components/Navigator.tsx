@@ -23,6 +23,7 @@ const Navigator: React.FC = () => {
     {
       label: 'Reports',
       icon: <ChartBar color={'#6D28D9'} />,
+      screenName: 'Report',
     },
     // NOTE: FUTURE
     // {

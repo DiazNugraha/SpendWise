@@ -5,3 +5,4 @@ export {Settings} from './Settings';
 export {AccountSettings} from './Settings/AccountSettings';
 export {WalletSettings} from './Settings/WalletSettings';
 export {History} from './History/History';
+export {Report} from './Report';
