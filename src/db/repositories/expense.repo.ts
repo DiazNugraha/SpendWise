@@ -57,9 +57,7 @@ export class ExpenseRepo {
       .from(expenses)
       .orderBy(sql`${expenses.createdAt} desc`);
 
-    query = options?.categories
-      ? applyWhere(query, inArray(expenses.categoryId, options.categories), options?.categories)
-      : query;
+    query = options?.categories ? applyWhere(query, inArray(expenses.categoryId, options.categories)) : query;
     query = applyLimit(query, options?.limit);
 
     let totalExpense = 0;
