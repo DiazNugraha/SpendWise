@@ -2,7 +2,7 @@ import {and, eq, gte, lte, sql} from 'drizzle-orm';
 import {db} from '../client';
 import {budgets, expenses} from '../schema';
 import uuid from 'react-native-uuid';
-import {applyWhere} from '@/helpers';
+import {applyWhere, formatDate} from '@/helpers';
 
 type IBudgetInsert = {
   title: string;
@@ -137,6 +137,57 @@ export class BudgetRepo {
       .limit(1);
 
     return budget[0];
+  }
+
+  async getPercentageOfEachBudget(props?: {type?: BudgetType; dateRange?: {startDate: Date; endDate: Date}}) {
+    const conditions = [];
+
+    if (props?.type) {
+      conditions.push(eq(budgets.type, props.type));
+    }
+
+    if (props?.dateRange) {
+      conditions.push(
+        gte(budgets.startDate, props.dateRange.startDate.getTime()),
+        lte(budgets.endDate, props.dateRange.endDate.getTime()),
+      );
+    }
+
+    const existingBudgets = await db
+      .select()
+      .from(budgets)
+      .where(conditions.length ? and(...conditions) : undefined);
+
+    const result = await Promise.all(
+      existingBudgets.map(async budget => {
+        const countExpenseAmount = await this.sumExpensesWithinDate(budget.startDate, budget.endDate);
+
+        return {
+          label: formatDate(new Date(budget.startDate), {
+            locales: 'en-GB',
+            dateTimeOption: {
+              day: 'numeric',
+              month: 'short',
+            },
+          }),
+          value: Math.floor((countExpenseAmount / budget.amount) * 100),
+          spentAmount: countExpenseAmount,
+          ...budget,
+        };
+      }),
+    );
+    return result;
+  }
+
+  async sumExpensesWithinDate(startDate: number, endDate: number) {
+    const result = await db
+      .select({
+        total: sql<number>`COALESCE(sum(${expenses.amount}), 0)`,
+      })
+      .from(expenses)
+      .where(and(gte(expenses.createdAt, startDate), lte(expenses.createdAt, endDate)));
+
+    return result[0]?.total ?? 0;
   }
 
   async deleteBudgetById(id: string) {
