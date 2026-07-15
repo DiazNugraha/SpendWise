@@ -149,7 +149,7 @@ export class BudgetRepo {
     if (props?.dateRange) {
       conditions.push(
         gte(budgets.startDate, props.dateRange.startDate.getTime()),
-        lte(budgets.endDate, props.dateRange.endDate.getTime()),
+        lte(budgets.startDate, props.dateRange.endDate.getTime()),
       );
     }
 
