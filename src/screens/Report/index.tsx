@@ -1,10 +1,12 @@
 import {ModalWrapper, SegmentsControlButton} from '@/components';
 import {useCallback, useState} from 'react';
-import {ScrollView, View} from 'react-native';
+import {Pressable, ScrollView, Text, View} from 'react-native';
 import {ReportFilter} from './components/Filter';
 import {BarChart} from 'react-native-gifted-charts';
 import {useFocusEffect} from '@react-navigation/native';
-import {useBudgetRepo} from '@/hooks';
+import {useBudgetRepo, useProfile} from '@/hooks';
+import * as Icons from 'lucide-react-native';
+import {formatDate, NumberFormatter} from '@/helpers';
 
 type IChartData = {
   value: number;
@@ -12,12 +14,23 @@ type IChartData = {
   frontColor?: string;
 };
 
+type IBudgetData = {
+  spentAmount: number;
+} & IBudget;
+
+const formatter = new NumberFormatter({
+  maxFractionDigits: 2,
+});
+
 export const Report: React.FC = () => {
   const budgetRepo = useBudgetRepo();
   const now = new Date();
 
+  const {primaryCurrencySymbol} = useProfile();
+
   const [activeSegment, setActiveSegment] = useState<BudgetType>('weekly');
   const [chartData, setChartData] = useState<IChartData[]>();
+  const [savedBudgets, setSavedBudgets] = useState<IBudgetData[]>([]);
   const [filter, setFilter] = useState<{
     dateRange: {startDate: Date; endDate: Date};
   }>({
@@ -33,7 +46,21 @@ export const Report: React.FC = () => {
       dateRange: filter?.dateRange,
     });
 
-    setChartData(results.map(res => ({...res, frontColor: '#177AD5'})));
+    setChartData(results.map(res => ({...res, frontColor: '#6D28D9'})));
+    setSavedBudgets(
+      results.map(res => {
+        return {
+          ...res,
+          icon: res.icon ?? '',
+          iconColor: res.iconColor ?? '',
+          dateRange: {
+            startDate: new Date(res.startDate),
+            endDate: new Date(res.endDate),
+          },
+          type: res.type as BudgetType,
+        };
+      }),
+    );
   }, [budgetRepo, filter, activeSegment]);
 
   useFocusEffect(
@@ -44,52 +71,84 @@ export const Report: React.FC = () => {
 
   return (
     <ModalWrapper title="Reports">
-      <ScrollView className="p-4 flex flex-col flex-1 gap-y-6">
-        <SegmentsControlButton
-          onClick={val => setActiveSegment(val as BudgetType)}
-          active={activeSegment}
-          segments={[
-            {
-              value: 'weekly',
-              label: 'Weekly',
-            },
-            {
-              value: 'monthly',
-              label: 'Monthly',
-            },
-            {
-              value: 'custom',
-              label: 'Custom',
-            },
-          ]}
-        />
-
-        <ReportFilter
-          value={{
-            dateRange: filter.dateRange,
-          }}
-          setDateRange={val => {
-            setFilter({
-              dateRange: {
-                startDate: new Date(val.startDate?.toString() ?? ''),
-                endDate: new Date(val.endDate?.toString() ?? ''),
+      <ScrollView className="p-4">
+        <View className="flex flex-col gap-y-6">
+          <SegmentsControlButton
+            onClick={val => setActiveSegment(val as BudgetType)}
+            active={activeSegment}
+            segments={[
+              {
+                value: 'weekly',
+                label: 'Weekly',
               },
-            });
-          }}
-        />
-
-        <View className="mt-6 flex-1 bg-white p-2 rounded-xl">
-          <BarChart
-            barWidth={22}
-            noOfSections={4}
-            barBorderRadius={4}
-            frontColor="lightgray"
-            data={chartData}
-            yAxisThickness={0}
-            xAxisThickness={0}
-            spacing={30}
-            maxValue={100}
+              {
+                value: 'monthly',
+                label: 'Monthly',
+              },
+              {
+                value: 'custom',
+                label: 'Custom',
+              },
+            ]}
           />
+
+          <ReportFilter
+            value={{
+              dateRange: filter.dateRange,
+            }}
+            setDateRange={val => {
+              setFilter({
+                dateRange: {
+                  startDate: new Date(val.startDate?.toString() ?? ''),
+                  endDate: new Date(val.endDate?.toString() ?? ''),
+                },
+              });
+            }}
+          />
+
+          <View className="flex-1 bg-white p-2 rounded-xl">
+            <BarChart
+              barWidth={22}
+              noOfSections={4}
+              barBorderRadius={4}
+              frontColor="lightgray"
+              data={chartData}
+              yAxisThickness={0}
+              xAxisThickness={0}
+              spacing={30}
+              maxValue={100}
+            />
+          </View>
+
+          <View className="flex flex-col gap-2">
+            {savedBudgets.map(budget => {
+              const Icon = Icons[budget.icon as keyof typeof Icons] as Icons.LucideIcon;
+              return (
+                <Pressable
+                  key={budget.id}
+                  className="flex flex-row justify-between px-3 py-2 rounded-lg w-full bg-white ">
+                  <View className="flex flex-row items-center gap-2">
+                    {Icon && <Icon color={budget.iconColor} />}
+                    <View className="flex flex-col gap-2">
+                      <Text className="capitalize font-medium text-sm">{budget.title}</Text>
+                      <Text className="text-[10px]">
+                        {formatDate(budget.dateRange.startDate)} - {formatDate(budget.dateRange.endDate)}
+                      </Text>
+                    </View>
+                  </View>
+                  <View className="flex flex-row items-center gap-1">
+                    <View className="flex flex-row items-end">
+                      <Text className="text-[#6D28D9] font-medium text-sm">
+                        {primaryCurrencySymbol} {formatter.format(budget.spentAmount)}
+                      </Text>
+                      <Text className="text-xs">/{formatter.format(budget.amount)}</Text>
+                    </View>
+                    <Icons.ChevronRight color={'#c4c4c4'} />
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
       </ScrollView>
     </ModalWrapper>
