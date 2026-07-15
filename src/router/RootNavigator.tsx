@@ -1,5 +1,5 @@
 import {createStackNavigator} from '@react-navigation/stack';
-import {AccountSettings, Budget, Expense, History, Report, WalletSettings} from '@/screens';
+import {AccountSettings, Budget, Expense, History, Report, ReportDetail, WalletSettings} from '@/screens';
 import {TabNavigator} from '@/components';
 import {RootNavigatorParamList} from '@/types';
 import BudgetForm from '@/screens/Budget/components/BudgetForm';
@@ -63,6 +63,15 @@ export function RootNavigator() {
       <Stack.Screen
         name={'Report'}
         component={Report}
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name={'ReportDetail'}
+        component={ReportDetail}
         options={{
           presentation: 'modal',
           headerShown: false,

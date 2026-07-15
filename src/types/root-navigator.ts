@@ -12,6 +12,9 @@ export type RootNavigatorParamList = {
   WalletSettings: undefined;
   AccountSettings: undefined;
   Report: undefined;
+  ReportDetail: {
+    id: string;
+  };
   [key: string]: any;
 };
 

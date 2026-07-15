@@ -3,10 +3,11 @@ import {useCallback, useState} from 'react';
 import {Pressable, ScrollView, Text, View} from 'react-native';
 import {ReportFilter} from './components/Filter';
 import {BarChart} from 'react-native-gifted-charts';
-import {useFocusEffect} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {useBudgetRepo, useProfile} from '@/hooks';
 import * as Icons from 'lucide-react-native';
 import {formatDate, NumberFormatter} from '@/helpers';
+import {RootNavigationProp} from '@/types';
 
 type IChartData = {
   value: number;
@@ -27,6 +28,7 @@ export const Report: React.FC = () => {
   const now = new Date();
 
   const {primaryCurrencySymbol} = useProfile();
+  const navigation = useNavigation<RootNavigationProp>();
 
   const [activeSegment, setActiveSegment] = useState<BudgetType>('weekly');
   const [chartData, setChartData] = useState<IChartData[]>();
@@ -126,6 +128,7 @@ export const Report: React.FC = () => {
               return (
                 <Pressable
                   key={budget.id}
+                  onPress={() => navigation.navigate('ReportDetail', {id: budget.id ?? ''})}
                   className="flex flex-row justify-between px-3 py-2 rounded-lg w-full bg-white ">
                   <View className="flex flex-row items-center gap-2">
                     {Icon && <Icon color={budget.iconColor} />}
