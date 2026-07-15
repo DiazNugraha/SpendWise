@@ -3,6 +3,8 @@ import {db} from '../client';
 import {budgets, expenses} from '../schema';
 import uuid from 'react-native-uuid';
 import {applyWhere, formatDate} from '@/helpers';
+import {categoryOptions} from '@/constants/options';
+import {LucideIcon} from 'lucide-react-native';
 
 type IBudgetInsert = {
   title: string;
@@ -188,6 +190,42 @@ export class BudgetRepo {
       .where(and(gte(expenses.createdAt, startDate), lte(expenses.createdAt, endDate)));
 
     return result[0]?.total ?? 0;
+  }
+
+  async getBudgetExpensesAnalytic(id: string) {
+    const selectBudget = (await db.select().from(budgets).where(eq(budgets.id, id)))[0];
+
+    if (!selectBudget) return;
+
+    const budgetExpenses = await this.getExpensesByBudget(id);
+
+    const categoryCollections: {
+      name: string;
+      icon?: LucideIcon;
+      total: number;
+      spentTimes: number;
+    }[] = [];
+
+    categoryOptions.forEach(category => {
+      const filteredExpenses = budgetExpenses.filter(e => e.categoryId === category.value);
+      const total = filteredExpenses.reduce((acc, curr) => {
+        return acc + curr.amount;
+      }, 0);
+      if (filteredExpenses.length > 0) {
+        categoryCollections.push({
+          name: category.label,
+          icon: category.icon,
+          total: total,
+          spentTimes: filteredExpenses.length,
+        });
+      }
+    });
+
+    return {
+      budgetAmount: selectBudget.amount,
+      budgetTitle: selectBudget.title,
+      categoryCollections,
+    };
   }
 
   async deleteBudgetById(id: string) {
