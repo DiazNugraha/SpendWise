@@ -29,7 +29,6 @@ const ExpenseFormInput: React.FC<IExpenseFormProps> = ({isLoading}) => {
 
   const fetchProviderOptions = useCallback(async () => {
     const datas = await userRepo.getUserProviders();
-    console.log('datas ', datas);
     if (!datas) return;
     setProviderOptions(
       datas.map(data => {
