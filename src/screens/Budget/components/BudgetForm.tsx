@@ -101,17 +101,12 @@ const BudgetForm: React.FC = () => {
   };
 
   const createBudget = async (values: IBudgetInput) => {
-    let adjustedDateType = {
-      startDate: values.dateRange.startDate,
-      endDate: values.dateRange.endDate,
-    };
+    const startDate = new Date(values.dateRange.startDate);
+    const endDate = new Date(values.dateRange.endDate);
 
-    if (typeof values.dateRange.startDate === 'string') {
-      adjustedDateType = {
-        startDate: new Date(values.dateRange.startDate),
-        endDate: new Date(values.dateRange.endDate),
-      };
-    }
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+
     const title = values.title ? values.title : capitalizeFirstLetter(values.type);
     const result = await budgetRepo.create({
       type: values.type as BudgetType,
@@ -120,8 +115,8 @@ const BudgetForm: React.FC = () => {
       title: title,
       amount: values.amount,
       enableNotify: values.enableNotify,
-      startDate: adjustedDateType.startDate,
-      endDate: adjustedDateType.endDate,
+      startDate: startDate,
+      endDate: endDate,
       autoRenew: values.autoRenew,
     });
 
