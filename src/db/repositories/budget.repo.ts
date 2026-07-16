@@ -12,10 +12,11 @@ type IBudgetInsert = {
   startDate: Date;
   endDate: Date;
   amount: number;
-  icon: string;
-  iconColor: string;
+  icon?: string;
+  iconColor?: string;
   enableNotify: boolean;
   autoRenew: boolean;
+  userId?: string;
 };
 
 export class BudgetRepo {
@@ -85,7 +86,7 @@ export class BudgetRepo {
       endDate: data.endDate.getTime(),
       isActive: true,
       autoRenew: data.autoRenew,
-      userId: this.userId,
+      userId: data.userId ?? this.userId,
       createdAt: now,
       updatedAt: now,
     });
