@@ -15,6 +15,7 @@ type IBudgetInsert = {
   icon: string;
   iconColor: string;
   enableNotify: boolean;
+  autoRenew: boolean;
 };
 
 export class BudgetRepo {
@@ -83,6 +84,7 @@ export class BudgetRepo {
       startDate: data.startDate.getTime(),
       endDate: data.endDate.getTime(),
       isActive: true,
+      autoRenew: data.autoRenew,
       userId: this.userId,
       createdAt: now,
       updatedAt: now,
@@ -103,6 +105,7 @@ export class BudgetRepo {
         enableNotify: data.enableNotify,
         startDate: data.startDate.getTime(),
         endDate: data.endDate.getTime(),
+        autoRenew: data.autoRenew,
         updatedAt: now,
       })
       .where(eq(budgets.id, id));

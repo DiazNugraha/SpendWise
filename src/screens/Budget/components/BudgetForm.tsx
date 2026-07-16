@@ -10,10 +10,9 @@ import {
 } from '@/components';
 import {budgetSchema, IBudgetInput} from '@/constants/schemas';
 import {Formik, FormikProps} from 'formik';
-import {BellRingIcon} from 'lucide-react-native';
 import {Text, View} from 'react-native';
 import * as Icons from 'lucide-react-native';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import Toast from 'react-native-toast-message';
 import {RouteProp, useFocusEffect, useNavigation, useRoute} from '@react-navigation/native';
 import {RootNavigatorParamList} from '@/types';
@@ -123,6 +122,7 @@ const BudgetForm: React.FC = () => {
       enableNotify: values.enableNotify,
       startDate: adjustedDateType.startDate,
       endDate: adjustedDateType.endDate,
+      autoRenew: values.autoRenew,
     });
 
     setIsLoading(false);
@@ -157,6 +157,7 @@ const BudgetForm: React.FC = () => {
       enableNotify: values.enableNotify,
       startDate: values.dateRange.startDate,
       endDate: values.dateRange.endDate,
+      autoRenew: values.autoRenew,
     });
 
     setIsLoading(false);
@@ -195,6 +196,7 @@ const BudgetForm: React.FC = () => {
             endDate: new Date(activeBudget.endDate),
           },
           enableNotify: activeBudget.enableNotify,
+          autoRenew: activeBudget.autoRenew,
           icon: activeBudget.icon as string,
           iconColor: activeBudget.iconColor as string,
         }),
@@ -219,6 +221,7 @@ const BudgetForm: React.FC = () => {
           const icon = getFieldMeta('icon').value as string;
           const iconColor = getFieldMeta('iconColor').value as string;
           const enableNotify = getFieldMeta('enableNotify').value as boolean;
+          const autoRenew = getFieldMeta('autoRenew').value as boolean;
 
           return (
             <FormButtonWrapper onSubmit={handleSubmit} text="Set Budget Plan" isLoading={isLoading}>
@@ -252,23 +255,45 @@ const BudgetForm: React.FC = () => {
                 <InputField name="title" label="Budget Title" placeholder="Name your budget plan" />
               </View>
 
-              <View className="flex flex-row justify-between items-center p-5 bg-white rounded-2xl">
-                <View className="flex flex-row gap-2 items-center">
-                  <View className="p-3 rounded-full bg-[#6D28D9]/20">
-                    <BellRingIcon color={'#6D28D9'} />
-                  </View>
-                  <View className="flex flex-col gap-2">
-                    <Text className="font-medium">Budget Alert</Text>
-                    <Text className="font-light text-[10px]">Get notified at 80% usage</Text>
-                  </View>
-                </View>
+              <SwitchInputWrapper title="Budget Alert" subtitle="Get notified at 80% usage." icon={Icons.BellRingIcon}>
                 <SwitchButton value={enableNotify} onChange={value => setFieldValue('enableNotify', value)} />
-              </View>
+              </SwitchInputWrapper>
+
+              <SwitchInputWrapper
+                title="Auto Renew"
+                subtitle="Automatically create a new goal when this one ends."
+                icon={Icons.RefreshCwIcon}>
+                <SwitchButton value={autoRenew} onChange={value => setFieldValue('autoRenew', value)} />
+              </SwitchInputWrapper>
             </FormButtonWrapper>
           );
         }}
       </Formik>
     </ModalWrapper>
+  );
+};
+
+type ISwitchInputWrapperProps = {
+  title: string;
+  subtitle: string;
+  icon: Icons.LucideIcon;
+} & PropsWithChildren;
+
+const SwitchInputWrapper: React.FC<ISwitchInputWrapperProps> = ({title, icon, subtitle, children}) => {
+  const Icon = icon;
+  return (
+    <View className="flex flex-row justify-between items-center p-3 bg-white rounded-2xl gap-2">
+      <View className="flex flex-row gap-2 items-center">
+        <View className="p-3 rounded-full bg-[#6D28D9]/20">
+          <Icon color={'#6D28D9'} />
+        </View>
+        <View className="flex flex-col gap-1">
+          <Text className="font-medium">{title}</Text>
+          <Text className="font-light text-[10px]">{subtitle}</Text>
+        </View>
+      </View>
+      {children}
+    </View>
   );
 };
 

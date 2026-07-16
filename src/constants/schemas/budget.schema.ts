@@ -25,6 +25,7 @@ export const budgetSchema = yup.object({
   icon: yup.string().default('Calendar'),
   iconColor: yup.string().default('#FF6467'),
   enableNotify: yup.boolean().default(true),
+  autoRenew: yup.boolean().default(true),
 });
 
 export type IBudgetInput = yup.InferType<typeof budgetSchema>;
