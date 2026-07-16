@@ -10,7 +10,9 @@ export const updateExpiredBudgets = async () => {
       if (budget.endDate < now.getTime()) {
         if (budget.autoRenew) {
           const startDate = new Date(budget.startDate);
-          let endDate = new Date(budget.endDate);
+          startDate.setDate(startDate.getDate() + 1);
+
+          const endDate = new Date(budget.endDate);
 
           if (budget.type === 'weekly') {
             endDate.setDate(endDate.getDate() + 7);
