@@ -53,7 +53,7 @@ const Navigator: React.FC = () => {
             className="p-5 bg-white rounded-2xl w-full flex items-center justify-center">
             {menu.icon}
           </Pressable>
-          <View className="flex items-center px-2 my-2">
+          <View className="flex items-center px-2 mt-2">
             <Text className="text-xs text-center">{menu.label}</Text>
           </View>
         </View>

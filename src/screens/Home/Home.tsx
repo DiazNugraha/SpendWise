@@ -26,12 +26,12 @@ export const Home: React.FC = () => {
 
   return (
     <ScrollView className="bg-gray-100 rounded-t-3xl flex-1 p-4">
-      <Header />
-      <View className="my-4">
-        <Button title="reset database" onPress={resetDatabaseAction} />
-      </View>
-      <Navigator />
-      <View className="flex-1">
+      <View className=" flex flex-col gap-6">
+        <Header />
+        <View className="my-4 flex flex-col gap-2">
+          <Button title="reset database" onPress={resetDatabaseAction} />
+        </View>
+        <Navigator />
         <History />
       </View>
     </ScrollView>

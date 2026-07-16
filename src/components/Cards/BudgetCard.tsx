@@ -72,20 +72,26 @@ export const BudgetCard: React.FC<Props> = ({budgetType}) => {
   );
 
   return (
-    <LinearGradient
-      colors={['#8B5CF6', '#6D28D9']}
-      start={{x: 0, y: 0}}
-      end={{x: 1, y: 1}}
-      className="w-full rounded-2xl p-4 overflow-hidden">
-      {/* Decorative highlight */}
-      <View className="absolute -top-2 -right-2 w-[40px] h-[40px] rounded-full bg-white/20" />
+    <View
+      style={{
+        borderRadius: 16,
+        boxShadow: '0px 8px 24px rgba(139, 92, 246, 0.35)',
+      }}>
+      <LinearGradient
+        colors={['#8B5CF6', '#6D28D9']}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        className="w-full rounded-2xl p-6 overflow-hidden">
+        <View className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-white/20" />
+        <View className="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-white/10" />
 
-      {selectedBudget ? (
-        <FoundSavedBudget budget={selectedBudget} spent={spent} />
-      ) : (
-        <NotFoundSavedBudget type={budgetType} />
-      )}
-    </LinearGradient>
+        {selectedBudget ? (
+          <FoundSavedBudget budget={selectedBudget} spent={spent} />
+        ) : (
+          <NotFoundSavedBudget type={budgetType} />
+        )}
+      </LinearGradient>
+    </View>
   );
 };
 
@@ -105,7 +111,7 @@ const FoundSavedBudget = ({budget, spent}: FoundSavedBudgetProps) => {
 
   return (
     <>
-      <Text className="text-violet-100 text-sm mb-2">{title}</Text>
+      <Text className="text-violet-100 text-sm mb-4">{title}</Text>
 
       <View className="flex-row items-end">
         <Text className="text-white text-3xl font-bold">
@@ -121,7 +127,8 @@ const FoundSavedBudget = ({budget, spent}: FoundSavedBudgetProps) => {
       <View className="mt-4 h-1.5 rounded-full bg-white/30">
         <View className="h-1.5 rounded-full bg-white" style={{width: `${spent > limit ? 100 : progress}%`}} />
       </View>
-      <View className="flex flex-row justify-between mt-5">
+
+      <View className="flex flex-row justify-between mt-8">
         <Text className="text-white text-xs">
           Remaining: {primaryCurrencySymbol} {formatter.format(limit - spent >= 0 ? limit - spent : 0)}
         </Text>
