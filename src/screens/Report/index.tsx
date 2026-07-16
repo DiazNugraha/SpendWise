@@ -74,7 +74,7 @@ export const Report: React.FC = () => {
   return (
     <ModalWrapper title="Reports">
       <ScrollView className="p-4">
-        <View className="flex flex-col gap-y-6">
+        <View className="flex flex-col gap-y-5">
           <SegmentsControlButton
             onClick={val => setActiveSegment(val as BudgetType)}
             active={activeSegment}
@@ -108,7 +108,7 @@ export const Report: React.FC = () => {
             }}
           />
 
-          <View className="flex-1 bg-white p-2 rounded-xl">
+          <View className="flex-1 bg-white p-2 rounded-xl overflow-hidden">
             <BarChart
               barWidth={22}
               noOfSections={4}
@@ -122,7 +122,7 @@ export const Report: React.FC = () => {
             />
           </View>
 
-          <View className="flex flex-col gap-2">
+          <View className="flex flex-col gap-2 py-5">
             {savedBudgets.map(budget => {
               const Icon = Icons[budget.icon as keyof typeof Icons] as Icons.LucideIcon;
               return (

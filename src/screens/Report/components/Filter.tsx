@@ -18,7 +18,7 @@ type IFilterProps = {
 
 export const ReportFilter: React.FC<IFilterProps> = ({value, setDateRange}) => {
   return (
-    <View className="flex flex-col gap-3 mt-6">
+    <View className="flex flex-col gap-3">
       <DatePicker
         onChange={val => {
           setDateRange({
