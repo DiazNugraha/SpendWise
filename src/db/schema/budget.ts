@@ -4,7 +4,7 @@ import {sqliteTable} from 'drizzle-orm/sqlite-core';
 export const budgets = sqliteTable('budgets', {
   id: text('id').primaryKey(),
   title: text('title').notNull(),
-  type: text('type').notNull(), // monthly, weekly, etc
+  type: text('type').notNull(), // monthly, weekly, custom
 
   startDate: integer('start_date').notNull(),
   endDate: integer('end_date').notNull(),
@@ -14,7 +14,9 @@ export const budgets = sqliteTable('budgets', {
   icon: text('icon'),
   iconColor: text('icon_color'),
 
-  enableNotify: integer('enable_notify', {mode: 'boolean'}).notNull(),
+  enableNotify: integer('enable_notify', {mode: 'boolean'}).notNull().default(false),
+  autoRenew: integer('auto_renew', {mode: 'boolean'}).notNull().default(false),
+
   isActive: integer('is_active', {mode: 'boolean'}).notNull().default(false),
 
   userId: text('user_id').notNull(),
