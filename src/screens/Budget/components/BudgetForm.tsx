@@ -41,6 +41,7 @@ const toFormValues = (budgetType: BudgetType, budget?: IBudgetInput) => {
         startDate,
         endDate,
       },
+      autoRenew: budgetType !== 'custom' ? true : false,
     }) as IBudgetInput;
   }
 
@@ -254,12 +255,14 @@ const BudgetForm: React.FC = () => {
                 <SwitchButton value={enableNotify} onChange={value => setFieldValue('enableNotify', value)} />
               </SwitchInputWrapper>
 
-              <SwitchInputWrapper
-                title="Auto Renew"
-                subtitle="Automatically create a new goal when this one ends."
-                icon={Icons.RefreshCwIcon}>
-                <SwitchButton value={autoRenew} onChange={value => setFieldValue('autoRenew', value)} />
-              </SwitchInputWrapper>
+              {budgetType !== 'custom' && (
+                <SwitchInputWrapper
+                  title="Auto Renew"
+                  subtitle="Automatically create a new goal when this one ends."
+                  icon={Icons.RefreshCwIcon}>
+                  <SwitchButton value={autoRenew} onChange={value => setFieldValue('autoRenew', value)} />
+                </SwitchInputWrapper>
+              )}
             </FormButtonWrapper>
           );
         }}
