@@ -34,7 +34,7 @@ const History: React.FC = () => {
   );
 
   return (
-    <View className="flex flex-col pb-3 px-3 flex-1">
+    <View className="flex flex-col pb-3 flex-1">
       {expenses.length > 0 ? (
         <Fragment>
           <View className="flex flex-row justify-between items-center">
