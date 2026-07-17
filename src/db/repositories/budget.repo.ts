@@ -2,7 +2,7 @@ import {and, eq, gte, lte, sql} from 'drizzle-orm';
 import {db} from '../client';
 import {budgets, expenses} from '../schema';
 import uuid from 'react-native-uuid';
-import {applyWhere, formatDate} from '@/helpers';
+import {formatDate} from '@/helpers';
 import {categoryOptions} from '@/constants/options';
 import {LucideIcon} from 'lucide-react-native';
 
@@ -31,41 +31,39 @@ export class BudgetRepo {
   }
 
   async findActivesEachType(options?: {notify?: boolean}) {
-    let weeklyQuery = db
-      .select()
-      .from(budgets)
-      .where(and(eq(budgets.type, 'weekly'), eq(budgets.isActive, true)));
-    let monthlyQuery = db
-      .select()
-      .from(budgets)
-      .where(and(eq(budgets.type, 'monthly'), eq(budgets.isActive, true)));
-    let customQuery = db
-      .select()
-      .from(budgets)
-      .where(and(eq(budgets.type, 'custom'), eq(budgets.isActive, true)));
+    let conditions = [eq(budgets.isActive, true)];
 
     if (options?.notify) {
-      weeklyQuery = applyWhere(weeklyQuery, eq(budgets.enableNotify, true));
-      monthlyQuery = applyWhere(monthlyQuery, eq(budgets.enableNotify, true));
-      customQuery = applyWhere(customQuery, eq(budgets.enableNotify, true));
+      conditions.push(eq(budgets.enableNotify, true));
     }
 
-    const weekly = await weeklyQuery;
-    const monthly = await monthlyQuery;
-    const custom = await customQuery;
+    const weekly = await db
+      .select()
+      .from(budgets)
+      .where(and(eq(budgets.type, 'weekly'), ...conditions));
+    const monthly = await db
+      .select()
+      .from(budgets)
+      .where(and(eq(budgets.type, 'monthly'), ...conditions));
+    const custom = await db
+      .select()
+      .from(budgets)
+      .where(and(eq(budgets.type, 'custom'), ...conditions));
 
     return [weekly[0], monthly[0], custom[0]].filter(e => e !== undefined);
   }
 
   async findActiveByType(type: BudgetType, options?: {notify?: boolean}) {
-    let query = db
+    const conditions = [eq(budgets.type, type), eq(budgets.isActive, true)];
+
+    if (options?.notify) {
+      conditions.push(eq(budgets.enableNotify, true));
+    }
+
+    return await db
       .select()
       .from(budgets)
-      .where(and(eq(budgets.type, type), eq(budgets.isActive, true)));
-
-    query = options?.notify ? applyWhere(query, eq(budgets.enableNotify, true)) : query;
-
-    return await query;
+      .where(and(...conditions));
   }
 
   async create(data: IBudgetInsert) {

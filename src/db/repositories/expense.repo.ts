@@ -2,7 +2,7 @@ import {and, eq, gte, inArray, lte, sql} from 'drizzle-orm';
 import {db} from '../client';
 import {expenseProviders, expenses, providers} from '../schema';
 import uuid from 'react-native-uuid';
-import {applyLimit, applyWhere, getDaysBetween} from '@/helpers';
+import {getDaysBetween} from '@/helpers';
 import {BudgetRepo} from './budget.repo';
 
 type IExpenseInsert = {
@@ -52,13 +52,11 @@ export class ExpenseRepo {
   }
 
   async findAll(options?: {limit?: number; categories?: string[]; budgetType?: BudgetType}) {
-    let query = db
-      .select()
-      .from(expenses)
-      .orderBy(sql`${expenses.createdAt} desc`);
+    const conditions = [];
 
-    query = options?.categories ? applyWhere(query, inArray(expenses.categoryId, options.categories)) : query;
-    query = applyLimit(query, options?.limit);
+    if (options?.categories) {
+      conditions.push(inArray(expenses.categoryId, options.categories));
+    }
 
     let totalExpense = 0;
 
@@ -67,10 +65,10 @@ export class ExpenseRepo {
       const activeBudget = dateRange[0];
 
       if (activeBudget) {
-        query = applyWhere(
-          query,
+        conditions.push(
           and(gte(expenses.createdAt, activeBudget.startDate), lte(expenses.createdAt, activeBudget.endDate)),
         );
+
         totalExpense = await this.sumExpensesWithinDate(activeBudget.startDate, activeBudget.endDate);
       }
     } else {
@@ -78,14 +76,18 @@ export class ExpenseRepo {
       const last30Days = new Date(now);
       last30Days.setDate(last30Days.getDate() - 30);
 
-      query = applyWhere(
-        query,
-        and(gte(expenses.createdAt, last30Days.getTime()), lte(expenses.createdAt, now.getTime())),
-      );
+      conditions.push(and(gte(expenses.createdAt, last30Days.getTime()), lte(expenses.createdAt, now.getTime())));
+
       totalExpense = await this.sumExpensesWithinDate(last30Days.getTime(), now.getTime());
     }
 
-    const data = await query;
+    const baseQuery = db
+      .select()
+      .from(expenses)
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(sql`${expenses.createdAt} desc`);
+
+    const data = await (options?.limit != null ? baseQuery.limit(options.limit) : baseQuery);
 
     return {
       data,
