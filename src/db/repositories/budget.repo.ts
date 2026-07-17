@@ -22,19 +22,15 @@ type IBudgetInsert = {
 export class BudgetRepo {
   constructor(private readonly userId?: string) {}
 
-  async findAll() {
-    return await db.select().from(budgets);
-  }
-
-  async findById(id: string) {
-    return await db.select().from(budgets).where(eq(budgets.id, id));
-  }
-
   async findActivesEachType(options?: {notify?: boolean}) {
     let conditions = [eq(budgets.isActive, true)];
 
     if (options?.notify) {
       conditions.push(eq(budgets.enableNotify, true));
+    }
+
+    if (this.userId) {
+      conditions.push(eq(budgets.userId, this.userId));
     }
 
     const weekly = await db
@@ -58,6 +54,10 @@ export class BudgetRepo {
 
     if (options?.notify) {
       conditions.push(eq(budgets.enableNotify, true));
+    }
+
+    if (this.userId) {
+      conditions.push(eq(budgets.userId, this.userId));
     }
 
     return await db
@@ -91,6 +91,8 @@ export class BudgetRepo {
   }
 
   async update(id: string, data: IBudgetInsert) {
+    if (!this.userId) return;
+
     const now = Date.now();
 
     return await db
@@ -107,7 +109,7 @@ export class BudgetRepo {
         autoRenew: data.autoRenew,
         updatedAt: now,
       })
-      .where(eq(budgets.id, id));
+      .where(and(eq(budgets.id, id), eq(budgets.userId, this.userId)));
   }
 
   async setToInactive(id: string) {
@@ -133,10 +135,11 @@ export class BudgetRepo {
   }
 
   async getLastInactiveBudget(budgetType: BudgetType) {
+    if (!this.userId) return;
     const budget = await db
       .select()
       .from(budgets)
-      .where(and(eq(budgets.isActive, false), eq(budgets.type, budgetType)))
+      .where(and(eq(budgets.isActive, false), eq(budgets.type, budgetType), eq(budgets.userId, this.userId)))
       .orderBy(sql`${budgets.createdAt} desc`)
       .limit(1);
 
@@ -155,6 +158,10 @@ export class BudgetRepo {
         gte(budgets.startDate, props.dateRange.startDate.getTime()),
         lte(budgets.startDate, props.dateRange.endDate.getTime()),
       );
+    }
+
+    if (this.userId) {
+      conditions.push(eq(budgets.userId, this.userId));
     }
 
     const existingBudgets = await db
@@ -184,12 +191,16 @@ export class BudgetRepo {
   }
 
   async sumExpensesWithinDate(startDate: number, endDate: number) {
+    if (!this.userId) return 0;
+
     const result = await db
       .select({
         total: sql<number>`COALESCE(sum(${expenses.amount}), 0)`,
       })
       .from(expenses)
-      .where(and(gte(expenses.createdAt, startDate), lte(expenses.createdAt, endDate)));
+      .where(
+        and(gte(expenses.createdAt, startDate), lte(expenses.createdAt, endDate), eq(expenses.userId, this.userId)),
+      );
 
     return result[0]?.total ?? 0;
   }

@@ -1,6 +1,6 @@
 import {and, eq, gte, inArray, lte, sql} from 'drizzle-orm';
 import {db} from '../client';
-import {expenseProviders, expenses, providers} from '../schema';
+import {expenseProviders, expenses} from '../schema';
 import uuid from 'react-native-uuid';
 import {getDaysBetween} from '@/helpers';
 import {BudgetRepo} from './budget.repo';
@@ -58,6 +58,10 @@ export class ExpenseRepo {
       conditions.push(inArray(expenses.categoryId, options.categories));
     }
 
+    if (this.userId) {
+      conditions.push(eq(expenses.userId, this.userId));
+    }
+
     let totalExpense = 0;
 
     if (options?.budgetType && options?.budgetType !== 'all') {
@@ -97,52 +101,21 @@ export class ExpenseRepo {
     };
   }
 
-  async findById(id: string) {
-    return await db.select().from(expenses).where(eq(expenses.id, id)).limit(1);
-  }
-
   async deleteById(id: string) {
     return await db.delete(expenses).where(eq(expenses.id, id)).limit(1);
   }
 
-  async findAllDetailed() {
-    //  base expenses + category
-    const rows = await db
-      .select({
-        id: expenses.id,
-        title: expenses.title,
-        amount: expenses.amount,
-        categoryId: expenses.categoryId,
-      })
-      .from(expenses);
-
-    // attach providers
-    const expensesWithProviders = rows.map(async row => {
-      const findExpenseProviders = await db
-        .select()
-        .from(expenseProviders)
-        .where(eq(expenseProviders.expenseId, row.id));
-      const listProviders = findExpenseProviders.map(
-        async findExpenseProvider =>
-          await db.select().from(providers).where(eq(providers.id, findExpenseProvider.providerId)),
-      );
-
-      return {
-        ...row,
-        providers: listProviders,
-      };
-    });
-
-    return expensesWithProviders;
-  }
-
   async sumExpensesWithinDate(startDate: number, endDate: number) {
+    if (!this.userId) return 0;
+
     const result = await db
       .select({
         total: sql<number>`COALESCE(sum(${expenses.amount}), 0)`,
       })
       .from(expenses)
-      .where(and(gte(expenses.createdAt, startDate), lte(expenses.createdAt, endDate)));
+      .where(
+        and(gte(expenses.createdAt, startDate), lte(expenses.createdAt, endDate), eq(expenses.userId, this.userId)),
+      );
 
     return result[0]?.total ?? 0;
   }
