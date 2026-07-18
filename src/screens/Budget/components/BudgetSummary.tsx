@@ -17,7 +17,7 @@ const BudgetSummary: React.FC<IBudgetSummaryProps> = ({budgets}) => {
 
   return (
     <View className="flex flex-col gap-3">
-      <Text>Budget Summary</Text>
+      {budgets.length > 0 && <Text>Budget Summary</Text>}
       <View className="flex flex-col gap-2">
         {budgets.map(e => {
           const Icon = Icons[e.icon as keyof typeof Icons] as Icons.LucideIcon;
