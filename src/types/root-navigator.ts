@@ -15,6 +15,7 @@ export type RootNavigatorParamList = {
   ReportDetail: {
     id: string;
   };
+  auth: undefined;
   [key: string]: any;
 };
 

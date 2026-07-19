@@ -14,6 +14,7 @@ export interface IProfileContext {
   user: IUser | null;
   onRefetch: () => void;
   primaryCurrencySymbol: string;
+  isLoading: boolean;
 }
 
 const ProfileContext = createContext<IProfileContext | null>(null);
@@ -21,8 +22,10 @@ const ProfileContext = createContext<IProfileContext | null>(null);
 const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
   const [user, setUser] = useState<IUser | null>(null);
   const [primaryCurrencySymbol, setPrimaryCurrencySymbol] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchUserProfile = useCallback(async () => {
+    setIsLoading(true);
     const userRepo = new UserRepo();
     const existingUser = (await userRepo.getUser())[0];
     const primaryCurrencyCode = existingUser?.primaryCurrencyCode;
@@ -41,6 +44,7 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
         setPrimaryCurrencySymbol(symbol ?? '');
       }
     }
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -53,6 +57,7 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
         user,
         onRefetch: async () => fetchUserProfile(),
         primaryCurrencySymbol,
+        isLoading,
       }}>
       {children}
     </ProfileContext.Provider>
