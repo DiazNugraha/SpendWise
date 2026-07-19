@@ -7,3 +7,4 @@ export {WalletSettings} from './Settings/WalletSettings';
 export {History} from './History/History';
 export {Report} from './Report';
 export {ReportDetail} from './Report/Detail';
+export {AuthScreen} from './Auth';
