@@ -7,10 +7,13 @@ export const users = sqliteTable('users', {
 
   lastName: text('last_name'),
 
-  email: text('email').notNull().unique(),
+  email: text('email').unique(),
 
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),
 
   primaryCurrencyCode: text('primary_currency_code'),
+
+  isGuest: integer('is_guest', {mode: 'boolean'}).notNull().default(true),
+  avatarUrl: text('avatar_url'),
 });

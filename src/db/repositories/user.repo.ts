@@ -65,10 +65,10 @@ export class UserRepo {
       id: newUserUuid,
       firstName: 'Guest',
       lastName: 'User',
-      email: 'guest.user@mail.com',
       createdAt: now,
       updatedAt: now,
       primaryCurrencyCode: 'IDR',
+      isGuest: true,
     };
 
     await db.insert(users).values(guestUser);
