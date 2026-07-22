@@ -13,6 +13,14 @@ type IUserInput = {
   lastName: string;
 };
 
+type ICreateUser = {
+  firstName: string;
+  lastName?: string;
+  email: string;
+  avatarUrl?: string;
+  primaryCurrencyCode?: string;
+};
+
 export class UserRepo {
   constructor(private readonly userId?: string) {}
 
@@ -61,33 +69,64 @@ export class UserRepo {
     const now = Date.now();
     const newUserUuid = uuid.v4();
 
-    const guestUser = {
+    const newUser = {
       id: newUserUuid,
       firstName: 'Guest',
       lastName: 'User',
       createdAt: now,
       updatedAt: now,
-      primaryCurrencyCode: 'IDR',
       isGuest: true,
     };
 
-    await db.insert(users).values(guestUser);
+    await db.insert(users).values(newUser);
+    await this.insertInitialUserProvider(newUserUuid);
 
-    const userInitProviderUuid = uuid.v4();
+    return newUser;
+  }
+
+  async createUser(data: ICreateUser) {
+    const now = Date.now();
+    const newUserUuid = uuid.v4();
+
+    const isGuest = !data.email;
+
+    const newUser = {
+      id: newUserUuid,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      avatarUrl: data.avatarUrl,
+      createdAt: now,
+      updatedAt: now,
+      isGuest: isGuest,
+      primaryCurrencyCode: data.primaryCurrencyCode,
+    };
+
+    await db.insert(users).values(newUser);
+    await this.insertInitialUserProvider(newUserUuid);
+
+    return newUser;
+  }
+
+  async insertInitialUserProvider(userId: string) {
     const cashProvider = (await db.select().from(providers).where(eq(providers.identifier, 'cash')).limit(1))[0];
-
     if (cashProvider) {
-      await db.insert(userProviders).values({
+      const now = Date.now();
+
+      const userInitProviderUuid = uuid.v4();
+      const newUserProviders = await db.insert(userProviders).values({
         id: userInitProviderUuid,
         providerId: cashProvider.id,
         identifier: cashProvider.identifier,
-        userId: newUserUuid,
+        userId: userId,
         createdAt: now,
         updatedAt: now,
       });
+
+      return newUserProviders;
     }
 
-    return guestUser;
+    return null;
   }
 
   async createUserProvider(data: IUserProviderInsert) {
