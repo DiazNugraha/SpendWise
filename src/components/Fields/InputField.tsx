@@ -12,6 +12,7 @@ type InputFieldProp = {
   type?: 'number' | 'text';
   required?: boolean;
   maxLength?: number;
+  disabled?: boolean;
 };
 
 export const InputField: React.FC<InputFieldProp> = ({
@@ -24,6 +25,7 @@ export const InputField: React.FC<InputFieldProp> = ({
   type = 'text',
   required,
   maxLength,
+  disabled = false,
 }) => {
   const [field, meta, helpers] = useField(name);
   const isNumeric = type === 'number';
@@ -40,6 +42,7 @@ export const InputField: React.FC<InputFieldProp> = ({
         keyboardType={isNumeric ? 'numeric' : 'default'}
         value={field.value}
         onChangeText={value => {
+          if (disabled) return;
           if (!isNumeric) {
             helpers.setValue(value);
             return;
@@ -61,9 +64,12 @@ export const InputField: React.FC<InputFieldProp> = ({
         secureTextEntry={secureTextEntry}
         multiline={multiline}
         numberOfLines={numberOfLines}
-        className={`input-field ${meta.touched && meta.error ? 'input-field-error' : ''} ${multiline ? 'h-32' : ''}`}
+        className={`input-field ${meta.touched && meta.error ? 'input-field-error' : ''} ${multiline ? 'h-32' : ''} ${
+          disabled ? 'input-field-disabled' : ''
+        }`}
         textAlignVertical="top"
         maxLength={maxLength}
+        editable={!disabled}
       />
 
       {meta.touched && meta.error && <Text className="text-red-500 mt-1">{meta.error}</Text>}
