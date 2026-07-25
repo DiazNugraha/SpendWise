@@ -21,6 +21,13 @@ type ICreateUser = {
   primaryCurrencyCode?: string;
 };
 
+type IUpdateUserSyncEmail = {
+  firstName: string;
+  lastName?: string;
+  email: string;
+  avatarUrl: string;
+};
+
 export class UserRepo {
   constructor(private readonly userId?: string) {}
 
@@ -61,6 +68,18 @@ export class UserRepo {
       .update(users)
       .set({
         ...data,
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUserSyncEmail(userId: string, data: IUpdateUserSyncEmail) {
+    const now = Date.now();
+    return await db
+      .update(users)
+      .set({
+        ...data,
+        isGuest: false,
+        updatedAt: now,
       })
       .where(eq(users.id, userId));
   }
