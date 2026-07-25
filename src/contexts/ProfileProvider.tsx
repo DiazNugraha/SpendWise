@@ -9,6 +9,7 @@ interface IUser {
   email?: string;
   primaryCurrencyCode?: string;
   avatarUrl?: string;
+  isGuest: boolean;
 }
 
 export interface IProfileContext {
@@ -39,6 +40,7 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
         email: existingUser.email ?? undefined,
         primaryCurrencyCode: primaryCurrencyCode ?? undefined,
         avatarUrl: existingUser.avatarUrl ?? undefined,
+        isGuest: existingUser.isGuest,
       });
 
       if (primaryCurrencyCode) {
