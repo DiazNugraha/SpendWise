@@ -23,9 +23,10 @@ export function SelectField<T extends string | number>({
 }: SelectFieldProps<T>) {
   const [field, meta, helpers] = useField<T>(name);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+  const [selectedValue, setSelectedValue] = useState<T>(field.value ?? undefined);
 
   const value = field.value ?? undefined;
-  const isEmpty = value.toString().length < 1;
+  const isEmpty = !selectedValue;
 
   return (
     <Fragment>
@@ -50,10 +51,16 @@ export function SelectField<T extends string | number>({
           setIsOpenModal(false);
         }}
         options={options}
-        value={value}
+        value={selectedValue}
         onChange={val => {
-          helpers.setValue(val);
-          onChange?.(val);
+          setSelectedValue(val);
+        }}
+        onSubmit={() => {
+          if (!selectedValue) return;
+          setIsOpenModal(false);
+
+          helpers.setValue(selectedValue);
+          onChange?.(selectedValue);
         }}
         modalLabel={modalLabel}
       />
@@ -68,6 +75,7 @@ type SelectDialogProps<T extends string | number> = {
   value: T;
   onChange: (value: T) => void;
   modalLabel?: string;
+  onSubmit: () => void;
 };
 
 function SelectDialog<T extends string | number>({
@@ -77,6 +85,7 @@ function SelectDialog<T extends string | number>({
   value,
   onChange,
   modalLabel,
+  onSubmit,
 }: SelectDialogProps<T>) {
   const toggle = (selectedValue: T) => {
     onChange(selectedValue);
@@ -107,7 +116,7 @@ function SelectDialog<T extends string | number>({
             }}
           />
 
-          <Pressable onPress={onClose} className="main-button-container">
+          <Pressable onPress={onSubmit} className="main-button-container">
             <Text className="text-white text-center">Done</Text>
           </Pressable>
         </View>
