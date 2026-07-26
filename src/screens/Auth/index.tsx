@@ -108,6 +108,12 @@ export const AuthScreen: React.FC = () => {
 
   return (
     <View className="flex flex-col h-full  px-5 justify-evenly">
+      {/* Top left */}
+      <View className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-purple-500/20" />
+
+      {/* Bottom right */}
+      <View className="absolute -bottom-16 -right-16 w-56 h-56 rounded-full bg-purple-500/10" />
+
       <View className="flex flex-col gap-1 items-center">
         <View className="flex flex-row">
           <Text className="text-[50px] font-bold">Spend</Text>
