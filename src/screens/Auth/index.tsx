@@ -1,6 +1,4 @@
 import {useProfile, useUserRepo} from '@/hooks';
-import {RootNavigationProp} from '@/types';
-import {useNavigation} from '@react-navigation/native';
 import {CircleUserRoundIcon} from 'lucide-react-native';
 import React, {useCallback, useEffect} from 'react';
 import {Alert, Image, Linking, Pressable, Text, View} from 'react-native';
@@ -12,7 +10,6 @@ import {extractUserFromCallbackUrl} from '@/helpers';
 export const AuthScreen: React.FC = () => {
   const {onRefetch: refetchUserProfile} = useProfile();
   const userRepo = useUserRepo();
-  const navigation = useNavigation<RootNavigationProp>();
 
   const handleGuestSignIn = async () => {
     const user = await userRepo.createGuestUser();
@@ -20,13 +17,12 @@ export const AuthScreen: React.FC = () => {
     if (user) {
       Toast.show({
         type: 'success',
-        text1: 'Success',
-        text2: 'Guest user successfully created.',
+        text1: 'Guest account created',
+        text2: 'You can start tracking your expenses now.',
       });
 
       refetchUserProfile();
-
-      return navigation.navigate('MainTabs');
+      return;
     }
 
     Toast.show({
@@ -78,13 +74,12 @@ export const AuthScreen: React.FC = () => {
         if (newUser) {
           Toast.show({
             type: 'success',
-            text1: 'Success',
-            text2: `User ${email} successfully created.`,
+            text1: 'Sign-in successful',
+            text2: 'Your account is ready.',
           });
 
           refetchUserProfile();
-
-          return navigation.navigate('MainTabs');
+          return;
         }
 
         Toast.show({
@@ -94,7 +89,7 @@ export const AuthScreen: React.FC = () => {
         });
       }
     },
-    [navigation, refetchUserProfile, userRepo],
+    [refetchUserProfile, userRepo],
   );
 
   // retrieve callback from google sign in
