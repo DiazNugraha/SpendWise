@@ -17,9 +17,9 @@ const Header: React.FC = () => {
         <View className="flex flex-row justify-between">
           <View className="flex flex-col gap-2">
             <Text className="font-medium">
-              Good morning, {user?.firstName} {user?.lastName} 👋
+              Welcome back, {user?.firstName} {user?.lastName} 👋
             </Text>
-            <Text className="font-medium">Let’s stay within your budget today</Text>
+            <Text className="font-medium">Let's stay on track with your budget.</Text>
           </View>
           {user?.avatarUrl && (
             <Image
