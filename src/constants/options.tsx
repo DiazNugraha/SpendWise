@@ -79,3 +79,12 @@ export const budgetOptions: {label: string; rangeDate?: number; icon: LucideIcon
     icon: Target,
   },
 ];
+
+export const currencyOptions: IOption<string>[] = [
+  {
+    label: 'IDR',
+    value: 'IDR',
+  },
+  {label: 'USD', value: 'USD'},
+  {label: 'SGD', value: 'SGD'},
+];

@@ -1,4 +1,5 @@
 import {SelectField} from '@/components';
+import {currencyOptions} from '@/constants/options';
 import {useProfile, useUserRepo} from '@/hooks';
 import {useFocusEffect} from '@react-navigation/native';
 import {Formik, FormikProps} from 'formik';
@@ -6,15 +7,6 @@ import {useCallback, useMemo, useRef, useState} from 'react';
 import {View} from 'react-native';
 import Toast from 'react-native-toast-message';
 import * as yup from 'yup';
-
-const CURRENCY_OPTIONS: IOption<string>[] = [
-  {
-    label: 'IDR',
-    value: 'IDR',
-  },
-  {label: 'USD', value: 'USD'},
-  {label: 'SGD', value: 'SGD'},
-];
 
 const currencySchema = yup.object({
   currency: yup.string().default(''),
@@ -81,7 +73,7 @@ export const CurrencyForm: React.FC = () => {
     <Formik innerRef={formRef} initialValues={initialValues} validationSchema={currencySchema} onSubmit={handleChange}>
       {({handleSubmit}) => (
         <View className="flex flex-col gap-3">
-          <SelectField name="currency" options={CURRENCY_OPTIONS} onChange={() => handleSubmit()} />
+          <SelectField name="currency" options={currencyOptions} onChange={() => handleSubmit()} />
         </View>
       )}
     </Formik>
