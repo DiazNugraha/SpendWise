@@ -88,3 +88,18 @@ export const currencyOptions: IOption<string>[] = [
   {label: 'USD', value: 'USD'},
   {label: 'SGD', value: 'SGD'},
 ];
+
+export const budgetSegments: IOption<string>[] = [
+  {
+    value: 'weekly',
+    label: 'Weekly',
+  },
+  {
+    value: 'monthly',
+    label: 'Monthly',
+  },
+  {
+    value: 'custom',
+    label: 'Custom',
+  },
+];

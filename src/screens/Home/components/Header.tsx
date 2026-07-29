@@ -1,15 +1,75 @@
 import {BudgetCard, SegmentsControlButton} from '@/components';
+import {budgetSegments} from '@/constants/options';
 import {useProfile} from '@/hooks';
 import {RootNavigationProp} from '@/types';
 import {useNavigation} from '@react-navigation/native';
 import {ChevronRightIcon, CloudBackupIcon} from 'lucide-react-native';
 import {useState} from 'react';
 import {Image, Pressable, Text, View} from 'react-native';
+import {Gesture, GestureDetector} from 'react-native-gesture-handler';
+import Animated, {
+  Extrapolation,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+
+const startingPosition = 0;
+const translateXMax = 150;
 
 const Header: React.FC = () => {
   const [activeSegment, setActiveSegment] = useState<BudgetType>('weekly');
   const {user} = useProfile();
   const navigation = useNavigation<RootNavigationProp>();
+
+  const goNext = () => {
+    const index = budgetSegments.findIndex(s => s.value === activeSegment);
+
+    if (index < budgetSegments.length - 1) {
+      setActiveSegment(budgetSegments[index + 1].value as BudgetType);
+    } else {
+      setActiveSegment(budgetSegments[0].value as BudgetType);
+    }
+  };
+
+  const goPrevious = () => {
+    const index = budgetSegments.findIndex(s => s.value === activeSegment);
+
+    if (index - 1 >= 0) {
+      setActiveSegment(budgetSegments[index - 1].value as BudgetType);
+    } else {
+      setActiveSegment(budgetSegments[budgetSegments.length - 1].value as BudgetType);
+    }
+  };
+
+  const translateX = useSharedValue(startingPosition);
+
+  const pan = Gesture.Pan()
+    .onUpdate(event => {
+      translateX.value = withSpring(event.translationX);
+    })
+    .onEnd(event => {
+      if (event.translationX < -translateXMax) {
+        goNext();
+      } else if (event.translationX > translateXMax) {
+        goPrevious();
+      }
+
+      translateX.value = withSpring(0);
+    })
+    .runOnJS(true);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(Math.abs(translateX.value), [0, translateXMax], [1, 0], Extrapolation.CLAMP);
+
+    const scale = interpolate(Math.abs(translateX.value), [0, translateXMax], [1, 0.95], Extrapolation.CLAMP);
+
+    return {
+      opacity,
+      transform: [{translateX: translateX.value}, {scale}],
+    };
+  });
 
   return (
     <View className="flex flex-col rounded-2xl gap-5">
@@ -55,22 +115,13 @@ const Header: React.FC = () => {
       <SegmentsControlButton
         onClick={val => setActiveSegment(val as BudgetType)}
         active={activeSegment}
-        segments={[
-          {
-            value: 'weekly',
-            label: 'Weekly',
-          },
-          {
-            value: 'monthly',
-            label: 'Monthly',
-          },
-          {
-            value: 'custom',
-            label: 'Custom',
-          },
-        ]}
+        segments={budgetSegments}
       />
-      <BudgetCard budgetType={activeSegment} />
+      <GestureDetector gesture={pan}>
+        <Animated.View style={[animatedStyle]}>
+          <BudgetCard budgetType={activeSegment} />
+        </Animated.View>
+      </GestureDetector>
     </View>
   );
 };
