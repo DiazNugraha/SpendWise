@@ -8,6 +8,7 @@ import {useBudgetRepo, useProfile} from '@/hooks';
 import * as Icons from 'lucide-react-native';
 import {formatDate, NumberFormatter} from '@/helpers';
 import {RootNavigationProp} from '@/types';
+import {budgetSegments} from '@/constants/options';
 
 type IChartData = {
   value: number;
@@ -78,20 +79,7 @@ export const Report: React.FC = () => {
           <SegmentsControlButton
             onClick={val => setActiveSegment(val as BudgetType)}
             active={activeSegment}
-            segments={[
-              {
-                value: 'weekly',
-                label: 'Weekly',
-              },
-              {
-                value: 'monthly',
-                label: 'Monthly',
-              },
-              {
-                value: 'custom',
-                label: 'Custom',
-              },
-            ]}
+            segments={budgetSegments}
           />
 
           <ReportFilter
