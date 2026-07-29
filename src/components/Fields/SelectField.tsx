@@ -26,7 +26,7 @@ export function SelectField<T extends string | number>({
   const [selectedValue, setSelectedValue] = useState<T>(field.value ?? undefined);
 
   const value = field.value ?? undefined;
-  const isEmpty = !selectedValue;
+  const isEmpty = !field.value;
 
   return (
     <Fragment>
