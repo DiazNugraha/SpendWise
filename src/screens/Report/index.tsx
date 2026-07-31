@@ -31,6 +31,7 @@ export const Report: React.FC = () => {
   const {primaryCurrencySymbol} = useProfile();
   const navigation = useNavigation<RootNavigationProp>();
 
+  const [containerWidth, setContainerWidth] = useState<number>(0);
   const [activeSegment, setActiveSegment] = useState<BudgetType>('weekly');
   const [chartData, setChartData] = useState<IChartData[]>();
   const [savedBudgets, setSavedBudgets] = useState<IBudgetData[]>([]);
@@ -96,7 +97,11 @@ export const Report: React.FC = () => {
             }}
           />
 
-          <View className="flex-1 bg-white p-2 rounded-xl overflow-hidden">
+          <View
+            className="flex-1 bg-white p-2 rounded-xl overflow-hidden"
+            onLayout={e => {
+              setContainerWidth(e.nativeEvent.layout.width);
+            }}>
             <BarChart
               barWidth={22}
               noOfSections={4}
@@ -106,7 +111,10 @@ export const Report: React.FC = () => {
               yAxisThickness={0}
               xAxisThickness={0}
               spacing={30}
+              formatYLabel={val => String(Math.round(Number(val)))}
               maxValue={100}
+              stepValue={25}
+              rulesLength={containerWidth}
             />
           </View>
 
