@@ -29,8 +29,8 @@ export const Budget: React.FC = () => {
 
   const handleDeleteBudgetGoal = () => {
     alert({
-      title: 'Remove Saved Budget Goals',
-      description: 'Are you sure to remove your saved budget goal?',
+      title: 'Delete Budget Goal',
+      description: 'Are you sure you want to delete this budget goal? This action cannot be undone.',
       onConfirm: async () => {
         if (!selectedBudget?.id) return;
         const result = await budgetRepo.deleteBudgetById(selectedBudget.id);
@@ -38,7 +38,7 @@ export const Budget: React.FC = () => {
           Toast.show({
             type: 'success',
             text1: 'Success!',
-            text2: 'Budget Goal removed successfully',
+            text2: 'Budget goal deleted successfully.',
           });
 
           fetchBudgets();
