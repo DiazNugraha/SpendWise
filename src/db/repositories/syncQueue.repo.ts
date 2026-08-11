@@ -1,6 +1,6 @@
 import uuid from 'react-native-uuid';
-import {db} from '../client';
 import {syncQueues} from '../schema';
+import {SQLiteTransaction} from 'drizzle-orm/sqlite-core';
 
 type ICreateSyncQueueInsert = {
   entityType: entityType;
@@ -12,16 +12,19 @@ type ICreateSyncQueueInsert = {
 };
 
 export class SyncQueueRepo {
-  async createSyncQueue(data: ICreateSyncQueueInsert) {
+  async createSyncQueue(tx: SQLiteTransaction<'async', any, any, any>, data: ICreateSyncQueueInsert) {
     const now = Date.now();
     const newUuid = uuid.v4();
 
-    const newQueue = await db.insert(syncQueues).values({
-      id: newUuid,
-      createdAt: now,
-      updatedAt: now,
-      ...data,
-    });
+    const [newQueue] = await tx
+      .insert(syncQueues)
+      .values({
+        id: newUuid,
+        createdAt: now,
+        updatedAt: now,
+        ...data,
+      })
+      .returning();
 
     return newQueue;
   }

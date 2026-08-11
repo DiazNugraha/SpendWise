@@ -5,6 +5,7 @@ import uuid from 'react-native-uuid';
 import {formatDate} from '@/helpers';
 import {categoryOptions} from '@/constants/options';
 import {LucideIcon} from 'lucide-react-native';
+import {SyncQueueRepo} from './syncQueue.repo';
 
 type IBudgetInsert = {
   title: string;
@@ -20,7 +21,7 @@ type IBudgetInsert = {
 };
 
 export class BudgetRepo {
-  constructor(private readonly userId?: string) {}
+  constructor(private readonly syncQueueRepo: SyncQueueRepo, private readonly userId?: string) {}
 
   async findActivesEachType(options?: {notify?: boolean}) {
     let conditions = [eq(budgets.isActive, true)];
@@ -71,22 +72,38 @@ export class BudgetRepo {
 
     const now = Date.now();
     const newBudgetId = uuid.v4();
+    const userId = data.userId ?? this.userId;
 
-    return await db.insert(budgets).values({
-      id: newBudgetId,
-      title: data.title,
-      type: data.type,
-      amount: data.amount,
-      icon: data.icon,
-      iconColor: data.iconColor,
-      enableNotify: data.enableNotify,
-      startDate: data.startDate.getTime(),
-      endDate: data.endDate.getTime(),
-      isActive: true,
-      autoRenew: data.autoRenew,
-      userId: data.userId ?? this.userId,
-      createdAt: now,
-      updatedAt: now,
+    return await db.transaction(async tx => {
+      const [newBudget] = await tx
+        .insert(budgets)
+        .values({
+          id: newBudgetId,
+          title: data.title,
+          type: data.type,
+          amount: data.amount,
+          icon: data.icon,
+          iconColor: data.iconColor,
+          enableNotify: data.enableNotify,
+          startDate: data.startDate.getTime(),
+          endDate: data.endDate.getTime(),
+          isActive: true,
+          autoRenew: data.autoRenew,
+          userId: userId,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
+      await this.syncQueueRepo.createSyncQueue(tx, {
+        entityId: newBudget.id,
+        entityType: 'BUDGET',
+        operation: 'CREATE',
+        retryCount: 0,
+        syncStatus: 'PENDING',
+      });
+
+      return newBudget;
     });
   }
 

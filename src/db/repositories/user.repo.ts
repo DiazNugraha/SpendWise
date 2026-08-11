@@ -2,6 +2,8 @@ import {eq, sql} from 'drizzle-orm';
 import {db} from '../client';
 import {providers, userProviders, users} from '../schema';
 import uuid from 'react-native-uuid';
+import {SyncQueueRepo} from './syncQueue.repo';
+import {SQLiteTransaction} from 'drizzle-orm/sqlite-core';
 
 type IUserProviderInsert = {
   providerId: string;
@@ -29,7 +31,7 @@ type IUpdateUserSyncEmail = {
 };
 
 export class UserRepo {
-  constructor(private readonly userId?: string) {}
+  constructor(private readonly syncQueueRepo: SyncQueueRepo, private readonly userId?: string) {}
 
   async find() {
     return await db.select().from(users);
@@ -88,7 +90,7 @@ export class UserRepo {
     const now = Date.now();
     const newUserUuid = uuid.v4();
 
-    const newUser = {
+    const newUserPayload = {
       id: newUserUuid,
       firstName: 'Guest',
       lastName: 'User',
@@ -97,10 +99,12 @@ export class UserRepo {
       isGuest: true,
     };
 
-    await db.insert(users).values(newUser);
-    await this.insertInitialUserProvider(newUserUuid);
+    return await db.transaction(async tx => {
+      const [newUser] = await tx.insert(users).values(newUserPayload).returning();
+      await this.insertInitialUserProvider(tx, newUser.id, newUser.isGuest);
 
-    return newUser;
+      return newUser;
+    });
   }
 
   async createUser(data: ICreateUser) {
@@ -109,7 +113,7 @@ export class UserRepo {
 
     const isGuest = !data.email;
 
-    const newUser = {
+    const newUserPayload = {
       id: newUserUuid,
       firstName: data.firstName,
       lastName: data.lastName,
@@ -121,45 +125,84 @@ export class UserRepo {
       primaryCurrencyCode: data.primaryCurrencyCode,
     };
 
-    await db.insert(users).values(newUser);
-    await this.insertInitialUserProvider(newUserUuid);
+    return await db.transaction(async tx => {
+      const [newUser] = await tx.insert(users).values(newUserPayload).returning();
+      await this.insertInitialUserProvider(tx, newUserUuid, newUser.isGuest);
 
-    return newUser;
+      await this.syncQueueRepo.createSyncQueue(tx, {
+        entityId: newUser.id,
+        entityType: 'USER',
+        operation: 'CREATE',
+        retryCount: 0,
+        syncStatus: 'PENDING',
+      });
+
+      return newUser;
+    });
   }
 
-  async insertInitialUserProvider(userId: string) {
-    const cashProvider = (await db.select().from(providers).where(eq(providers.identifier, 'cash')).limit(1))[0];
+  async insertInitialUserProvider(tx: SQLiteTransaction<'async', any, any, any>, userId: string, isGuest: boolean) {
+    const cashProvider = (await tx.select().from(providers).where(eq(providers.identifier, 'cash')).limit(1))[0];
     if (cashProvider) {
       const now = Date.now();
 
       const userInitProviderUuid = uuid.v4();
-      const newUserProviders = await db.insert(userProviders).values({
-        id: userInitProviderUuid,
-        providerId: cashProvider.id,
-        identifier: cashProvider.identifier,
-        userId: userId,
-        createdAt: now,
-        updatedAt: now,
-      });
+      const [newUserProvider] = await tx
+        .insert(userProviders)
+        .values({
+          id: userInitProviderUuid,
+          providerId: cashProvider.id,
+          identifier: cashProvider.identifier,
+          userId: userId,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
 
-      return newUserProviders;
+      if (!isGuest) {
+        await this.syncQueueRepo.createSyncQueue(tx, {
+          entityId: newUserProvider.id,
+          entityType: 'USER_PROVIDER',
+          operation: 'CREATE',
+          retryCount: 0,
+          syncStatus: 'PENDING',
+        });
+      }
+
+      return newUserProvider;
     }
 
     return null;
   }
 
   async createUserProvider(data: IUserProviderInsert) {
-    if (!this.userId) return;
+    const userId = this.userId;
+    if (!userId) return;
 
     const now = Date.now();
     const newUuid = uuid.v4();
 
-    return await db.insert(userProviders).values({
-      id: newUuid,
-      ...data,
-      createdAt: now,
-      updatedAt: now,
-      userId: this.userId,
+    return await db.transaction(async tx => {
+      const [newUserProvider] = await tx
+        .insert(userProviders)
+        .values({
+          id: newUuid,
+          ...data,
+          createdAt: now,
+          updatedAt: now,
+          userId: userId,
+        })
+        .returning();
+
+      await this.syncQueueRepo.createSyncQueue(tx, {
+        entityId: newUserProvider.id,
+        entityType: 'USER_PROVIDER',
+        operation: 'CREATE',
+        retryCount: 0,
+        syncStatus: 'PENDING',
+      });
+
+      return newUserProvider;
     });
   }
 

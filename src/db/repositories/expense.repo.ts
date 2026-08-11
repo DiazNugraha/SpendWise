@@ -4,6 +4,7 @@ import {expenseProviders, expenses} from '../schema';
 import uuid from 'react-native-uuid';
 import {getDaysBetween} from '@/helpers';
 import {BudgetRepo} from './budget.repo';
+import {SyncQueueRepo} from './syncQueue.repo';
 
 type IExpenseInsert = {
   title: string;
@@ -14,41 +15,73 @@ type IExpenseInsert = {
 };
 
 export class ExpenseRepo {
-  constructor(private readonly budgetRepo: BudgetRepo, private readonly userId?: string) {}
+  constructor(
+    private readonly syncQueueRepo: SyncQueueRepo,
+    private readonly budgetRepo: BudgetRepo,
+    private readonly userId?: string,
+  ) {}
 
   async create(data: IExpenseInsert) {
-    if (!this.userId) return;
+    const userId = this.userId;
+
+    if (!userId) return;
 
     const now = Date.now();
     const newExpenseId = uuid.v4();
 
-    // insert expense
-    const newExpense = await db.insert(expenses).values({
-      id: newExpenseId,
-      title: data.title,
-      categoryId: data.categoryId,
-      amount: data.amount,
-      description: data.description,
-      userId: this.userId,
-      createdAt: now,
-      updatedAt: now,
-    });
+    return await db.transaction(async tx => {
+      // insert expense
+      const [newExpense] = await tx
+        .insert(expenses)
+        .values({
+          id: newExpenseId,
+          title: data.title,
+          categoryId: data.categoryId,
+          amount: data.amount,
+          description: data.description,
+          userId: userId,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
 
-    // link providers (many to many)
-    if (data.providerIds && data.providerIds?.length > 0) {
-      const formattedProviders = data.providerIds?.map(id => {
-        const newUuid = uuid.v4();
-        return {
-          id: newUuid,
-          expenseId: newExpenseId,
-          providerId: id,
-        };
+      let newExpenseProviders: {id: string; expenseId: string; providerId: string}[] = [];
+      // link providers (many to many)
+      const formattedProviders = data.providerIds?.map(id => ({
+        id: uuid.v4(),
+        expenseId: newExpense.id,
+        providerId: id,
+      }));
+
+      if (formattedProviders?.length) {
+        const newProviders = await tx.insert(expenseProviders).values(formattedProviders).returning();
+        newExpenseProviders = newProviders;
+      }
+
+      await this.syncQueueRepo.createSyncQueue(tx, {
+        entityId: newExpense.id,
+        entityType: 'EXPENSE',
+        operation: 'CREATE',
+        retryCount: 0,
+        syncStatus: 'PENDING',
       });
 
-      await db.insert(expenseProviders).values(formattedProviders);
-    }
+      if (newExpenseProviders.length > 0) {
+        await Promise.all(
+          newExpenseProviders.map(async nep => {
+            await this.syncQueueRepo.createSyncQueue(tx, {
+              entityId: nep.id,
+              entityType: 'EXPENSE_PROVIDER',
+              operation: 'CREATE',
+              retryCount: 0,
+              syncStatus: 'PENDING',
+            });
+          }),
+        );
+      }
 
-    return newExpense;
+      return newExpense;
+    });
   }
 
   async findAll(options?: {limit?: number; categories?: string[]; budgetType?: BudgetType}) {
