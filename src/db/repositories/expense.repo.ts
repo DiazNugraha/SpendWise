@@ -135,7 +135,7 @@ export class ExpenseRepo {
   }
 
   async deleteById(id: string) {
-    return await db.delete(expenses).where(eq(expenses.id, id)).limit(1);
+    return await db.delete(expenses).where(eq(expenses.id, id));
   }
 
   async sumExpensesWithinDate(startDate: number, endDate: number) {
