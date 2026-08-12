@@ -6,8 +6,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import {useFocusEffect} from '@react-navigation/native';
 import {NumberFormatter} from '@/helpers';
 import {categoryOptions} from '@/constants/options';
-import {ArrowUpIcon} from 'lucide-react-native';
-import {useExpenseRepo, useProfile} from '@/hooks';
+import {useAlert, useExpenseRepo, useProfile} from '@/hooks';
+import Toast from 'react-native-toast-message';
 
 const formatter = new NumberFormatter({
   maxFractionDigits: 2,
@@ -15,6 +15,7 @@ const formatter = new NumberFormatter({
 
 export const History = () => {
   const {primaryCurrencySymbol} = useProfile();
+  const {alert} = useAlert();
   const expenseRepo = useExpenseRepo();
 
   const [filter, setFilter] = useState<{
@@ -39,6 +40,7 @@ export const History = () => {
     setTotalExpense(meta.totalExpense);
 
     const formatData: IExpense[] = data.map(d => ({
+      id: d.id,
       title: d.title,
       providers: [],
       category: d.categoryId,
@@ -55,6 +57,35 @@ export const History = () => {
       fetchExpenses();
     }, [fetchExpenses]),
   );
+
+  const handleRemoveById = async (id?: string) => {
+    if (!id) return;
+
+    alert({
+      title: 'Delete expense',
+      description: `Are you sure you want to delete this expense? This action cannot be undone.`,
+      onConfirm: async () => {
+        const result = await expenseRepo.deleteById(id);
+        if (result) {
+          Toast.show({
+            type: 'success',
+            text1: 'Success!',
+            text2: 'Expense deleted successfully',
+          });
+
+          fetchExpenses();
+          return;
+        }
+
+        Toast.show({
+          type: 'error',
+          text1: 'Error!',
+          text2: 'Failed to delete expense. Please try again.',
+        });
+      },
+      confirmButtonLabel: 'Yes, Continue',
+    });
+  };
 
   return (
     <ModalWrapper title="Expense History">
@@ -91,16 +122,16 @@ export const History = () => {
             <Text className="text-white text-3xl font-bold">
               {primaryCurrencySymbol} {formatter.format(totalExpense)}
             </Text>
-            <View className="flex flex-row gap-1 items-center">
-              <ArrowUpIcon size={16} color={'white'} />
-              <Text className="text-white/40 font-normal text-sm">12% vs last week</Text>
-            </View>
+            {/* <View className="flex flex-row gap-1 items-center"> */}
+            {/*   <ArrowUpIcon size={16} color={'white'} /> */}
+            {/*   <Text className="text-white/40 font-normal text-sm">12% vs last week</Text> */}
+            {/* </View> */}
           </View>
         </LinearGradient>
 
         <FlatList
           data={expenses}
-          renderItem={({item}) => <ExpenseCard {...item} />}
+          renderItem={({item}) => <ExpenseCard item={item} onRemove={() => handleRemoveById(item.id)} />}
           keyExtractor={(_, index) => index.toString()}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{

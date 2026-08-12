@@ -49,7 +49,7 @@ const History: React.FC = () => {
           </View>
           <View className="flex flex-col gap-2 mb-3">
             {expenses.map(item => (
-              <ExpenseCard {...item} key={item.id} />
+              <ExpenseCard item={item} key={item.id} />
             ))}
           </View>
         </Fragment>
