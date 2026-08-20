@@ -1,5 +1,6 @@
 import {UserRepo} from '@/db/repositories';
 import {getCurrencySymbol} from '@/helpers';
+import {useSyncQueueRepo} from '@/hooks';
 import {createContext, PropsWithChildren, useCallback, useContext, useEffect, useState} from 'react';
 
 interface IUser {
@@ -26,9 +27,11 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
   const [primaryCurrencySymbol, setPrimaryCurrencySymbol] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const syncQueueRepo = useSyncQueueRepo();
+
   const fetchUserProfile = useCallback(async () => {
     setIsLoading(true);
-    const userRepo = new UserRepo();
+    const userRepo = new UserRepo(syncQueueRepo);
     const existingUser = (await userRepo.getUser())[0];
     const primaryCurrencyCode = existingUser?.primaryCurrencyCode;
 
@@ -49,7 +52,7 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
       }
     }
     setIsLoading(false);
-  }, []);
+  }, [syncQueueRepo]);
 
   useEffect(() => {
     fetchUserProfile();
