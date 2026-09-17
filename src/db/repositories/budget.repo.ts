@@ -7,7 +7,7 @@ import {categoryOptions} from '@/constants/options';
 import {LucideIcon} from 'lucide-react-native';
 import {SyncQueueRepo} from './syncQueue.repo';
 
-type IBudgetInsert = {
+interface IBudgetInsert {
   title: string;
   type: BudgetType;
   startDate: Date;
@@ -18,12 +18,23 @@ type IBudgetInsert = {
   enableNotify: boolean;
   autoRenew: boolean;
   userId?: string;
-};
+}
+
+interface IBudgetExpenseAnalytic {
+  budgetAmount: number;
+  budgetTitle: string;
+  categoryCollections: {
+    name: string;
+    icon?: LucideIcon;
+    total: number;
+    spentTimes: number;
+  }[];
+}
 
 export class BudgetRepo {
   constructor(private readonly syncQueueRepo: SyncQueueRepo, private readonly userId?: string) {}
 
-  async findActivesEachType(options?: {notify?: boolean}) {
+  async findActivesEachType(options?: {notify?: boolean}): Promise<IBudgetSchema[]> {
     let conditions = [eq(budgets.isActive, true)];
 
     if (options?.notify) {
@@ -50,7 +61,7 @@ export class BudgetRepo {
     return [weekly[0], monthly[0], custom[0]].filter(e => e !== undefined);
   }
 
-  async findActiveByType(type: BudgetType, options?: {notify?: boolean}) {
+  async findActiveByType(type: BudgetType, options?: {notify?: boolean}): Promise<IBudgetSchema[]> {
     const conditions = [eq(budgets.type, type), eq(budgets.isActive, true)];
 
     if (options?.notify) {
@@ -67,7 +78,7 @@ export class BudgetRepo {
       .where(and(...conditions));
   }
 
-  async create(data: IBudgetInsert) {
+  async create(data: IBudgetInsert): Promise<IBudgetSchema | undefined> {
     if (!this.userId) return;
 
     const now = Date.now();
@@ -107,7 +118,7 @@ export class BudgetRepo {
     });
   }
 
-  async update(id: string, data: IBudgetInsert) {
+  async update(id: string, data: IBudgetInsert): Promise<IBudgetSchema[] | undefined> {
     if (!this.userId) return;
 
     const now = Date.now();
@@ -126,19 +137,21 @@ export class BudgetRepo {
         autoRenew: data.autoRenew,
         updatedAt: now,
       })
-      .where(and(eq(budgets.id, id), eq(budgets.userId, this.userId)));
+      .where(and(eq(budgets.id, id), eq(budgets.userId, this.userId)))
+      .returning();
   }
 
-  async setToInactive(id: string) {
+  async setToInactive(id: string): Promise<IBudgetSchema[]> {
     return await db
       .update(budgets)
       .set({
         isActive: false,
       })
-      .where(and(eq(budgets.id, id), eq(budgets.isActive, true)));
+      .where(and(eq(budgets.id, id), eq(budgets.isActive, true)))
+      .returning();
   }
 
-  async getExpensesByBudget(id: string) {
+  async getExpensesByBudget(id: string): Promise<IExpenseSchema[]> {
     const budget = await db.select().from(budgets).where(eq(budgets.id, id)).limit(1);
 
     const {startDate, endDate} = budget[0];
@@ -151,7 +164,7 @@ export class BudgetRepo {
     return existingExpenses;
   }
 
-  async getLastInactiveBudget(budgetType: BudgetType) {
+  async getLastInactiveBudget(budgetType: BudgetType): Promise<IBudgetSchema | undefined> {
     if (!this.userId) return;
     const budget = await db
       .select()
@@ -163,7 +176,10 @@ export class BudgetRepo {
     return budget[0];
   }
 
-  async getPercentageOfEachBudget(props?: {type?: BudgetType; dateRange?: {startDate: Date; endDate: Date}}) {
+  async getPercentageOfEachBudget(props?: {
+    type?: BudgetType;
+    dateRange?: {startDate: Date; endDate: Date};
+  }): Promise<IBudgetSchema[]> {
     const conditions = [];
 
     if (props?.type) {
@@ -207,7 +223,7 @@ export class BudgetRepo {
     return result;
   }
 
-  async sumExpensesWithinDate(startDate: number, endDate: number) {
+  async sumExpensesWithinDate(startDate: number, endDate: number): Promise<number> {
     if (!this.userId) return 0;
 
     const result = await db
@@ -222,7 +238,7 @@ export class BudgetRepo {
     return result[0]?.total ?? 0;
   }
 
-  async getBudgetExpensesAnalytic(id: string) {
+  async getBudgetExpensesAnalytic(id: string): Promise<IBudgetExpenseAnalytic | undefined> {
     const selectBudget = (await db.select().from(budgets).where(eq(budgets.id, id)))[0];
 
     if (!selectBudget) return;
@@ -258,7 +274,7 @@ export class BudgetRepo {
     };
   }
 
-  async deleteBudgetById(id: string) {
-    return await db.delete(budgets).where(eq(budgets.id, id));
+  async deleteBudgetById(id: string): Promise<IBudgetSchema[]> {
+    return await db.delete(budgets).where(eq(budgets.id, id)).returning();
   }
 }

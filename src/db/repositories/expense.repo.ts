@@ -21,7 +21,7 @@ export class ExpenseRepo {
     private readonly userId?: string,
   ) {}
 
-  async create(data: IExpenseInsert) {
+  async create(data: IExpenseInsert): Promise<IExpenseSchema | undefined> {
     const userId = this.userId;
 
     if (!userId) return;
@@ -84,7 +84,12 @@ export class ExpenseRepo {
     });
   }
 
-  async findAll(options?: {limit?: number; categories?: string[]; budgetType?: BudgetType}) {
+  async findAll(options?: {limit?: number; categories?: string[]; budgetType?: BudgetType}): Promise<{
+    data: IExpenseSchema[];
+    meta: {
+      totalExpense: number;
+    };
+  }> {
     const conditions = [];
 
     if (options?.categories) {
@@ -138,7 +143,7 @@ export class ExpenseRepo {
     return await db.delete(expenses).where(eq(expenses.id, id));
   }
 
-  async sumExpensesWithinDate(startDate: number, endDate: number) {
+  async sumExpensesWithinDate(startDate: number, endDate: number): Promise<number> {
     if (!this.userId) return 0;
 
     const result = await db
@@ -153,7 +158,7 @@ export class ExpenseRepo {
     return result[0]?.total ?? 0;
   }
 
-  async checkIfThereIsBudgetGoalsToNotify() {
+  async checkIfThereIsBudgetGoalsToNotify(): Promise<IBudgetSchema[]> {
     const activeBudgetGoals = await this.budgetRepo.findActivesEachType({notify: true});
     const needToNotify = await Promise.all(
       activeBudgetGoals.map(async budget => {
@@ -165,7 +170,8 @@ export class ExpenseRepo {
       }),
     );
 
-    return needToNotify.filter(e => e !== null);
+    const filtered = needToNotify.filter(e => e !== null);
+    return filtered;
   }
 
   async compareProgressWithLastBudgetGoal(budgetType: BudgetType): Promise<number> {

@@ -33,20 +33,27 @@ type IUpdateUserSyncEmail = {
 export class UserRepo {
   constructor(private readonly syncQueueRepo: SyncQueueRepo, private readonly userId?: string) {}
 
-  async find() {
+  async find(): Promise<IUserSchema[]> {
     return await db.select().from(users);
   }
 
-  async setPrimaryCurrencyCode(userId: string, code: string) {
+  async setPrimaryCurrencyCode(userId: string, code: string): Promise<IUserSchema[]> {
     return await db
       .update(users)
       .set({
         primaryCurrencyCode: code,
       })
-      .where(eq(users.id, userId));
+      .where(eq(users.id, userId))
+      .returning();
   }
 
-  async getUserProviders() {
+  async getUserProviders(): Promise<
+    | {
+        providers: IProviderSchema | null;
+        user_providers: IUserProviderSchema;
+      }[]
+    | undefined
+  > {
     if (!this.userId) return;
 
     const result = await db
@@ -57,7 +64,7 @@ export class UserRepo {
     return result;
   }
 
-  async getUser() {
+  async getUser(): Promise<IUserSchema[]> {
     return await db
       .select()
       .from(users)
@@ -65,16 +72,17 @@ export class UserRepo {
       .orderBy(sql`${users.createdAt} desc`);
   }
 
-  async updateUser(userId: string, data: IUserInput) {
+  async updateUser(userId: string, data: IUserInput): Promise<IUserSchema[]> {
     return await db
       .update(users)
       .set({
         ...data,
       })
-      .where(eq(users.id, userId));
+      .where(eq(users.id, userId))
+      .returning();
   }
 
-  async updateUserSyncEmail(userId: string, data: IUpdateUserSyncEmail) {
+  async updateUserSyncEmail(userId: string, data: IUpdateUserSyncEmail): Promise<IUserSchema[]> {
     const now = Date.now();
     return await db
       .update(users)
@@ -83,10 +91,11 @@ export class UserRepo {
         isGuest: false,
         updatedAt: now,
       })
-      .where(eq(users.id, userId));
+      .where(eq(users.id, userId))
+      .returning();
   }
 
-  async createGuestUser() {
+  async createGuestUser(): Promise<IUserSchema> {
     const now = Date.now();
     const newUserUuid = uuid.v4();
 
@@ -107,7 +116,7 @@ export class UserRepo {
     });
   }
 
-  async createUser(data: ICreateUser) {
+  async createUser(data: ICreateUser): Promise<IUserSchema> {
     const now = Date.now();
     const newUserUuid = uuid.v4();
 
@@ -141,41 +150,43 @@ export class UserRepo {
     });
   }
 
-  async insertInitialUserProvider(tx: SQLiteTransaction<'async', any, any, any>, userId: string, isGuest: boolean) {
+  async insertInitialUserProvider(
+    tx: SQLiteTransaction<'async', any, any, any>,
+    userId: string,
+    isGuest: boolean,
+  ): Promise<IUserProviderSchema | undefined> {
     const cashProvider = (await tx.select().from(providers).where(eq(providers.identifier, 'cash')).limit(1))[0];
-    if (cashProvider) {
-      const now = Date.now();
+    if (!cashProvider) return;
 
-      const userInitProviderUuid = uuid.v4();
-      const [newUserProvider] = await tx
-        .insert(userProviders)
-        .values({
-          id: userInitProviderUuid,
-          providerId: cashProvider.id,
-          identifier: cashProvider.identifier,
-          userId: userId,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
+    const now = Date.now();
 
-      if (!isGuest) {
-        await this.syncQueueRepo.createSyncQueue(tx, {
-          entityId: newUserProvider.id,
-          entityType: 'USER_PROVIDER',
-          operation: 'CREATE',
-          retryCount: 0,
-          syncStatus: 'PENDING',
-        });
-      }
+    const userInitProviderUuid = uuid.v4();
+    const [newUserProvider] = await tx
+      .insert(userProviders)
+      .values({
+        id: userInitProviderUuid,
+        providerId: cashProvider.id,
+        identifier: cashProvider.identifier,
+        userId: userId,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
 
-      return newUserProvider;
+    if (!isGuest) {
+      await this.syncQueueRepo.createSyncQueue(tx, {
+        entityId: newUserProvider.id,
+        entityType: 'USER_PROVIDER',
+        operation: 'CREATE',
+        retryCount: 0,
+        syncStatus: 'PENDING',
+      });
     }
 
-    return null;
+    return newUserProvider;
   }
 
-  async createUserProvider(data: IUserProviderInsert) {
+  async createUserProvider(data: IUserProviderInsert): Promise<IUserProviderSchema | undefined> {
     const userId = this.userId;
     if (!userId) return;
 
@@ -206,7 +217,7 @@ export class UserRepo {
     });
   }
 
-  async updateUserProvider(id: string, data: IUserProviderInsert) {
+  async updateUserProvider(id: string, data: IUserProviderInsert): Promise<IUserProviderSchema[]> {
     const now = Date.now();
 
     return await db
@@ -215,10 +226,11 @@ export class UserRepo {
         ...data,
         updatedAt: now,
       })
-      .where(eq(userProviders.id, id));
+      .where(eq(userProviders.id, id))
+      .returning();
   }
 
-  async removeUserProvider(id: string) {
-    return await db.delete(userProviders).where(eq(userProviders.id, id));
+  async removeUserProvider(id: string): Promise<IUserProviderSchema[]> {
+    return await db.delete(userProviders).where(eq(userProviders.id, id)).returning();
   }
 }

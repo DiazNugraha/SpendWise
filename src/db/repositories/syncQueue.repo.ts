@@ -12,7 +12,10 @@ type ICreateSyncQueueInsert = {
 };
 
 export class SyncQueueRepo {
-  async createSyncQueue(tx: SQLiteTransaction<'async', any, any, any>, data: ICreateSyncQueueInsert) {
+  async createSyncQueue(
+    tx: SQLiteTransaction<'async', any, any, any>,
+    data: ICreateSyncQueueInsert,
+  ): Promise<ISyncQueueSchema> {
     const now = Date.now();
     const newUuid = uuid.v4();
 

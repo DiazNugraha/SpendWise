@@ -15,16 +15,19 @@ export class ProviderRepo {
     return await db.select().from(providers);
   }
 
-  async create(data: IProviderInsert) {
+  async create(data: IProviderInsert): Promise<IProviderSchema[]> {
     const newProviderId = uuid.v4();
 
-    return await db.insert(providers).values({
-      id: newProviderId,
-      ...data,
-    });
+    return await db
+      .insert(providers)
+      .values({
+        id: newProviderId,
+        ...data,
+      })
+      .returning();
   }
 
-  async createProviders(datas: IProviderInsert[]) {
+  async createProviders(datas: IProviderInsert[]): Promise<IProviderSchema[]> {
     const formattedDatas = await Promise.all(
       datas.map(async data => {
         const newUuid = uuid.v4();
@@ -32,6 +35,6 @@ export class ProviderRepo {
       }),
     );
 
-    return await db.insert(providers).values(formattedDatas);
+    return await db.insert(providers).values(formattedDatas).returning();
   }
 }
