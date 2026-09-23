@@ -22,7 +22,7 @@ const BudgetSummary: React.FC<IBudgetSummaryProps> = ({budgets}) => {
         {budgets.map(e => {
           const Icon = Icons[e.icon as keyof typeof Icons] as Icons.LucideIcon;
           return (
-            <ItemWrapper key={e.type}>
+            <ItemWrapper key={e.type} bgColor={e.iconColor}>
               <View className="flex flex-row gap-2 items-center">
                 {Icon && <Icon color={e.iconColor} />}
                 <View className="flex flex-col gap-2">
@@ -43,8 +43,16 @@ const BudgetSummary: React.FC<IBudgetSummaryProps> = ({budgets}) => {
   );
 };
 
-const ItemWrapper: React.FC<PropsWithChildren> = ({children}) => {
-  return <View className="rounded-xl flex flex-row justify-between items-center flex-1 p-3 bg-white">{children}</View>;
+const ItemWrapper: React.FC<PropsWithChildren & {bgColor: string}> = ({children, bgColor}) => {
+  return (
+    <View
+      className="rounded-xl flex flex-row justify-between items-center flex-1 p-3"
+      style={{
+        backgroundColor: `${bgColor}1A`,
+      }}>
+      {children}
+    </View>
+  );
 };
 
 export default BudgetSummary;
