@@ -1,13 +1,17 @@
-import {BudgetRepo} from '@/db/repositories';
+import {BudgetRepo, SyncQueueRepo} from '@/db/repositories';
 
-export const updateExpiredBudgets = async () => {
-  const budgetRepo = new BudgetRepo('');
+export const updateExpiredBudgets = async (userId: string): Promise<(IBudgetSchema & {totalSpent: number})[]> => {
+  const syncQueueRepo = new SyncQueueRepo();
+  const budgetRepo = new BudgetRepo(syncQueueRepo, userId);
+
   const activeBudgets = await budgetRepo.findActivesEachType();
   const now = new Date();
 
-  const updatedIds: (string | null)[] = await Promise.all(
+  const updatedBudgets: ((IBudgetSchema & {totalSpent: number}) | null | undefined)[] = await Promise.all(
     activeBudgets.map(async budget => {
       if (budget.endDate < now.getTime()) {
+        const totalSpent = await budgetRepo.sumExpensesWithinDate(budget.startDate, budget.endDate);
+
         if (budget.autoRenew) {
           const startDate = new Date(budget.startDate);
           startDate.setDate(startDate.getDate() + 1);
@@ -33,17 +37,17 @@ export const updateExpiredBudgets = async () => {
             userId: budget.userId,
           });
 
-          return budget.id;
+          return {...budget, totalSpent};
         }
 
         await budgetRepo.setToInactive(budget.id);
 
-        return budget.id;
+        return {...budget, totalSpent};
       }
-      return null;
     }),
   );
 
-  console.log('updatedIds', updatedIds);
-  console.log('activeBudgets', activeBudgets);
+  const filtered: (IBudgetSchema & {totalSpent: number})[] = updatedBudgets.filter(u => u !== null && u !== undefined);
+
+  return filtered;
 };
