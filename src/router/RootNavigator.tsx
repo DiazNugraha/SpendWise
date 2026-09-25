@@ -23,7 +23,7 @@ export function RootNavigator() {
 
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, Math.max(0, 1000 - elapsed));
+    }, Math.max(0, 200 - elapsed));
 
     return () => clearTimeout(timer);
   }, [loadingProfileData, navigation]);
