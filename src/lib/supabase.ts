@@ -3,8 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AppState, Platform} from 'react-native';
 import {PUBLIC_SUPABASE_URL, PUBLIC_PUBLISHABLE_KEY} from '@env';
 
-const supabaseUrl = PUBLIC_SUPABASE_URL;
-const supabasePublishableKey = PUBLIC_PUBLISHABLE_KEY;
+export const supabaseUrl = PUBLIC_SUPABASE_URL;
+export const supabasePublishableKey = PUBLIC_PUBLISHABLE_KEY;
 
 export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
   auth: {
