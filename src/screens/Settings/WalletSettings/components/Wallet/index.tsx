@@ -9,10 +9,9 @@ import {displayProviderIcon} from '@/constants';
 
 interface IWallet {
   id: string;
-  providerId: string;
   name: string;
   identifier: string;
-  providerIdentifier: string;
+  description: string | null;
 }
 
 export const WalletList: React.FC = () => {
@@ -30,10 +29,9 @@ export const WalletList: React.FC = () => {
       setSavedWallets(
         wallets?.map(e => ({
           id: e.user_providers.id,
-          name: e.providers?.name ?? '',
-          providerIdentifier: e.providers?.identifier ?? '',
+          name: e.providers?.label ?? '',
           identifier: e.user_providers.identifier,
-          providerId: e.user_providers.providerId,
+          description: e.user_providers.description,
         })),
       );
   }, [userRepo]);
@@ -118,22 +116,24 @@ interface IWalletItemProps {
 }
 
 const WalletItem: React.FC<IWalletItemProps> = ({wallet, onClick, onRemove}) => {
-  const {name, identifier, providerIdentifier} = wallet;
+  const {name, identifier, description} = wallet;
 
   return (
     <Pressable
       className="flex flex-row justify-between px-5 py-3 border-gray-300 border rounded-2xl items-center"
       onPress={() => {
-        if (providerIdentifier !== 'cash') onClick();
+        if (identifier !== 'cash') onClick();
       }}>
       <View className="flex flex-row gap-2 items-center">
-        {displayProviderIcon(wallet.providerIdentifier)}
+        {displayProviderIcon(wallet.identifier)}
         <View className="flex flex-col gap-2">
           <Text>{name}</Text>
-          {providerIdentifier !== 'cash' && <Text className="text-xs text-gray-600">{identifier}</Text>}
+          {identifier !== 'cash' && description !== null && (
+            <Text className="text-xs text-gray-600">{description}</Text>
+          )}
         </View>
       </View>
-      {providerIdentifier !== 'cash' && <Trash2Icon size={24} color={'red'} onPress={onRemove} />}
+      {identifier !== 'cash' && <Trash2Icon size={24} color={'red'} onPress={onRemove} />}
     </Pressable>
   );
 };

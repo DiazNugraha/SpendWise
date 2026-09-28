@@ -22,7 +22,7 @@ const ExpenseForm: React.FC = () => {
     const savedData = await expenseRepo.create({
       amount: values.amount ?? 0,
       title: title,
-      providerIds: values.providers.filter(e => e !== undefined),
+      userProviderIds: values.providers.filter(e => e !== undefined),
       categoryId: values.category,
       description: values.description,
     });

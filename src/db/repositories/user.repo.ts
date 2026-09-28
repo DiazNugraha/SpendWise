@@ -1,12 +1,13 @@
 import {eq, sql} from 'drizzle-orm';
 import {db} from '../client';
-import {providers, userProviders, users} from '../schema';
+import {userProviders, users} from '../schema';
 import uuid from 'react-native-uuid';
 import {SyncQueueRepo} from './syncQueue.repo';
 import {SQLiteTransaction} from 'drizzle-orm/sqlite-core';
+import {providerOptions} from '@/constants/options';
 
 type IUserProviderInsert = {
-  providerId: string;
+  description: string;
   identifier: string;
 };
 
@@ -49,19 +50,22 @@ export class UserRepo {
 
   async getUserProviders(): Promise<
     | {
-        providers: IProviderSchema | null;
+        providers: IOption<string> | null;
         user_providers: IUserProviderSchema;
       }[]
     | undefined
   > {
     if (!this.userId) return;
 
-    const result = await db
-      .select()
-      .from(userProviders)
-      .where(eq(userProviders.userId, this.userId))
-      .leftJoin(providers, eq(userProviders.providerId, providers.id));
-    return result;
+    const result = await db.select().from(userProviders).where(eq(userProviders.userId, this.userId));
+
+    return result.map(res => {
+      const provider = providerOptions.find(e => e.value === res.identifier);
+      return {
+        user_providers: res,
+        providers: provider ?? null,
+      };
+    });
   }
 
   async getUser(): Promise<IUserSchema[]> {
@@ -155,7 +159,7 @@ export class UserRepo {
     userId: string,
     isGuest: boolean,
   ): Promise<IUserProviderSchema | undefined> {
-    const cashProvider = (await tx.select().from(providers).where(eq(providers.identifier, 'cash')).limit(1))[0];
+    const cashProvider = providerOptions.find(e => e.value === 'cash');
     if (!cashProvider) return;
 
     const now = Date.now();
@@ -165,8 +169,7 @@ export class UserRepo {
       .insert(userProviders)
       .values({
         id: userInitProviderUuid,
-        providerId: cashProvider.id,
-        identifier: cashProvider.identifier,
+        identifier: cashProvider.value,
         userId: userId,
         createdAt: now,
         updatedAt: now,

@@ -11,7 +11,7 @@ type IExpenseInsert = {
   categoryId: string;
   amount: number;
   description?: string;
-  providerIds?: string[];
+  userProviderIds?: string[];
 };
 
 export class ExpenseRepo {
@@ -45,12 +45,12 @@ export class ExpenseRepo {
         })
         .returning();
 
-      let newExpenseProviders: {id: string; expenseId: string; providerId: string}[] = [];
+      let newExpenseProviders: {id: string; expenseId: string; userProviderId: string}[] = [];
       // link providers (many to many)
-      const formattedProviders = data.providerIds?.map(id => ({
+      const formattedProviders = data.userProviderIds?.map(id => ({
         id: uuid.v4(),
         expenseId: newExpense.id,
-        providerId: id,
+        userProviderId: id,
       }));
 
       if (formattedProviders?.length) {

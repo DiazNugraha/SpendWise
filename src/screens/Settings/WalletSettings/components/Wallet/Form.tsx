@@ -1,20 +1,20 @@
 import {InputField, SelectCarouselField} from '@/components';
-import {useProviderRepo, useUserRepo} from '@/hooks';
+import {useUserRepo} from '@/hooks';
 import {useFocusEffect} from '@react-navigation/native';
 import {Formik, FormikProps} from 'formik';
 import {useCallback, useMemo, useRef, useState} from 'react';
 import {Pressable, Text, View} from 'react-native';
 import Toast from 'react-native-toast-message';
+import {providerOptions as providerOptionCollections} from '@/constants/options';
 import * as yup from 'yup';
 
 interface IWallet {
   id: string;
-  providerId: string;
   identifier: string;
 }
 
 const walletSchema = yup.object({
-  providerId: yup.string().default('').required('Provider is required'),
+  description: yup.string().default('').required('Identifier is required'),
   identifier: yup.string().default('').required('Identifier is required'),
 });
 
@@ -27,7 +27,6 @@ interface IWalletModalProps {
 
 export const WalletForm: React.FC<IWalletModalProps> = ({selectedItem, onRefetch}) => {
   const userRepo = useUserRepo();
-  const providerRepo = useProviderRepo();
 
   const formRef = useRef<FormikProps<IWalletInput>>(null);
 
@@ -66,18 +65,18 @@ export const WalletForm: React.FC<IWalletModalProps> = ({selectedItem, onRefetch
   const initialValues = useMemo(() => walletSchema.getDefault(), []);
 
   const fetchProviderOptions = useCallback(async () => {
-    const providers = await providerRepo.findAll();
+    const providers = providerOptionCollections;
 
     const wallets = await userRepo.getUserProviders();
 
-    const walletCollection = wallets?.map(e => e.providers?.name ?? '') ?? [];
+    const walletCollection = wallets?.map(e => e.providers?.value ?? '') ?? [];
 
     setProviderOptions(
       providers
-        .filter(e => !walletCollection.includes(e.name))
-        .map(provider => ({label: provider.name, value: provider.id})),
+        .filter(e => !walletCollection.includes(e.value))
+        .map(provider => ({label: provider.label, value: provider.value})),
     );
-  }, [userRepo, providerRepo]);
+  }, [userRepo]);
 
   useFocusEffect(
     useCallback(() => {
@@ -89,7 +88,7 @@ export const WalletForm: React.FC<IWalletModalProps> = ({selectedItem, onRefetch
         formRef.current.resetForm({
           values: walletSchema.cast({
             identifier: selectedItem.identifier,
-            providerId: selectedItem.providerId,
+            description: selectedItem.identifier,
           }),
         });
       } else {
@@ -97,15 +96,16 @@ export const WalletForm: React.FC<IWalletModalProps> = ({selectedItem, onRefetch
       }
     }, [selectedItem, initialValues, fetchProviderOptions]),
   );
+
   return (
     <Formik innerRef={formRef} initialValues={initialValues} validationSchema={walletSchema} onSubmit={handleOnSubmit}>
       {({handleSubmit}) => (
         <View className="flex flex-col flex-1 justify-between">
           <View className="flex flex-col gap-2">
             {!selectedItem && (
-              <SelectCarouselField name="providerId" label="Provider" required options={providerOptions} />
+              <SelectCarouselField name="identifier" label="Provider" required options={providerOptions} />
             )}
-            <InputField name="identifier" label="Identifier" required placeholder="Your wallet identifier" />
+            <InputField name="description" label="Identifier" required placeholder="Your wallet identifier" />
           </View>
           <Pressable className="main-button-container" onPress={handleSubmit}>
             <Text className="font-medium text-white">Submit</Text>

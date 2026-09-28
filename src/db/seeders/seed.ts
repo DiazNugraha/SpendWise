@@ -1,5 +1,4 @@
 import {sqlite} from '../client';
-import {addProvidersSeeder} from './add_providers';
 
 export async function seedDatabase() {
   // 1. create seed tracker table
@@ -21,9 +20,6 @@ export async function seedDatabase() {
 
   // 3. run seeders
   console.log('🌱 Running seed...');
-
-  // seed 01: add providers
-  await addProvidersSeeder();
 
   // 4. mark as seeded
   await sqlite.execute(`INSERT INTO __seeds (id) VALUES (?)`, ['init']);

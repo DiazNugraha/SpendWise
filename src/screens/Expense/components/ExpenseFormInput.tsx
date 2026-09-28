@@ -32,10 +32,10 @@ const ExpenseFormInput: React.FC<IExpenseFormProps> = ({isLoading}) => {
     if (!datas) return;
     setProviderOptions(
       datas.map(data => {
-        const icon = data.providers?.identifier ? displayProviderIcon(data.providers?.identifier) : undefined;
+        const icon = data.providers?.value ? displayProviderIcon(data.providers?.value) : undefined;
         return {
-          value: data.providers?.id ?? '',
-          label: data.providers?.name ?? '',
+          value: data.user_providers.id ?? '',
+          label: data.providers?.label ?? '',
           icon: icon,
         };
       }),

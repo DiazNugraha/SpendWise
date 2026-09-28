@@ -23,5 +23,5 @@ interface IExpenseSchema {
 interface IExpenseProviderSchema {
   id: string;
   expenseId: string;
-  providerId: string;
+  userProviderId: string;
 }

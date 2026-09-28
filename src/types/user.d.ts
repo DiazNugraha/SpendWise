@@ -13,8 +13,8 @@ interface IUserSchema {
 interface IUserProviderSchema {
   id: string;
   userId: string;
-  providerId: string;
   identifier: string;
+  description: string | null;
   createdAt: number;
   updatedAt: number;
 }
