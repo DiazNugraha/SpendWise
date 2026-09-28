@@ -127,6 +127,13 @@
       "when": 1790605522278,
       "tag": "0017_tranquil_skullbuster",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1790606784658,
+      "tag": "0018_yielding_bloodstorm",
+      "breakpoints": true
     }
   ]
 }
