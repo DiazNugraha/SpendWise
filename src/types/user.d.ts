@@ -4,7 +4,7 @@ interface IUserSchema {
   lastName: string | null;
   email: string | null;
   primaryCurrencyCode: string | null;
-  isGuest: boolean;
+  isGuest?: boolean;
   avatarUrl: string | null;
   createdAt: number;
   updatedAt: number;

@@ -1,8 +1,9 @@
 import uuid from 'react-native-uuid';
-import {budgets, expenseProviders, expenses, providers, syncQueues, userProviders, users} from '../schema';
+import {budgets, expenseProviders, expenses, syncQueues, userProviders, users} from '../schema';
 import {SQLiteTransaction} from 'drizzle-orm/sqlite-core';
 import {db} from '../client';
 import {and, eq, inArray} from 'drizzle-orm';
+import {filterSyncQueueIdsByEntityType} from '@/helpers';
 
 type ICreateSyncQueueInsert = {
   entityType: entityType;
@@ -12,6 +13,8 @@ type ICreateSyncQueueInsert = {
   retryCount: number;
   lastError?: string;
 };
+
+type IAllSchema = IBudgetSchema | IExpenseSchema | IExpenseProviderSchema | IUserSchema | IUserProviderSchema;
 
 export class SyncQueueRepo {
   async createSyncQueue(
@@ -34,76 +37,120 @@ export class SyncQueueRepo {
     return newQueue;
   }
 
-  async getPendings() {
-    const pendings = await db
-      .select()
-      .from(syncQueues)
-      .where(and(eq(syncQueues.syncStatus, 'PENDING'), eq(syncQueues.operation, 'CREATE')));
+  async getSyncDatas({syncStatus, operation}: {syncStatus?: string; operation?: string}): Promise<
+    {
+      key: string;
+      values: IAllSchema[];
+    }[]
+  > {
+    const filters: any[] = [];
 
-    const resultMap = new Map<string, string[]>();
-
-    function addToMap(key: string, value: string) {
-      const items = resultMap.get(key) ?? [];
-      items.push(value);
-      resultMap.set(key, items);
+    if (syncStatus) {
+      filters.push(eq(syncQueues.syncStatus, syncStatus));
     }
 
+    if (operation) {
+      filters.push(eq(syncQueues.operation, operation));
+    }
+
+    const pendings: ISyncQueueSchema[] = await db
+      .select()
+      .from(syncQueues)
+      .where(and(...filters));
+
+    const results = await filterSyncQueueIdsByEntityType(pendings);
+
+    const resultMap = new Map<string, IAllSchema[]>();
+
+    function addToMap(key: string, datas: IAllSchema[]) {
+      let current = resultMap.get(key) ?? [];
+      current = [...current, ...datas];
+      resultMap.set(key, current);
+    }
+
+    const queries = {
+      BUDGET: (ids: string[]) =>
+        db
+          .select({
+            id: budgets.id,
+            createdAt: budgets.createdAt,
+            updatedAt: budgets.updatedAt,
+            title: budgets.title,
+            type: budgets.type,
+            amount: budgets.amount,
+            icon: budgets.icon,
+            iconColor: budgets.iconColor,
+            enableNotify: budgets.enableNotify,
+            autoRenew: budgets.autoRenew,
+            isActive: budgets.isActive,
+            startDate: budgets.startDate,
+            endDate: budgets.endDate,
+            userId: budgets.userId,
+          })
+          .from(budgets)
+          .where(inArray(budgets.id, ids)),
+      EXPENSE: (ids: string[]) =>
+        db
+          .select({
+            id: expenses.id,
+            createdAt: expenses.createdAt,
+            updatedAt: expenses.updatedAt,
+            title: expenses.title,
+            categoryId: expenses.categoryId,
+            amount: expenses.amount,
+            description: expenses.description,
+            userId: expenses.userId,
+          })
+          .from(expenses)
+          .where(inArray(expenses.id, ids)),
+      EXPENSE_PROVIDER: (ids: string[]) =>
+        db
+          .select({
+            id: expenseProviders.id,
+            expenseId: expenseProviders.expenseId,
+            userProviderId: expenseProviders.userProviderId,
+          })
+          .from(expenseProviders)
+          .where(inArray(expenseProviders.id, ids)),
+      USER: (ids: string[]) =>
+        db
+          .select({
+            id: users.id,
+            createdAt: users.createdAt,
+            updatedAt: users.updatedAt,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+            primaryCurrencyCode: users.primaryCurrencyCode,
+            avatarUrl: users.avatarUrl,
+          })
+          .from(users)
+          .where(inArray(users.id, ids)),
+      USER_PROVIDER: (ids: string[]) =>
+        db
+          .select({
+            id: userProviders.id,
+            createdAt: userProviders.createdAt,
+            updatedAt: userProviders.updatedAt,
+            identifier: userProviders.identifier,
+            description: userProviders.description,
+            userId: userProviders.userId,
+          })
+          .from(userProviders)
+          .where(inArray(userProviders.id, ids)),
+    };
+
     await Promise.all(
-      pendings.map(async p => {
-        const id = p.entityId;
-        switch (p.entityType) {
-          case 'BUDGET':
-            addToMap('BUDGET', id);
-            break;
-          case 'EXPENSE':
-            addToMap('EXPENSE', id);
-            break;
-          case 'EXPENSE_PROVIDER':
-            addToMap('EXPENSE_PROVIDER', id);
-            break;
-          case 'PROVIDER':
-            addToMap('PROVIDER', id);
-            break;
-          case 'USER':
-            addToMap('USER', id);
+      results.map(async res => {
+        const query = queries[res.key as keyof typeof queries];
 
-            break;
-          case 'USER_PROVIDER':
-            addToMap('USER_PROVIDER', id);
-            break;
-          default:
-            break;
-        }
+        if (!query) return;
+
+        const data = await query(res.values);
+        addToMap(res.key.toLowerCase(), data);
       }),
     );
 
-    const results = Array.from(resultMap).map(([key, values]) => ({
-      key,
-      values,
-    }));
-
-    const pendingItems = await Promise.all(
-      results.map(async r => {
-        switch (r.key) {
-          case 'BUDGET':
-            return await db.select().from(budgets).where(inArray(budgets.id, r.values));
-          case 'EXPENSE':
-            return await db.select().from(expenses).where(inArray(expenses.id, r.values));
-          case 'EXPENSE_PROVIDER':
-            return await db.select().from(expenseProviders).where(inArray(expenseProviders.id, r.values));
-          case 'PROVIDER':
-            return await db.select().from(providers).where(inArray(providers.id, r.values));
-          case 'USER':
-            return await db.select().from(users).where(inArray(users.id, r.values));
-          case 'USER_PROVIDER':
-            return await db.select().from(userProviders).where(inArray(userProviders.id, r.values));
-          default:
-        }
-      }),
-    );
-
-    const filtered = pendingItems.filter(e => e !== undefined && e.length > 0);
-
-    return filtered.flat();
+    return Array.from(resultMap).map(([key, values]) => ({key, values}));
   }
 }
