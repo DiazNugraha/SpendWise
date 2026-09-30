@@ -3,7 +3,14 @@ import {Button, DevSettings, ScrollView, Text, View} from 'react-native';
 import Header from './components/Header';
 import History from './components/History';
 import Navigator from './components/Navigator';
-import {formatDate, NumberFormatter, resetDatabase, seedWeeklyAndExpenses, updateExpiredBudgets} from '@/helpers';
+import {
+  formatDate,
+  NumberFormatter,
+  resetDatabase,
+  seedWeeklyAndExpenses,
+  syncPendingData,
+  updateExpiredBudgets,
+} from '@/helpers';
 import {useAlert, useProfile} from '@/hooks';
 import * as Icons from 'lucide-react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -45,6 +52,7 @@ export const Home: React.FC = () => {
   const handleUpdateExpiredBudgets = useCallback(async () => {
     if (!user?.id) return;
     const updatedBudgets = await updateExpiredBudgets(user?.id);
+    await syncPendingData(user.id);
 
     if (updatedBudgets.length > 0) {
       alert({
