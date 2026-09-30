@@ -17,6 +17,8 @@ type ICreateSyncQueueInsert = {
 type IAllSchema = IBudgetSchema | IExpenseSchema | IExpenseProviderSchema | IUserSchema | IUserProviderSchema;
 
 export class SyncQueueRepo {
+  constructor(private readonly userId?: string) {}
+
   async createSyncQueue(
     tx: SQLiteTransaction<'async', any, any, any>,
     data: ICreateSyncQueueInsert,
@@ -43,6 +45,9 @@ export class SyncQueueRepo {
       values: IAllSchema[];
     }[]
   > {
+    const userId = this.userId;
+    if (!userId) return [];
+
     const filters: any[] = [];
 
     if (syncStatus) {
@@ -88,7 +93,7 @@ export class SyncQueueRepo {
             userId: budgets.userId,
           })
           .from(budgets)
-          .where(inArray(budgets.id, ids)),
+          .where(and(inArray(budgets.id, ids), eq(budgets.userId, userId))),
       EXPENSE: (ids: string[]) =>
         db
           .select({
@@ -102,7 +107,7 @@ export class SyncQueueRepo {
             userId: expenses.userId,
           })
           .from(expenses)
-          .where(inArray(expenses.id, ids)),
+          .where(and(inArray(expenses.id, ids), eq(expenses.userId, userId))),
       EXPENSE_PROVIDER: (ids: string[]) =>
         db
           .select({
@@ -125,7 +130,7 @@ export class SyncQueueRepo {
             avatarUrl: users.avatarUrl,
           })
           .from(users)
-          .where(inArray(users.id, ids)),
+          .where(and(inArray(users.id, ids), eq(users.id, userId))),
       USER_PROVIDER: (ids: string[]) =>
         db
           .select({
@@ -137,7 +142,7 @@ export class SyncQueueRepo {
             userId: userProviders.userId,
           })
           .from(userProviders)
-          .where(inArray(userProviders.id, ids)),
+          .where(and(inArray(userProviders.id, ids), eq(userProviders.userId, userId))),
     };
 
     await Promise.all(
@@ -152,5 +157,43 @@ export class SyncQueueRepo {
     );
 
     return Array.from(resultMap).map(([key, values]) => ({key, values}));
+  }
+
+  async updateBatch({
+    operation,
+    syncStatus,
+    entityType,
+    retryCount,
+    lastError,
+    entityIds,
+  }: {
+    operation: string;
+    syncStatus: string;
+    entityType: string;
+    retryCount: number;
+    lastError?: string;
+    entityIds: string[];
+  }) {
+    return await db
+      .update(syncQueues)
+      .set({
+        operation,
+        syncStatus,
+        retryCount,
+        entityType,
+        lastError,
+      })
+      .where(
+        and(
+          inArray(syncQueues.entityId, entityIds),
+          eq(syncQueues.operation, operation),
+          eq(syncQueues.entityType, entityType),
+        ),
+      )
+      .returning();
+  }
+
+  async getOneByEntityId(entityId: string) {
+    return (await db.select().from(syncQueues).where(eq(syncQueues.entityId, entityId)))[0];
   }
 }

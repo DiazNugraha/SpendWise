@@ -3,8 +3,8 @@ import {supabase} from '@/lib';
 
 type IAllSchema = IBudgetSchema | IExpenseSchema | IExpenseProviderSchema | IUserSchema | IUserProviderSchema;
 
-export const synchPendings = async () => {
-  const syncQueueRepo = new SyncQueueRepo();
+export const syncPendingData = async (userId: string) => {
+  const syncQueueRepo = new SyncQueueRepo(userId);
 
   const pendings = await syncQueueRepo.getSyncDatas({
     operation: 'CREATE',
@@ -14,30 +14,54 @@ export const synchPendings = async () => {
   await insertSyncToSupabase(pendings);
 };
 
+const MAX_RETRIES = 5;
+
 const upsertToSupabase = async (key: string, datas: {key: string; values: IAllSchema[]}[]) => {
+  const syncQueueRepo = new SyncQueueRepo();
+
   const selectedData = datas.find(e => e.key === key);
 
-  if (!selectedData) return;
+  if (!selectedData || selectedData.values.length === 0) return;
 
-  return await supabase.from(key).upsert(selectedData?.values).select();
+  const entityIds = selectedData.values.map(e => e.id);
+  const entityType = key.toUpperCase();
+
+  try {
+    const {error} = await supabase.from(key).upsert(selectedData?.values).select();
+
+    if (error) throw error;
+
+    return await syncQueueRepo.updateBatch({
+      operation: 'CREATE',
+      syncStatus: 'SYNCED',
+      entityType,
+      retryCount: 0,
+      entityIds,
+    });
+  } catch (error) {
+    const item = await syncQueueRepo.getOneByEntityId(entityIds[0]);
+
+    const retryCount = item.retryCount + 1;
+
+    await syncQueueRepo.updateBatch({
+      operation: 'CREATE',
+      syncStatus: retryCount >= MAX_RETRIES ? 'FAILED' : 'PENDING',
+      retryCount,
+      entityType,
+      lastError: error instanceof Error ? error.message : String(error),
+      entityIds,
+    });
+  }
 };
 
 const insertSyncToSupabase = async (datas: {key: string; values: IAllSchema[]}[]) => {
-  const results = await Promise.all([
+  await Promise.all([
     await upsertToSupabase('user', datas),
     await upsertToSupabase('user_provider', datas),
     await upsertToSupabase('budget', datas),
     await upsertToSupabase('expense', datas),
     await upsertToSupabase('expense_provider', datas),
   ]);
-
-  const error = results.filter(e => e !== undefined).find(result => result.error)?.error;
-
-  if (error) {
-    throw error;
-  }
-
-  return results;
 };
 
 export const filterSyncQueueIdsByEntityType = async (collections: ISyncQueueSchema[]) => {
