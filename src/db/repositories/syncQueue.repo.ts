@@ -42,7 +42,7 @@ export class SyncQueueRepo {
   async getSyncDatas({syncStatus, operation}: {syncStatus?: string; operation?: string}): Promise<
     {
       key: string;
-      values: IAllSchema[];
+      values: (IAllSchema | string)[];
     }[]
   > {
     const userId = this.userId;
@@ -65,9 +65,9 @@ export class SyncQueueRepo {
 
     const results = await filterSyncQueueIdsByEntityType(pendings);
 
-    const resultMap = new Map<string, IAllSchema[]>();
+    const resultMap = new Map<string, (IAllSchema | string)[]>();
 
-    function addToMap(key: string, datas: IAllSchema[]) {
+    function addToMap(key: string, datas: (IAllSchema | string)[]) {
       let current = resultMap.get(key) ?? [];
       current = [...current, ...datas];
       resultMap.set(key, current);
@@ -145,16 +145,26 @@ export class SyncQueueRepo {
           .where(and(inArray(userProviders.id, ids), eq(userProviders.userId, userId))),
     };
 
-    await Promise.all(
-      results.map(async res => {
-        const query = queries[res.key as keyof typeof queries];
+    if (operation === 'CREATE' || operation === 'UPDATE') {
+      await Promise.all(
+        results.map(async res => {
+          const query = queries[res.key as keyof typeof queries];
 
-        if (!query) return;
+          if (!query) return;
 
-        const data = await query(res.values);
-        addToMap(res.key.toLowerCase(), data);
-      }),
-    );
+          const data = await query(res.values);
+          addToMap(res.key.toLowerCase(), data);
+        }),
+      );
+    }
+
+    if (operation === 'DELETE') {
+      await Promise.all(
+        results.map(async res => {
+          addToMap(res.key.toLowerCase(), res.values);
+        }),
+      );
+    }
 
     return Array.from(resultMap).map(([key, values]) => ({key, values}));
   }
