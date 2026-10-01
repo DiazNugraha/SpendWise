@@ -3,25 +3,52 @@ import {supabase} from '@/lib';
 
 type IAllSchema = IBudgetSchema | IExpenseSchema | IExpenseProviderSchema | IUserSchema | IUserProviderSchema;
 
+const MAX_RETRIES = 5;
+
 export const syncPendingData = async (userId: string) => {
   const syncQueueRepo = new SyncQueueRepo(userId);
 
-  const pendings = await syncQueueRepo.getSyncDatas({
+  const createdPendingItems = await syncQueueRepo.getSyncDatas({
     operation: 'CREATE',
     syncStatus: 'PENDING',
   });
 
-  await insertSyncToSupabase(pendings);
+  const deletedPendingItems = await syncQueueRepo.getSyncDatas({
+    operation: 'DELETE',
+    syncStatus: 'PENDING',
+  });
+
+  // insert pendings
+  await insertSyncToSupabase(createdPendingItems);
+
+  // delete pendings
+  await deleteSyncToSupabase(deletedPendingItems);
 };
 
-const MAX_RETRIES = 5;
+const insertSyncToSupabase = async (datas: {key: string; values: (IAllSchema | string)[]}[]) => {
+  await Promise.all([
+    await upsertToSupabase('user', datas),
+    await upsertToSupabase('user_provider', datas),
+    await upsertToSupabase('budget', datas),
+    await upsertToSupabase('expense', datas),
+    await upsertToSupabase('expense_provider', datas),
+  ]);
+};
 
-const upsertToSupabase = async (key: string, datas: {key: string; values: IAllSchema[]}[]) => {
+const upsertToSupabase = async (key: string, datas: {key: string; values: (IAllSchema | string)[]}[]) => {
   const syncQueueRepo = new SyncQueueRepo();
 
-  const selectedData = datas.find(e => e.key === key);
+  const findData = datas.find(e => e.key === key);
+  if (
+    !findData ||
+    findData.values.length === 0 ||
+    !Array.isArray(findData.values) ||
+    !findData.values.every(value => typeof value === 'object')
+  ) {
+    return;
+  }
 
-  if (!selectedData || selectedData.values.length === 0) return;
+  const selectedData = findData as {key: string; values: IAllSchema[]};
 
   const entityIds = selectedData.values.map(e => e.id);
   const entityType = key.toUpperCase();
@@ -54,14 +81,61 @@ const upsertToSupabase = async (key: string, datas: {key: string; values: IAllSc
   }
 };
 
-const insertSyncToSupabase = async (datas: {key: string; values: IAllSchema[]}[]) => {
+const deleteSyncToSupabase = async (datas: {key: string; values: (IAllSchema | string)[]}[]) => {
   await Promise.all([
-    await upsertToSupabase('user', datas),
-    await upsertToSupabase('user_provider', datas),
-    await upsertToSupabase('budget', datas),
-    await upsertToSupabase('expense', datas),
-    await upsertToSupabase('expense_provider', datas),
+    await deleteToSupabase('user', datas),
+    await deleteToSupabase('user_provider', datas),
+    await deleteToSupabase('budget', datas),
+    await deleteToSupabase('expense', datas),
+    await deleteToSupabase('expense_provider', datas),
   ]);
+};
+
+const deleteToSupabase = async (key: string, datas: {key: string; values: (IAllSchema | string)[]}[]) => {
+  const syncQueueRepo = new SyncQueueRepo();
+
+  const findData = datas.find(e => e.key === key);
+
+  if (
+    !findData ||
+    findData.values.length === 0 ||
+    !Array.isArray(findData.values) ||
+    !findData.values.every(value => typeof value === 'string')
+  ) {
+    return;
+  }
+
+  const selectedData = findData as {key: string; values: string[]};
+
+  const entityIds = selectedData.values.map(e => e);
+  const entityType = key.toUpperCase();
+
+  try {
+    const {error} = await supabase.from(key).delete().in('id', entityIds);
+
+    if (error) throw error;
+
+    return await syncQueueRepo.updateBatch({
+      operation: 'DELETE',
+      syncStatus: 'SYNCED',
+      entityType,
+      retryCount: 0,
+      entityIds,
+    });
+  } catch (error) {
+    const item = await syncQueueRepo.getOneByEntityId(entityIds[0]);
+
+    const retryCount = item.retryCount + 1;
+
+    await syncQueueRepo.updateBatch({
+      operation: 'DELETE',
+      syncStatus: retryCount >= MAX_RETRIES ? 'FAILED' : 'PENDING',
+      retryCount,
+      entityType,
+      lastError: error instanceof Error ? error.message : String(error),
+      entityIds,
+    });
+  }
 };
 
 export const filterSyncQueueIdsByEntityType = async (collections: ISyncQueueSchema[]) => {
