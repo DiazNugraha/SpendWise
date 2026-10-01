@@ -274,7 +274,21 @@ export class BudgetRepo {
     };
   }
 
-  async deleteBudgetById(id: string): Promise<IBudgetSchema[]> {
-    return await db.delete(budgets).where(eq(budgets.id, id)).returning();
+  async deleteBudgetById(id: string): Promise<IBudgetSchema> {
+    return await db.transaction(async tx => {
+      const [deletedItem] = await tx.delete(budgets).where(eq(budgets.id, id)).returning();
+
+      if (deletedItem) {
+        await this.syncQueueRepo.createSyncQueue(tx, {
+          entityId: deletedItem.id,
+          entityType: 'BUDGET',
+          operation: 'DELETE',
+          retryCount: 0,
+          syncStatus: 'PENDING',
+        });
+      }
+
+      return deletedItem;
+    });
   }
 }

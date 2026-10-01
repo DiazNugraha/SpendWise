@@ -233,7 +233,21 @@ export class UserRepo {
       .returning();
   }
 
-  async removeUserProvider(id: string): Promise<IUserProviderSchema[]> {
-    return await db.delete(userProviders).where(eq(userProviders.id, id)).returning();
+  async removeUserProvider(id: string): Promise<IUserProviderSchema> {
+    return await db.transaction(async tx => {
+      const [deletedItem] = await tx.delete(userProviders).where(eq(userProviders.id, id)).returning();
+
+      if (deletedItem) {
+        await this.syncQueueRepo.createSyncQueue(tx, {
+          entityId: deletedItem.id,
+          entityType: 'USER_PROVIDER',
+          operation: 'DELETE',
+          retryCount: 0,
+          syncStatus: 'PENDING',
+        });
+      }
+
+      return deletedItem;
+    });
   }
 }

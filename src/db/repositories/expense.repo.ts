@@ -140,7 +140,21 @@ export class ExpenseRepo {
   }
 
   async deleteById(id: string) {
-    return await db.delete(expenses).where(eq(expenses.id, id));
+    return await db.transaction(async tx => {
+      const [deletedItem] = await tx.delete(expenses).where(eq(expenses.id, id)).returning();
+
+      if (deletedItem) {
+        await this.syncQueueRepo.createSyncQueue(tx, {
+          entityId: deletedItem.id,
+          entityType: 'EXPENSE',
+          operation: 'DELETE',
+          retryCount: 0,
+          syncStatus: 'PENDING',
+        });
+      }
+
+      return deletedItem;
+    });
   }
 
   async sumExpensesWithinDate(startDate: number, endDate: number): Promise<number> {
