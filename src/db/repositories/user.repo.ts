@@ -76,14 +76,31 @@ export class UserRepo {
       .orderBy(sql`${users.createdAt} desc`);
   }
 
-  async updateUser(userId: string, data: IUserInput): Promise<IUserSchema[]> {
-    return await db
-      .update(users)
-      .set({
-        ...data,
-      })
-      .where(eq(users.id, userId))
-      .returning();
+  async updateUser(data: IUserInput): Promise<IUserSchema | undefined> {
+    const userId = this.userId;
+    if (!userId) return;
+
+    return await db.transaction(async tx => {
+      const [updatedItem] = await tx
+        .update(users)
+        .set({
+          ...data,
+        })
+        .where(eq(users.id, userId))
+        .returning();
+
+      if (updatedItem) {
+        await this.syncQueueRepo.createSyncQueue(tx, {
+          entityId: updatedItem.id,
+          entityType: 'USER',
+          operation: 'UPDATE',
+          retryCount: 0,
+          syncStatus: 'PENDING',
+        });
+      }
+
+      return updatedItem;
+    });
   }
 
   async updateUserSyncEmail(userId: string, data: IUpdateUserSyncEmail): Promise<IUserSchema[]> {
@@ -220,17 +237,31 @@ export class UserRepo {
     });
   }
 
-  async updateUserProvider(id: string, data: IUserProviderInsert): Promise<IUserProviderSchema[]> {
+  async updateUserProvider(id: string, data: IUserProviderInsert): Promise<IUserProviderSchema> {
     const now = Date.now();
 
-    return await db
-      .update(userProviders)
-      .set({
-        ...data,
-        updatedAt: now,
-      })
-      .where(eq(userProviders.id, id))
-      .returning();
+    return await db.transaction(async tx => {
+      const [updatedItem] = await tx
+        .update(userProviders)
+        .set({
+          ...data,
+          updatedAt: now,
+        })
+        .where(eq(userProviders.id, id))
+        .returning();
+
+      if (updatedItem) {
+        await this.syncQueueRepo.createSyncQueue(tx, {
+          entityId: updatedItem.id,
+          entityType: 'USER_PROVIDER',
+          operation: 'UPDATE',
+          retryCount: 0,
+          syncStatus: 'PENDING',
+        });
+      }
+
+      return updatedItem;
+    });
   }
 
   async removeUserProvider(id: string): Promise<IUserProviderSchema> {

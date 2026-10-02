@@ -118,27 +118,42 @@ export class BudgetRepo {
     });
   }
 
-  async update(id: string, data: IBudgetInsert): Promise<IBudgetSchema[] | undefined> {
-    if (!this.userId) return;
+  async update(id: string, data: IBudgetInsert): Promise<IBudgetSchema | undefined> {
+    const userId = this.userId;
+    if (!userId) return;
 
     const now = Date.now();
 
-    return await db
-      .update(budgets)
-      .set({
-        title: data.title,
-        type: data.type,
-        amount: data.amount,
-        icon: data.icon,
-        iconColor: data.iconColor,
-        enableNotify: data.enableNotify,
-        startDate: data.startDate.getTime(),
-        endDate: data.endDate.getTime(),
-        autoRenew: data.autoRenew,
-        updatedAt: now,
-      })
-      .where(and(eq(budgets.id, id), eq(budgets.userId, this.userId)))
-      .returning();
+    return await db.transaction(async tx => {
+      const [updatedItem] = await tx
+        .update(budgets)
+        .set({
+          title: data.title,
+          type: data.type,
+          amount: data.amount,
+          icon: data.icon,
+          iconColor: data.iconColor,
+          enableNotify: data.enableNotify,
+          startDate: data.startDate.getTime(),
+          endDate: data.endDate.getTime(),
+          autoRenew: data.autoRenew,
+          updatedAt: now,
+        })
+        .where(and(eq(budgets.id, id), eq(budgets.userId, userId)))
+        .returning();
+
+      if (updatedItem) {
+        await this.syncQueueRepo.createSyncQueue(tx, {
+          entityId: updatedItem.id,
+          entityType: 'BUDGET',
+          operation: 'UPDATE',
+          retryCount: 0,
+          syncStatus: 'PENDING',
+        });
+      }
+
+      return updatedItem;
+    });
   }
 
   async setToInactive(id: string): Promise<IBudgetSchema[]> {

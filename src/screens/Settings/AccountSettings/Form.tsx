@@ -42,9 +42,7 @@ export const AccountForm: React.FC = () => {
   };
 
   const handleOnSubmit = async (values: IAccountInput) => {
-    if (!userProfile?.id) return;
-
-    const result = await userRepo.updateUser(userProfile.id, {
+    const result = await userRepo.updateUser({
       ...values,
     });
 
