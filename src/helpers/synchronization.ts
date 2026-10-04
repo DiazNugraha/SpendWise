@@ -18,24 +18,36 @@ export const syncPendingData = async (userId: string) => {
     syncStatus: 'PENDING',
   });
 
+  const updatedPendingItems = await syncQueueRepo.getSyncDatas({
+    operation: 'UPDATE',
+    syncStatus: 'PENDING',
+  });
+
   // insert pendings
-  await insertSyncToSupabase(createdPendingItems);
+  await upsertSyncToSupabase(createdPendingItems, 'CREATE');
 
   // delete pendings
   await deleteSyncToSupabase(deletedPendingItems);
+
+  // update pendings
+  await upsertSyncToSupabase(updatedPendingItems, 'UPDATE');
 };
 
-const insertSyncToSupabase = async (datas: {key: string; values: (IAllSchema | string)[]}[]) => {
+const upsertSyncToSupabase = async (datas: {key: string; values: (IAllSchema | string)[]}[], operation: string) => {
   await Promise.all([
-    await upsertToSupabase('user', datas),
-    await upsertToSupabase('user_provider', datas),
-    await upsertToSupabase('budget', datas),
-    await upsertToSupabase('expense', datas),
-    await upsertToSupabase('expense_provider', datas),
+    await upsertToSupabase('user', datas, operation),
+    await upsertToSupabase('user_provider', datas, operation),
+    await upsertToSupabase('budget', datas, operation),
+    await upsertToSupabase('expense', datas, operation),
+    await upsertToSupabase('expense_provider', datas, operation),
   ]);
 };
 
-const upsertToSupabase = async (key: string, datas: {key: string; values: (IAllSchema | string)[]}[]) => {
+const upsertToSupabase = async (
+  key: string,
+  datas: {key: string; values: (IAllSchema | string)[]}[],
+  operation: string,
+) => {
   const syncQueueRepo = new SyncQueueRepo();
 
   const findData = datas.find(e => e.key === key);
@@ -59,7 +71,7 @@ const upsertToSupabase = async (key: string, datas: {key: string; values: (IAllS
     if (error) throw error;
 
     return await syncQueueRepo.updateBatch({
-      operation: 'CREATE',
+      operation: operation,
       syncStatus: 'SYNCED',
       entityType,
       retryCount: 0,
@@ -71,7 +83,7 @@ const upsertToSupabase = async (key: string, datas: {key: string; values: (IAllS
     const retryCount = item.retryCount + 1;
 
     await syncQueueRepo.updateBatch({
-      operation: 'CREATE',
+      operation: operation,
       syncStatus: retryCount >= MAX_RETRIES ? 'FAILED' : 'PENDING',
       retryCount,
       entityType,
