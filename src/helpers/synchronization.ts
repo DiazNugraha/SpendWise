@@ -26,11 +26,11 @@ export const syncPendingData = async (userId: string) => {
   // insert pendings
   await upsertSyncToSupabase(createdPendingItems, 'CREATE');
 
-  // delete pendings
-  await deleteSyncToSupabase(deletedPendingItems);
-
   // update pendings
   await upsertSyncToSupabase(updatedPendingItems, 'UPDATE');
+
+  // delete pendings
+  await deleteSyncToSupabase(deletedPendingItems);
 };
 
 const upsertSyncToSupabase = async (datas: {key: string; values: (IAllSchema | string)[]}[], operation: string) => {
