@@ -11,6 +11,7 @@ import * as yup from 'yup';
 interface IWallet {
   id: string;
   identifier: string;
+  description: string | null;
 }
 
 const walletSchema = yup.object({
@@ -88,7 +89,7 @@ export const WalletForm: React.FC<IWalletModalProps> = ({selectedItem, onRefetch
         formRef.current.resetForm({
           values: walletSchema.cast({
             identifier: selectedItem.identifier,
-            description: selectedItem.identifier,
+            description: selectedItem.description,
           }),
         });
       } else {
