@@ -3,7 +3,7 @@ import {currencyOptions} from '@/constants/options';
 import {useProfile, useUserRepo} from '@/hooks';
 import {useFocusEffect} from '@react-navigation/native';
 import {Formik, FormikProps} from 'formik';
-import {useCallback, useMemo, useRef, useState} from 'react';
+import {useCallback, useMemo, useRef} from 'react';
 import {View} from 'react-native';
 import Toast from 'react-native-toast-message';
 import * as yup from 'yup';
@@ -19,14 +19,11 @@ export const CurrencyForm: React.FC = () => {
   const userRepo = useUserRepo();
 
   const formRef = useRef<FormikProps<ICurrencyInput>>(null);
-  const [userId, setUserId] = useState<string>();
 
   const initialValues = useMemo(() => currencySchema.getDefault(), []);
 
   const handleChange = async (value: ICurrencyInput) => {
-    if (!userId) return;
-
-    const updatedUser = await userRepo.setPrimaryCurrencyCode(userId, value.currency);
+    const updatedUser = await userRepo.setPrimaryCurrencyCode(value.currency);
 
     if (updatedUser) {
       Toast.show({
@@ -49,7 +46,6 @@ export const CurrencyForm: React.FC = () => {
   const fetchUserCurrency = useCallback(async () => {
     const user = await userRepo.find();
     const currencyCode = user[0]?.primaryCurrencyCode ?? undefined;
-    if (user[0].id) setUserId(user[0].id);
     if (currencyCode) {
       formRef.current?.resetForm({
         values: {

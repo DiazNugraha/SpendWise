@@ -38,14 +38,32 @@ export class UserRepo {
     return await db.select().from(users);
   }
 
-  async setPrimaryCurrencyCode(userId: string, code: string): Promise<IUserSchema[]> {
-    return await db
-      .update(users)
-      .set({
-        primaryCurrencyCode: code,
-      })
-      .where(eq(users.id, userId))
-      .returning();
+  async setPrimaryCurrencyCode(code: string): Promise<IUserSchema | undefined> {
+    const userId = this.userId;
+
+    if (!userId) return;
+
+    return await db.transaction(async tx => {
+      const [updatedItem] = await tx
+        .update(users)
+        .set({
+          primaryCurrencyCode: code,
+        })
+        .where(eq(users.id, userId))
+        .returning();
+
+      if (updatedItem) {
+        await this.syncQueueRepo.createSyncQueue(tx, {
+          entityId: updatedItem.id,
+          entityType: 'USER',
+          operation: 'UPDATE',
+          retryCount: 0,
+          syncStatus: 'PENDING',
+        });
+      }
+
+      return updatedItem;
+    });
   }
 
   async getUserProviders(): Promise<
