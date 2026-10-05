@@ -1,10 +1,10 @@
 import {BudgetCard, SegmentsControlButton} from '@/components';
 import {budgetSegments} from '@/constants/options';
-import {useProfile} from '@/hooks';
+import {useBudgetRepo, useProfile} from '@/hooks';
 import {RootNavigationProp} from '@/types';
 import {useNavigation} from '@react-navigation/native';
 import {ChevronRightIcon, CloudBackupIcon} from 'lucide-react-native';
-import {useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {Image, Pressable, Text, View} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Animated, {
@@ -20,7 +20,10 @@ const translateXMax = 150;
 
 const Header: React.FC = () => {
   const [activeSegment, setActiveSegment] = useState<BudgetType>('weekly');
+
+  const budgetRepo = useBudgetRepo();
   const {user} = useProfile();
+
   const navigation = useNavigation<RootNavigationProp>();
 
   const goNext = () => {
@@ -70,6 +73,19 @@ const Header: React.FC = () => {
       transform: [{translateX: translateX.value}, {scale}],
     };
   });
+
+  const findActiveBudgetGoals = useCallback(async () => {
+    const activeBudgetGoals = await budgetRepo.findActivesEachType();
+
+    const findOne = activeBudgetGoals.filter(e => e.isActive)[0];
+    if (findOne) {
+      setActiveSegment(findOne.type as BudgetType);
+    }
+  }, [budgetRepo]);
+
+  useEffect(() => {
+    findActiveBudgetGoals();
+  }, [findActiveBudgetGoals]);
 
   return (
     <View className="flex flex-col rounded-2xl gap-5">
