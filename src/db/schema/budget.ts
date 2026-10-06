@@ -1,5 +1,6 @@
 import {text, integer} from 'drizzle-orm/sqlite-core';
 import {sqliteTable} from 'drizzle-orm/sqlite-core';
+import {users} from './user';
 
 export const budgets = sqliteTable('budgets', {
   id: text('id').primaryKey(),
@@ -19,7 +20,9 @@ export const budgets = sqliteTable('budgets', {
 
   isActive: integer('is_active', {mode: 'boolean'}).notNull().default(false),
 
-  userId: text('user_id').notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, {onDelete: 'cascade'}),
 
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),

@@ -20,6 +20,7 @@ import m0015 from './0015_harsh_invisible_woman.sql';
 import m0016 from './0016_abandoned_wiccan.sql';
 import m0017 from './0017_tranquil_skullbuster.sql';
 import m0018 from './0018_yielding_bloodstorm.sql';
+import m0019 from './0019_perpetual_red_shift.sql';
 
   export default {
     journal,
@@ -42,7 +43,8 @@ m0014,
 m0015,
 m0016,
 m0017,
-m0018
+m0018,
+m0019
     }
   }
   

@@ -7,6 +7,8 @@ export const sqlite = open({
   name: 'app.db',
 });
 
+sqlite.execute('PRAGMA foreign_keys = ON;');
+
 // drizzle instance
 export const db = drizzle(sqlite, {
   schema,
