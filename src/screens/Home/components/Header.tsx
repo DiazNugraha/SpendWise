@@ -92,22 +92,24 @@ const Header: React.FC = () => {
       <View className="flex flex-col gap-2">
         <View className="flex flex-row justify-between">
           <View className="flex flex-col gap-2">
-            <Text className="font-medium">
-              Welcome back, {user?.firstName} {user?.lastName} 👋
+            <Text className="font-medium text-base">
+              Welcome back, {user?.firstName} {user?.lastName}
             </Text>
-            <Text className="font-medium">Let's stay on track with your budget.</Text>
+            <Text className="text-sm text-slate-500">Let's stay on track with your budget.</Text>
           </View>
           {user?.avatarUrl && (
-            <Image
-              source={{
-                uri: user.avatarUrl,
-              }}
-              className="rounded-full"
-              style={{
-                height: 24,
-                width: 24,
-              }}
-            />
+            <Pressable onPress={() => navigation.navigate('AccountSettings')}>
+              <Image
+                source={{
+                  uri: user.avatarUrl,
+                }}
+                className="rounded-full"
+                style={{
+                  height: 42,
+                  width: 42,
+                }}
+              />
+            </Pressable>
           )}
         </View>
         {user?.isGuest && (

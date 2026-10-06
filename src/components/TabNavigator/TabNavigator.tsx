@@ -1,12 +1,12 @@
 import {Home, Settings} from '@/screens';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {TouchableOpacity, TouchableOpacityProps, View} from 'react-native';
-import {HomeIcon as HomeIcon, Plus as PlusIcon, Settings as SettingsIcon} from 'lucide-react-native';
+import {Text, TouchableOpacity, TouchableOpacityProps, View} from 'react-native';
+import {CircleUserIcon, HomeIcon, PlusIcon} from 'lucide-react-native';
 
 const AddPlaceholderButton: React.FC<TouchableOpacityProps> = ({onPress}) => {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8} className="-top-5 flex-1 items-center justify-center">
-      <View className="w-16 h-16 rounded-full bg-purple-700 border-4 border-white  items-center justify-center elevation-md">
+      <View className="w-20 h-20 rounded-full bg-[#7C3AED] border-[6px] border-white items-center justify-center">
         <PlusIcon color={'white'} size={24} />
       </View>
     </TouchableOpacity>
@@ -27,9 +27,7 @@ export const TabNavigator: React.FC = () => {
             tabBarStyle: {
               height: 72,
               backgroundColor: '#FFFFFF',
-              elevation: 12,
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
+              borderTopWidth: 0,
             },
             tabBarActiveTintColor: '#7C3AED',
             tabBarInactiveTintColor: '#9CA3AF',
@@ -39,7 +37,14 @@ export const TabNavigator: React.FC = () => {
           name="Home"
           component={Home}
           options={{
-            tabBarIcon: ({color}) => <HomeIcon color={color} size={24} />,
+            tabBarIcon: ({color}) => (
+              <View className="flex flex-col gap-1 h-full items-center">
+                <HomeIcon color={color} size={24} />
+                <Text className="text-xs" style={{color: color}}>
+                  Home
+                </Text>
+              </View>
+            ),
           }}
         />
         <Tab.Screen
@@ -59,7 +64,14 @@ export const TabNavigator: React.FC = () => {
           name="Setting"
           component={Settings}
           options={{
-            tabBarIcon: ({color}) => <SettingsIcon color={color} size={24} />,
+            tabBarIcon: ({color}) => (
+              <View className="flex flex-col gap-1 h-full items-center w-[70px]">
+                <CircleUserIcon color={color} size={24} />
+                <Text className="text-xs whitespace-nowrap" style={{color: color}}>
+                  Profile
+                </Text>
+              </View>
+            ),
           }}
         />
       </Tab.Navigator>

@@ -3,10 +3,10 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {JSX} from 'react';
 import {
-  ChartBar,
   // Award as IconAward,
   // Brain as IconBrain,
-  Goal as IconGoal,
+  GoalIcon,
+  ChartColumnBigIcon,
 } from 'lucide-react-native';
 
 const Navigator: React.FC = () => {
@@ -17,12 +17,12 @@ const Navigator: React.FC = () => {
   }[] = [
     {
       label: 'Goals',
-      icon: <IconGoal color={'#6D28D9'} />,
+      icon: <GoalIcon color={'#6D28D9'} />,
       screenName: 'Budget',
     },
     {
       label: 'Reports',
-      icon: <ChartBar color={'#6D28D9'} />,
+      icon: <ChartColumnBigIcon color={'#6D28D9'} />,
       screenName: 'Report',
     },
     // NOTE: FUTURE
@@ -47,7 +47,7 @@ const Navigator: React.FC = () => {
   return (
     <View className="flex flex-row rounded-2xl justify-between gap-2">
       {menus.map((menu, i) => (
-        <View className="flex flex-col items-center justify-center flex-1 w-full" key={i}>
+        <View className="flex flex-col items-center justify-center flex-1 w-full shadow-md" key={i}>
           <Pressable
             onPress={() => handlePress(i)}
             className="p-5 bg-white rounded-2xl w-full flex items-center justify-center">
