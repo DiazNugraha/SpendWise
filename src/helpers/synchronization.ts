@@ -95,11 +95,11 @@ const upsertToSupabase = async (
 
 const deleteSyncToSupabase = async (datas: {key: string; values: (IAllSchema | string)[]}[]) => {
   await Promise.all([
-    await deleteToSupabase('user', datas),
-    await deleteToSupabase('user_provider', datas),
-    await deleteToSupabase('budget', datas),
-    await deleteToSupabase('expense', datas),
     await deleteToSupabase('expense_provider', datas),
+    await deleteToSupabase('user_provider', datas),
+    await deleteToSupabase('expense', datas),
+    await deleteToSupabase('budget', datas),
+    await deleteToSupabase('user', datas),
   ]);
 };
 
