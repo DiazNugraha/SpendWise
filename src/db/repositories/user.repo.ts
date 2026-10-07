@@ -121,9 +121,12 @@ export class UserRepo {
     });
   }
 
-  async updateUserSyncEmail(userId: string, data: IUpdateUserSyncEmail): Promise<IUserSchema[]> {
+  async updateUserSyncEmail(data: IUpdateUserSyncEmail): Promise<IUserSchema | undefined> {
+    const userId = this.userId;
+    if (!userId) return;
+
     const now = Date.now();
-    return await db
+    const [updatedItem] = await db
       .update(users)
       .set({
         ...data,
@@ -132,6 +135,8 @@ export class UserRepo {
       })
       .where(eq(users.id, userId))
       .returning();
+
+    return updatedItem;
   }
 
   async createGuestUser(): Promise<IUserSchema> {

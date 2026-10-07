@@ -44,7 +44,7 @@ const AccountSyncTrigger: React.FC = () => {
         const lastName = fullName.split(' ')?.[1] ?? undefined;
         const email = userSession.user_metadata.email;
 
-        const newUser = await userRepo.updateUserSyncEmail(user.id, {
+        const newUser = await userRepo.updateUserSyncEmail({
           email,
           firstName,
           lastName,
