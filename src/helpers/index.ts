@@ -7,3 +7,4 @@ export * from './color';
 export * from './seed-weekly-and-expenses';
 export * from './auth';
 export * from './synchronization';
+export * from './load-saved';

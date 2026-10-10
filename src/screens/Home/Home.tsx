@@ -1,16 +1,9 @@
 import React, {PropsWithChildren, useCallback, useEffect} from 'react';
-import {Button, DevSettings, ScrollView, Text, View} from 'react-native';
+import {ScrollView, Text, View} from 'react-native';
 import Header from './components/Header';
 import History from './components/History';
 import Navigator from './components/Navigator';
-import {
-  formatDate,
-  NumberFormatter,
-  resetDatabase,
-  seedWeeklyAndExpenses,
-  syncPendingData,
-  updateExpiredBudgets,
-} from '@/helpers';
+import {formatDate, NumberFormatter, synchronization, updateExpiredBudgets} from '@/helpers';
 import {useAlert, useProfile} from '@/hooks';
 import * as Icons from 'lucide-react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -22,37 +15,10 @@ export const Home: React.FC = () => {
 
   const navigation = useNavigation<StackNavigationProp<any>>();
 
-  const resetDatabaseAction = async () => {
-    alert({
-      title: 'Reset Database',
-      description: 'Are you sure?',
-      onConfirm: async () => {
-        await resetDatabase().then(() => {
-          DevSettings.reload();
-        });
-      },
-      onCancel: () => {
-        return;
-      },
-    });
-  };
-
-  const seedDummyAction = async () => {
-    alert({
-      title: 'Seed dummy budget',
-      description: 'Are you sure?',
-      onConfirm: async () => {
-        await seedWeeklyAndExpenses().then(() => {
-          DevSettings.reload();
-        });
-      },
-    });
-  };
-
   const handleUpdateExpiredBudgets = useCallback(async () => {
     if (!user?.id) return;
     const updatedBudgets = await updateExpiredBudgets(user?.id);
-    await syncPendingData(user.id);
+    await synchronization(user.id);
 
     if (updatedBudgets.length > 0) {
       alert({
@@ -75,10 +41,6 @@ export const Home: React.FC = () => {
       <View className=" flex flex-col gap-6">
         <Header />
         <Navigator />
-        <View className="my-4 flex flex-col gap-2">
-          <Button title="reset database" onPress={resetDatabaseAction} />
-          <Button title="seed dummy budget" onPress={seedDummyAction} />
-        </View>
         <History />
       </View>
     </ScrollView>

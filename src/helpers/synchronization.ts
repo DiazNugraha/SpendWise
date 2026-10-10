@@ -1,9 +1,32 @@
+import {db} from '@/db/client';
 import {SyncQueueRepo} from '@/db/repositories';
+import {users} from '@/db/schema';
 import {supabase} from '@/lib';
+import {eq} from 'drizzle-orm';
+import {loadSavedData} from './load-saved';
+import {PostgrestSingleResponse} from '@supabase/supabase-js';
 
 type IAllSchema = IBudgetSchema | IExpenseSchema | IExpenseProviderSchema | IUserSchema | IUserProviderSchema;
 
 const MAX_RETRIES = 5;
+
+export const synchronization = async (userId: string) => {
+  const [user] = await db.select().from(users).where(eq(users.id, userId));
+  if (!user) return;
+
+  const existingUserResponse: PostgrestSingleResponse<IUserSchema[]> = await supabase
+    .from('user')
+    .select()
+    .eq('email', user.email);
+
+  const existingUser = existingUserResponse.data ? existingUserResponse.data[0] : undefined;
+
+  if (existingUser && user.id !== existingUser.id) {
+    return await loadSavedData(userId, existingUser);
+  }
+
+  return await syncPendingData(userId);
+};
 
 export const syncPendingData = async (userId: string) => {
   const syncQueueRepo = new SyncQueueRepo(userId);
