@@ -14,8 +14,6 @@ type ICreateSyncQueueInsert = {
   lastError?: string;
 };
 
-type IAllSchema = IBudgetSchema | IExpenseSchema | IExpenseProviderSchema | IUserSchema | IUserProviderSchema;
-
 export class SyncQueueRepo {
   constructor(private readonly userId?: string) {}
 

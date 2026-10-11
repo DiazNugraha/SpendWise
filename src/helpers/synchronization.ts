@@ -6,8 +6,6 @@ import {eq} from 'drizzle-orm';
 import {loadSavedData} from './load-saved';
 import {PostgrestSingleResponse} from '@supabase/supabase-js';
 
-type IAllSchema = IBudgetSchema | IExpenseSchema | IExpenseProviderSchema | IUserSchema | IUserProviderSchema;
-
 const MAX_RETRIES = 5;
 
 export const synchronization = async (userId: string) => {

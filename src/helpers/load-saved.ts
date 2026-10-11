@@ -5,8 +5,6 @@ import {PostgrestSingleResponse} from '@supabase/supabase-js';
 import {eq} from 'drizzle-orm';
 import {DevSettings} from 'react-native';
 
-type IAllSchema = IBudgetSchema | IExpenseSchema | IExpenseProviderSchema | IUserSchema | IUserProviderSchema;
-
 const NonPrimaryTables = ['EXPENSE_PROVIDER'];
 
 export const loadSavedData = async (userId: string, userSupabase: IUserSchema) => {
