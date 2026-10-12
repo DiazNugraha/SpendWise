@@ -13,9 +13,9 @@ export const seedWeeklyAndExpenses = async () => {
     throw new Error('Category food not found');
   }
 
-  const startDate = new Date('2026-07-11');
-  const endDate = new Date('2026-07-12');
-  const budgetAmount = 100000;
+  const startDate = new Date(2026, 8, 23, 0, 0, 0);
+  const endDate = new Date(2026, 8, 23, 15, 28, 0);
+  const budgetAmount = 1000000;
   const spentAmount = 80000;
 
   // NOTE: Adjust payload and userId later
@@ -24,25 +24,26 @@ export const seedWeeklyAndExpenses = async () => {
     amount: budgetAmount,
     startDate: startDate.getTime(),
     endDate: endDate.getTime(),
-    title: 'Weekly',
-    userId: '',
+    title: 'Bulanan',
+    userId: 'f8384cf0-e518-42df-ad98-c88945a83769',
     createdAt: nowTime,
     updatedAt: nowTime,
-    enableNotify: false,
-    type: 'weekly',
-    icon: 'Calendar',
-    iconColor: '#21BCFF',
-    isActive: false,
+    enableNotify: true,
+    type: 'monthly',
+    icon: 'Target',
+    iconColor: '#FDC745',
+    isActive: true,
+    autoRenew: false,
   });
 
   // NOTE: Adjust userId and categoryId later
-  await db.insert(expenses).values({
-    id: expenseUuid,
-    amount: spentAmount,
-    createdAt: startDate.getTime(),
-    updatedAt: nowTime,
-    userId: '',
-    title: category.label,
-    categoryId: category?.value,
-  });
+  // await db.insert(expenses).values({
+  //   id: expenseUuid,
+  //   amount: spentAmount,
+  //   createdAt: startDate.getTime(),
+  //   updatedAt: startDate.getTime(),
+  //   userId: 'f8384cf0-e518-42df-ad98-c88945a83769',
+  //   title: category.label,
+  //   categoryId: category?.value,
+  // });
 };
