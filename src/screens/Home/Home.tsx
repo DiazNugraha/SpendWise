@@ -3,22 +3,27 @@ import {ScrollView, Text, View} from 'react-native';
 import Header from './components/Header';
 import History from './components/History';
 import Navigator from './components/Navigator';
-import {formatDate, NumberFormatter, synchronization, updateExpiredBudgets} from '@/helpers';
-import {useAlert, useProfile} from '@/hooks';
+import {formatDate, NumberFormatter, updateExpiredBudgets} from '@/helpers';
+import {useAlert, useProfile, useSyncQueueRepo} from '@/hooks';
 import * as Icons from 'lucide-react-native';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {SyncService} from '@/services';
 
 export const Home: React.FC = () => {
   const {alert} = useAlert();
   const {user} = useProfile();
+
+  const syncQueueRepo = useSyncQueueRepo();
 
   const navigation = useNavigation<StackNavigationProp<any>>();
 
   const handleUpdateExpiredBudgets = useCallback(async () => {
     if (!user?.id) return;
     const updatedBudgets = await updateExpiredBudgets(user?.id);
-    await synchronization(user.id);
+
+    const syncService = new SyncService(syncQueueRepo, user.id);
+    await syncService.sync();
 
     if (updatedBudgets.length > 0) {
       alert({
@@ -30,7 +35,7 @@ export const Home: React.FC = () => {
         confirmButtonLabel: 'Go to Report',
       });
     }
-  }, [alert, navigation, user]);
+  }, [alert, navigation, user, syncQueueRepo]);
 
   useEffect(() => {
     handleUpdateExpiredBudgets();
