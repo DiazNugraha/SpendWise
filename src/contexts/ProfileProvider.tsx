@@ -1,6 +1,5 @@
-import {UserRepo} from '@/db/repositories';
+import {SyncQueueRepo, UserRepo} from '@/db/repositories';
 import {getCurrencySymbol} from '@/helpers';
-import {useSyncQueueRepo} from '@/hooks';
 import {createContext, PropsWithChildren, useCallback, useContext, useEffect, useState} from 'react';
 
 interface IUser {
@@ -15,7 +14,7 @@ interface IUser {
 
 export interface IProfileContext {
   user: IUser | null;
-  onRefetch: () => void;
+  onRefetch: (email?: string) => void;
   primaryCurrencySymbol: string;
   isLoading: boolean;
 }
@@ -27,12 +26,22 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
   const [primaryCurrencySymbol, setPrimaryCurrencySymbol] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const syncQueueRepo = useSyncQueueRepo();
+  const fetchUserProfile = useCallback(async (email?: string) => {
+    const syncQueueRepo = new SyncQueueRepo();
 
-  const fetchUserProfile = useCallback(async () => {
     setIsLoading(true);
+
     const userRepo = new UserRepo(syncQueueRepo);
-    const existingUser = (await userRepo.getUser())[0];
+
+    let existingUser = null;
+    if (email) {
+      existingUser = await userRepo.getUserByEmail(email);
+    } else {
+      existingUser = (await userRepo.getUser())[0];
+    }
+
+    if (!existingUser) return;
+
     const primaryCurrencyCode = existingUser?.primaryCurrencyCode;
 
     if (existingUser) {
@@ -43,7 +52,7 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
         email: existingUser.email ?? undefined,
         primaryCurrencyCode: primaryCurrencyCode ?? undefined,
         avatarUrl: existingUser.avatarUrl ?? undefined,
-        isGuest: existingUser.isGuest,
+        isGuest: existingUser.isGuest ?? true,
       });
 
       if (primaryCurrencyCode) {
@@ -52,7 +61,7 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
       }
     }
     setIsLoading(false);
-  }, [syncQueueRepo]);
+  }, []);
 
   useEffect(() => {
     fetchUserProfile();
@@ -62,7 +71,7 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
     <ProfileContext.Provider
       value={{
         user,
-        onRefetch: async () => fetchUserProfile(),
+        onRefetch: async email => fetchUserProfile(email),
         primaryCurrencySymbol,
         isLoading,
       }}>

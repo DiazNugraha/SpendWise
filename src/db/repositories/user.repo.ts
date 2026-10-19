@@ -94,6 +94,12 @@ export class UserRepo {
       .orderBy(sql`${users.createdAt} desc`);
   }
 
+  async getUserByEmail(email: string): Promise<IUserSchema> {
+    const [selectedUser] = await db.select().from(users).where(eq(users.email, email));
+
+    return selectedUser;
+  }
+
   async updateUser(data: IUserInput): Promise<IUserSchema | undefined> {
     const userId = this.userId;
     if (!userId) return;

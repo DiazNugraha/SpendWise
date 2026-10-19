@@ -71,14 +71,14 @@ export const AuthScreen: React.FC = () => {
           avatarUrl: userSession.user_metadata.avatar_url,
         });
 
-        if (newUser) {
+        if (newUser && newUser.email) {
           Toast.show({
             type: 'success',
             text1: 'Sign-in successful',
             text2: 'Your account is ready.',
           });
 
-          refetchUserProfile();
+          refetchUserProfile(newUser.email);
           return;
         }
 
