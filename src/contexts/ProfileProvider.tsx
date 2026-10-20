@@ -40,7 +40,10 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
       existingUser = (await userRepo.getUser())[0];
     }
 
-    if (!existingUser) return;
+    if (!existingUser) {
+      setIsLoading(false);
+      return;
+    }
 
     const primaryCurrencyCode = existingUser?.primaryCurrencyCode;
 
