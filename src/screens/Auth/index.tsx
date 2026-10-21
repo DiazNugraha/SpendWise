@@ -56,7 +56,8 @@ export const AuthScreen: React.FC = () => {
   // google sign in callback url handler
   const handleProceedGoogleCallbackUrl = useCallback(
     async (callbackUrl: string) => {
-      const userSession = await extractUserFromCallbackUrl(callbackUrl);
+      const extractedUserSession = await extractUserFromCallbackUrl(callbackUrl);
+      const userSession = extractedUserSession.session.user;
 
       if (userSession) {
         const fullName: string = userSession.user_metadata.full_name ?? '';
@@ -65,6 +66,7 @@ export const AuthScreen: React.FC = () => {
         const email = userSession.user_metadata.email;
 
         const newUser = await userRepo.createUser({
+          id: extractedUserSession.supabaseUserId,
           email,
           firstName,
           lastName,

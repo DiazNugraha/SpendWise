@@ -1,36 +1,32 @@
 import {supabase} from '@/lib';
-import {Alert} from 'react-native';
-import {URL, URLSearchParams} from 'react-native-url-polyfill';
+import {URL} from 'react-native-url-polyfill';
 
 export const extractUserFromCallbackUrl = async (callbackUrl: string) => {
-  const url = new URL(callbackUrl);
+  const parsedUrl = new URL(callbackUrl);
+  const errorDescription = parsedUrl.searchParams.get('error_description');
 
-  const hash = url.hash.slice(1);
-  if (!hash) return;
-
-  const params = new URLSearchParams(hash);
-
-  const access_token = params.get('access_token');
-  const refresh_token = params.get('refresh_token');
-
-  if (!access_token || !refresh_token) {
-    return;
+  if (errorDescription) {
+    throw new Error(errorDescription);
   }
 
-  const {error} = await supabase.auth.setSession({
-    access_token,
-    refresh_token,
-  });
+  const code = parsedUrl.searchParams.get('code');
 
-  if (error) {
-    console.error(error);
-    Alert.alert('Error', error.message || 'An unknown error occurred');
-    return;
+  if (!code) {
+    throw new Error('No authorization code received from Google.');
   }
+
+  const {data, error: exchangeError} = await supabase.auth.exchangeCodeForSession(code);
+
+  if (exchangeError) throw exchangeError;
 
   const {
     data: {session},
   } = await supabase.auth.getSession();
 
-  return session?.user;
+  const supabaseUserId = session?.user.id;
+
+  return {
+    session: data.session,
+    supabaseUserId,
+  };
 };
