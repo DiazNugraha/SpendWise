@@ -75,7 +75,15 @@ export class SyncUploadPendingData {
     try {
       const {error} = await supabase.from(key).upsert(selectedData?.values).select();
 
-      if (error) throw error;
+      if (error) {
+        console.error({
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        });
+        throw error;
+      }
 
       return await this.syncQueueRepo.updateBatch({
         operation: operation,
