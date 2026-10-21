@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `initial_sync_completed` integer DEFAULT false NOT NULL;

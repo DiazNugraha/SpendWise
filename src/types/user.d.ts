@@ -5,6 +5,7 @@ interface IUserSchema {
   email: string | null;
   primaryCurrencyCode: string | null;
   isGuest?: boolean;
+  initialSyncCompleted?: boolean;
   avatarUrl: string | null;
   createdAt: number;
   updatedAt: number;

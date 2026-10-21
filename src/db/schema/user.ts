@@ -14,6 +14,8 @@ export const users = sqliteTable('users', {
 
   primaryCurrencyCode: text('primary_currency_code'),
 
+  initialSyncCompleted: integer('initial_sync_completed', {mode: 'boolean'}).notNull().default(false),
+
   isGuest: integer('is_guest', {mode: 'boolean'}).notNull().default(true),
   avatarUrl: text('avatar_url'),
 });
