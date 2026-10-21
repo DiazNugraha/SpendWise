@@ -36,7 +36,8 @@ const AccountSyncTrigger: React.FC = () => {
 
   const handleProceedGoogleCallbackUrl = useCallback(
     async (callbackUrl: string) => {
-      const userSession = await extractUserFromCallbackUrl(callbackUrl);
+      const extractedUserSession = await extractUserFromCallbackUrl(callbackUrl);
+      const userSession = extractedUserSession.session.user;
 
       if (userSession && user?.id) {
         const fullName: string = userSession.user_metadata.full_name ?? '';
@@ -51,15 +52,14 @@ const AccountSyncTrigger: React.FC = () => {
           avatarUrl: userSession.user_metadata.avatar_url,
         });
 
-        if (newUser) {
+        if (newUser && newUser.email) {
           Toast.show({
             type: 'success',
             text1: 'Success',
             text2: `${email} successfully synced.`,
           });
 
-          refetchUserProfile();
-
+          refetchUserProfile(newUser.email);
           return navigation.navigate('MainTabs');
         }
 
