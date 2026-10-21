@@ -17,6 +17,7 @@ type IUserInput = {
 };
 
 type ICreateUser = {
+  id?: string;
   firstName: string;
   lastName?: string;
   email: string;
@@ -168,7 +169,8 @@ export class UserRepo {
 
   async createUser(data: ICreateUser): Promise<IUserSchema> {
     const now = Date.now();
-    const newUserUuid = uuid.v4();
+
+    const newUserUuid = data?.id ? data.id : uuid.v4();
 
     const isGuest = !data.email;
 
