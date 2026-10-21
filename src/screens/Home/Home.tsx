@@ -4,7 +4,7 @@ import Header from './components/Header';
 import History from './components/History';
 import Navigator from './components/Navigator';
 import {formatDate, NumberFormatter, updateExpiredBudgets} from '@/helpers';
-import {useAlert, useProfile, useSyncQueueRepo} from '@/hooks';
+import {useAlert, useProfile, useSyncQueueRepo, useUserRepo} from '@/hooks';
 import * as Icons from 'lucide-react-native';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -15,6 +15,7 @@ export const Home: React.FC = () => {
   const {user} = useProfile();
 
   const syncQueueRepo = useSyncQueueRepo();
+  const userRepo = useUserRepo();
 
   const navigation = useNavigation<StackNavigationProp<any>>();
 
@@ -22,7 +23,7 @@ export const Home: React.FC = () => {
     if (!user?.id) return;
     const updatedBudgets = await updateExpiredBudgets(user?.id);
 
-    const syncService = new SyncService(syncQueueRepo, user.id);
+    const syncService = new SyncService(syncQueueRepo, userRepo, user.id);
     await syncService.sync();
 
     if (updatedBudgets.length > 0) {
@@ -35,7 +36,7 @@ export const Home: React.FC = () => {
         confirmButtonLabel: 'Go to Report',
       });
     }
-  }, [alert, navigation, user, syncQueueRepo]);
+  }, [alert, navigation, user, syncQueueRepo, userRepo]);
 
   useEffect(() => {
     handleUpdateExpiredBudgets();

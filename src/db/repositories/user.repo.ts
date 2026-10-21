@@ -312,4 +312,19 @@ export class UserRepo {
       return deletedItem;
     });
   }
+
+  async completeInitialSync(): Promise<IUserSchema | undefined> {
+    const userId = this.userId;
+    if (!userId) return;
+
+    const [updatedItem] = await db
+      .update(users)
+      .set({
+        initialSyncCompleted: true,
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    return updatedItem;
+  }
 }

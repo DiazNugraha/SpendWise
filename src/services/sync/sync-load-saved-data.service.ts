@@ -4,7 +4,6 @@ import {getSchema} from '@/helpers';
 import {supabase} from '@/lib';
 import {PostgrestSingleResponse} from '@supabase/supabase-js';
 import {eq} from 'drizzle-orm';
-import {DevSettings} from 'react-native';
 
 export class SyncLoadSavedData {
   constructor(private readonly userId: string) {}
@@ -65,8 +64,6 @@ export class SyncLoadSavedData {
         return inserted;
       }),
     );
-
-    DevSettings.reload();
   }
 
   private async populateExistingDatas(userSupabaseId: string) {
