@@ -7,6 +7,7 @@ import {eq} from 'drizzle-orm';
 import {SyncLoadSavedData} from './sync-load-saved-data.service';
 import {SyncUploadPendingData} from './sync-upload-pending-data.service';
 import {DevSettings} from 'react-native';
+import {SyncLoadMergeData} from './sync-load-merge-data.service';
 
 export class SyncService {
   constructor(
@@ -41,5 +42,14 @@ export class SyncService {
 
     const syncUploadPendingData = new SyncUploadPendingData(this.syncQueueRepo, userId);
     return await syncUploadPendingData.sync();
+  }
+
+  async merge(suapabaseUserId: string): Promise<IUserSchema | undefined> {
+    const userId = this.userId;
+    if (!userId) return;
+
+    const syncLoadMergeDataService = new SyncLoadMergeData(userId);
+
+    return await syncLoadMergeDataService.merge(suapabaseUserId);
   }
 }

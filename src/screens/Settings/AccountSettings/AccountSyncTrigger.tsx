@@ -1,6 +1,7 @@
 import {extractUserFromCallbackUrl} from '@/helpers';
-import {useProfile, useUserRepo} from '@/hooks';
+import {useProfile, useSyncQueueRepo, useUserRepo} from '@/hooks';
 import {supabase} from '@/lib';
+import {SyncService} from '@/services';
 import {RootNavigationProp} from '@/types';
 import {useNavigation} from '@react-navigation/native';
 import {useCallback, useEffect} from 'react';
@@ -10,7 +11,9 @@ import Toast from 'react-native-toast-message';
 const AccountSyncTrigger: React.FC = () => {
   const {user, onRefetch: refetchUserProfile} = useProfile();
 
+  const syncQueueRepo = useSyncQueueRepo();
   const userRepo = useUserRepo();
+
   const navigation = useNavigation<RootNavigationProp>();
 
   const handleGoogleSignIn = async () => {
@@ -36,30 +39,22 @@ const AccountSyncTrigger: React.FC = () => {
 
   const handleProceedGoogleCallbackUrl = useCallback(
     async (callbackUrl: string) => {
+      if (!user?.id) return;
       const extractedUserSession = await extractUserFromCallbackUrl(callbackUrl);
       const userSession = extractedUserSession.session.user;
 
-      if (userSession && user?.id) {
-        const fullName: string = userSession.user_metadata.full_name ?? '';
-        const firstName = fullName.split(' ')[0];
-        const lastName = fullName.split(' ')?.[1] ?? undefined;
-        const email = userSession.user_metadata.email;
+      if (userSession && user?.id && extractedUserSession.supabaseUserId) {
+        const syncService = new SyncService(syncQueueRepo, userRepo, user.id);
+        const mergedUserData = await syncService.merge(extractedUserSession.supabaseUserId);
 
-        const newUser = await userRepo.updateUserSyncEmail({
-          email,
-          firstName,
-          lastName,
-          avatarUrl: userSession.user_metadata.avatar_url,
-        });
-
-        if (newUser && newUser.email) {
+        if (mergedUserData && mergedUserData.email) {
           Toast.show({
             type: 'success',
             text1: 'Success',
-            text2: `${email} successfully synced.`,
+            text2: `${mergedUserData.email} successfully synced.`,
           });
 
-          refetchUserProfile(newUser.email);
+          refetchUserProfile(mergedUserData.email);
           return navigation.navigate('MainTabs');
         }
 
@@ -70,7 +65,7 @@ const AccountSyncTrigger: React.FC = () => {
         });
       }
     },
-    [navigation, refetchUserProfile, userRepo, user],
+    [navigation, refetchUserProfile, userRepo, syncQueueRepo, user],
   );
 
   // retrieve callback from google sign in
