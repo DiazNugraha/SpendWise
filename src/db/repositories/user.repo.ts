@@ -25,13 +25,6 @@ type ICreateUser = {
   primaryCurrencyCode?: string;
 };
 
-type IUpdateUserSyncEmail = {
-  firstName: string;
-  lastName?: string;
-  email: string;
-  avatarUrl: string;
-};
-
 export class UserRepo {
   constructor(private readonly syncQueueRepo: SyncQueueRepo, private readonly userId?: string) {}
 
@@ -126,24 +119,6 @@ export class UserRepo {
 
       return updatedItem;
     });
-  }
-
-  async updateUserSyncEmail(data: IUpdateUserSyncEmail): Promise<IUserSchema | undefined> {
-    const userId = this.userId;
-    if (!userId) return;
-
-    const now = Date.now();
-    const [updatedItem] = await db
-      .update(users)
-      .set({
-        ...data,
-        isGuest: false,
-        updatedAt: now,
-      })
-      .where(eq(users.id, userId))
-      .returning();
-
-    return updatedItem;
   }
 
   async createGuestUser(): Promise<IUserSchema> {
