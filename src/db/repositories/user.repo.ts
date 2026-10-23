@@ -1,4 +1,4 @@
-import {eq, sql} from 'drizzle-orm';
+import {eq} from 'drizzle-orm';
 import {db} from '../client';
 import {userProviders, users} from '../schema';
 import uuid from 'react-native-uuid';
@@ -80,17 +80,16 @@ export class UserRepo {
     });
   }
 
-  async getUser(): Promise<IUserSchema[]> {
-    return await db
-      .select()
-      .from(users)
-      .limit(1)
-      .orderBy(sql`${users.createdAt} desc`);
+  async getUser(): Promise<IUserSchema | undefined> {
+    const userId = this.userId;
+    if (!userId) return;
+
+    const [selectedUser] = await db.select().from(users).limit(1);
+    return selectedUser;
   }
 
-  async getUserByEmail(email: string): Promise<IUserSchema> {
-    const [selectedUser] = await db.select().from(users).where(eq(users.email, email));
-
+  async getOneGuestUser(): Promise<IUserSchema | undefined> {
+    const [selectedUser] = await db.select().from(users).limit(1);
     return selectedUser;
   }
 

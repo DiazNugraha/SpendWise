@@ -47,14 +47,14 @@ const AccountSyncTrigger: React.FC = () => {
         const syncService = new SyncService(syncQueueRepo, userRepo, user.id);
         const mergedUserData = await syncService.merge(extractedUserSession.supabaseUserId);
 
-        if (mergedUserData && mergedUserData.email) {
+        if (mergedUserData) {
           Toast.show({
             type: 'success',
             text1: 'Success',
             text2: `${mergedUserData.email} successfully synced.`,
           });
 
-          refetchUserProfile(mergedUserData.email);
+          refetchUserProfile();
           return navigation.navigate('MainTabs');
         }
 

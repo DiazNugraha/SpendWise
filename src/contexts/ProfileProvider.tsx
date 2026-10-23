@@ -1,5 +1,6 @@
 import {SyncQueueRepo, UserRepo} from '@/db/repositories';
 import {getCurrencySymbol} from '@/helpers';
+import {supabase} from '@/lib';
 import {createContext, PropsWithChildren, useCallback, useContext, useEffect, useState} from 'react';
 
 interface IUser {
@@ -14,7 +15,7 @@ interface IUser {
 
 export interface IProfileContext {
   user: IUser | null;
-  onRefetch: (email?: string) => void;
+  onRefetch: () => void;
   primaryCurrencySymbol: string;
   isLoading: boolean;
 }
@@ -26,19 +27,29 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
   const [primaryCurrencySymbol, setPrimaryCurrencySymbol] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const fetchUserProfile = useCallback(async (email?: string) => {
+  const fetchUserProfile = useCallback(async () => {
     const syncQueueRepo = new SyncQueueRepo();
+
+    const {
+      data: {session},
+    } = await supabase.auth.getSession();
+
+    if (!session?.user) return;
+
+    let userId: string | undefined = session?.user.id;
+
+    const userRepo = new UserRepo(syncQueueRepo, userId);
+
+    if (!userId) {
+      const guestUser = await userRepo.getOneGuestUser();
+      userId = guestUser ? guestUser.id : undefined;
+    }
+
+    if (!userId) return;
 
     setIsLoading(true);
 
-    const userRepo = new UserRepo(syncQueueRepo);
-
-    let existingUser = null;
-    if (email) {
-      existingUser = await userRepo.getUserByEmail(email);
-    } else {
-      existingUser = (await userRepo.getUser())[0];
-    }
+    const existingUser = await userRepo.getUser();
 
     if (!existingUser) {
       setIsLoading(false);
@@ -74,7 +85,7 @@ const ProfileProvider: React.FC<PropsWithChildren> = ({children}) => {
     <ProfileContext.Provider
       value={{
         user,
-        onRefetch: async email => fetchUserProfile(email),
+        onRefetch: async () => fetchUserProfile(),
         primaryCurrencySymbol,
         isLoading,
       }}>
