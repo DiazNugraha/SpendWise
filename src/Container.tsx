@@ -1,5 +1,5 @@
 import {NavigationContainer} from '@react-navigation/native';
-import {RootNavigator} from '@/router';
+import {RootNavigator} from '@/routers';
 import {AlertProvider, ProfileProvider} from './contexts';
 
 export default function Container() {
