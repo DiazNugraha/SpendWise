@@ -50,3 +50,46 @@ Spendwise is engineered for instantaneous response times by writing directly to 
 │  Supabase (PostgreSQL)  │
 └─────────────────────────┘
 ```
+
+## INSTALLATION
+
+1. Clone Repository:
+
+```bash
+  git clone [https://github.com/DiazNugraha/SpendWise.git](https://github.com/DiazNugraha/SpendWise.git)
+  cd SpendWise
+```
+
+2. Install Dependencies:
+
+```bash
+  npm install
+```
+
+3. Configure Environment Variables:
+
+```bash
+  cp .env.example .env
+```
+
+Add your Supabase credentials:
+
+```bash
+  PUBLIC_SUPABASE_URL=[https://your-project.supabase.co](https://your-project.supabase.co)
+  PUBLIC_PUBLISHABLE_KEY=your-anon-key
+```
+
+4. Run Native Build:
+
+- IOS:
+
+```bash
+  cd ios && pod install && cd ..
+  npm ios
+```
+
+- Android:
+
+```bash
+  npm install
+```
